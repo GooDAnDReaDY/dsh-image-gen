@@ -1,6 +1,6 @@
 {
   "name": "@goodandready/dsh-fal-image-gen",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "FAL image generation for DeepSeek Harness: a generate_image tool backed by the FAL queue API (default model fal-ai/flux-2/klein/9b). Images render directly in the conversation, are saved to the workspace, and all settings are editable from the Web GUI.",
   "keywords": [
     "deepseek-harness",
