@@ -1,0 +1,7 @@
+# dsh-fal-image-gen bundle layer: applied automatically when the package is
+# installed as a profile bundle (package.json declares dsh.bundle.patch).
+# Override any field in the profile's own cordis.patch.yml or in
+# $DSH_HOME/settings.yaml under `dsh-fal-image-gen:`.
+- insert:
+    - id: dsh-fal-image-gen
+      name: dsh-fal-image-gen

@@ -1,0 +1,74 @@
+{
+  "name": "dsh-fal-image-gen",
+  "version": "0.1.0",
+  "description": "FAL image generation for DeepSeek Harness: a generate_image tool backed by the FAL queue API (default model fal-ai/flux-2/klein/9b). Images render directly in the conversation, are saved to the workspace, and all settings are editable from the Web GUI.",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "plugin",
+    "bundle",
+    "image",
+    "fal",
+    "flux",
+    "generate_image"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GooDAnDReaDY/dsh-fal-image-gen.git"
+  },
+  "homepage": "https://github.com/GooDAnDReaDY/dsh-fal-image-gen",
+  "bugs": {
+    "url": "https://github.com/GooDAnDReaDY/dsh-fal-image-gen/issues"
+  },
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml"
+  },
+  "files": [
+    "lib/",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "fal",
+    "fal.ai",
+    "image-generation",
+    "flux",
+    "flux-2",
+    "text-to-image",
+    "aigc"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-attachment": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-credentials": "^0.1.0-rc.6",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  }
+}
