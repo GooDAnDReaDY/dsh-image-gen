@@ -4,9 +4,9 @@
 
 A generated image is:
 
-- saved into the workspace (`<workspace>/generated/fal/*.png`);
-- rendered directly in the conversation (via the dsh attachments service);
-- its `fal.media` file URL returned to the model with the path, size and seed.
+- shown inline in the conversation, in the plugin's own tool card;
+- saved into the session working directory (`<session cwd>/generated/fal/*.png`);
+- returned to the model with its path, size and seed.
 
 ## Install
 
@@ -36,7 +36,7 @@ All settings live in **Settings → Plugins → Plugin configuration → FAL Ima
 | `defaultFormat` | `png` | Default output format. |
 | `pollIntervalMs` | `2000` | Job status poll interval. |
 | `timeoutMs` | `180000` | Total generation timeout. |
-| `outputDir` | `generated/fal` | Output folder (relative to the workspace root). |
+| `outputDir` | `generated/fal` | Output folder. A relative path resolves against the session working directory; an absolute path is used as given. |
 | `numImagesMax` | `4` | Max images per call. |
 
 Equivalent values can be set in `$DSH_HOME/settings.yaml` under `dsh-fal-image-gen:` — the GUI writes to the same settings document, so both ways are equivalent.
@@ -63,7 +63,6 @@ Tool parameters (all except `prompt` are optional):
 |---|---|
 | `prompt` | required, detailed image description |
 | `image_size` | `square_hd` / `square` / `portrait_4_3` / `portrait_16_9` / `landscape_4_3` / `landscape_16_9` |
-| `num_images` | 1–4 (default 1; first is displayed) |
 | `seed` | seed for reproducibility |
 | `output_format` | `png` (default) / `jpeg` / `webp` |
 | `output_name` | file name without extension |
@@ -75,10 +74,18 @@ dsh-fal-image-gen/
 ├── package.json            # dsh bundle/plugin metadata + peerDependencies
 ├── cordis.patch.yml        # bundle layer: inserts the plugin row
 ├── lib/index.js            # host: generate_image tool + FAL queue client
-├── lib/client.js           # browser: settings card in the Web GUI
+├── lib/client.js           # browser: settings card + the generate_image tool card
 ├── README.md
 └── LICENSE                 # MIT
 ```
+
+## Why the plugin ships its own tool card
+
+Tool cards in dsh do not render image blocks — only user and assistant messages
+do — so a picture returned by a tool would otherwise show up as JSON. The plugin
+registers a keyed `tool.call.toolview` entry for `generate_image` and serves the
+stored bytes from its own route (`GET /dsh-fal-image-gen/image`), which is what
+puts the image in the conversation.
 
 No npm runtime dependencies (the `@deepseek-ai/*` peer deps resolve from the dsh install), no build step — plain ESM.
 

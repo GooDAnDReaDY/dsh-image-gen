@@ -4,4 +4,4 @@
 # $DSH_HOME/settings.yaml under `dsh-fal-image-gen:`.
 - insert:
     - id: dsh-fal-image-gen
-      name: dsh-fal-image-gen
+      name: '@goodandready/dsh-fal-image-gen'
