@@ -8,6 +8,35 @@ A generated image is:
 - saved into the session working directory (`<session cwd>/generated/fal/*.png`);
 - returned to the model with its path, size and seed.
 
+## Two delivery modes
+
+The picture appears in the conversation either way. What differs is **what the
+chat model receives** — and that decides whether the turn survives a text-only
+model.
+
+| | `link` (default) | `image` |
+|---|---|---|
+| The model receives | text and a link | the image itself |
+| Shown in the chat | yes, the card renders it from the link | yes |
+| Works with a text-only chat model | **yes, on its own** | **no** — needs [`dsh-vision-bridge`](https://github.com/GooDAnDReaDY/dsh-vision-bridge) or a vision-capable chat model |
+| The model can reason about the picture | no, only about the prompt and the link | yes |
+| The link points to | this plugin's own route, as durable as the attachment | `fal.media`, which expires |
+
+Pick `image` when the conversation should be able to discuss what was drawn —
+"make the cat bluer" needs a model that can actually see it. Without a vision
+model in the chat that mode fails the turn with `does not support image input`,
+which is precisely what `dsh-vision-bridge` exists to prevent: it swaps the
+picture for a description from a vision model you choose.
+
+Set it in **Settings → Plugins → FAL Image Generation → How the image reaches
+the chat**, or in the profile:
+
+```yaml
+- id: dsh-fal-image-gen
+  config:
+    deliverAs: image
+```
+
 ## Install
 
 ```bash
@@ -36,6 +65,7 @@ All settings live in **Settings → Plugins → Plugin configuration → FAL Ima
 | `defaultFormat` | `png` | Default output format. |
 | `pollIntervalMs` | `2000` | Job status poll interval. |
 | `timeoutMs` | `180000` | Total generation timeout. |
+| `deliverAs` | `link` | `link` — the result is text with a link, works with any chat model. `image` — the result carries the picture, needs `dsh-vision-bridge` or a vision-capable model. |
 | `outputDir` | `generated/fal` | Output folder. A relative path resolves against the session working directory; an absolute path is used as given. |
 | `numImagesMax` | `4` | Max images per call. |
 
