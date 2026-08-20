@@ -1,7 +1,7 @@
 {
   "name": "@goodandready/dsh-fal-image-gen",
-  "version": "0.4.1",
-  "description": "Image generation for DeepSeek Harness: a generate_image tool backed by the FAL queue API. The picture is shown inline in the conversation; the model receives either a link (works with any chat model) or the image itself (needs dsh-vision-bridge or a vision-capable model).",
+  "version": "0.5.0",
+  "description": "Image generation for DeepSeek Harness: a generate_image tool with pluggable providers — the FAL queue API or any OpenAI-compatible images API. The picture is shown inline in the conversation; the model receives either a link (works with any chat model) or the image itself (needs dsh-vision-bridge or a vision-capable model).",
   "keywords": [
     "deepseek-harness",
     "dsh",
@@ -12,7 +12,8 @@
     "flux",
     "flux-2",
     "text-to-image",
-    "aigc"
+    "aigc",
+    "openai"
   ],
   "repository": {
     "type": "git",
@@ -60,5 +61,8 @@
     "@deepseek-ai/dsh-attachment": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-credentials": "^0.1.0-rc.6",
     "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
   }
 }

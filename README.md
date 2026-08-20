@@ -1,12 +1,42 @@
 # dsh-fal-image-gen
 
-**Image generation** for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh): a `generate_image` tool backed by the [FAL](https://fal.ai) REST queue API. Default model — `fal-ai/flux-2/klein/9b`.
+**Image generation** for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh): a `generate_image` tool with pluggable providers — the [FAL](https://fal.ai) REST queue API (default model `fal-ai/flux-2/klein/9b`) or any OpenAI-compatible images API.
 
 A generated image is:
 
 - shown inline in the conversation, in the plugin's own tool card;
-- saved into the session working directory (`<session cwd>/generated/fal/*.png`);
+- saved into the session working directory (`<session cwd>/generated/images/*.png`);
 - returned to the model with its path, size and seed.
+
+## Providers
+
+| `provider` | What it is | Protocol |
+|---|---|---|
+| `fal` (default) | the FAL queue | submit, poll, download |
+| `custom` | any OpenAI-compatible API | `POST {customBaseURL}/images/generations`, one request |
+
+The named sizes stay the same whichever provider runs — they are the tool's
+language. FAL takes them as they are; for an OpenAI-compatible API they are
+translated (`square_hd` → `1024x1024`, `landscape_4_3` → `1024x768`, and so on).
+An API picky about sizes gets `customSize`, which is sent verbatim instead.
+
+`response_format` is deliberately not sent: newer OpenAI models reject it, and
+the answer is accepted either way — base64 inline, or a link that gets
+downloaded.
+
+### Example: OpenAI
+
+```yaml
+- id: dsh-fal-image-gen
+  config:
+    provider: custom
+    customBaseURL: https://api.openai.com/v1
+    customModel: gpt-image-1
+    customKeyEnv: OPENAI_API_KEY
+```
+
+An empty `customKeyEnv` means no authorization header at all, for a local
+gateway that needs none.
 
 ## Two delivery modes
 
@@ -58,7 +88,8 @@ All settings live in **Settings → Plugins → Plugin configuration → FAL Ima
 
 | Field | Default | Description |
 |---|---|---|
-| `model` | `fal-ai/flux-2/klein/9b` | FAL model id, called as `{baseURL}/{model}`. |
+| `provider` | `fal` | Which provider generates the image: `fal` or `custom`. |
+| `model` | `fal-ai/flux-2/klein/9b` | FAL model id, called as `{baseURL}/{model}`. Used when `provider` is `fal`. |
 | `apiKeyEnv` | `FAL_API_KEY` | API key reference (credentials / env var). |
 | `baseURL` | `https://queue.fal.run` | FAL queue base URL. |
 | `defaultSize` | `landscape_4_3` | Default image size. |
@@ -66,8 +97,11 @@ All settings live in **Settings → Plugins → Plugin configuration → FAL Ima
 | `pollIntervalMs` | `2000` | Job status poll interval. |
 | `timeoutMs` | `180000` | Total generation timeout. |
 | `deliverAs` | `link` | `link` — the result is text with a link, works with any chat model. `image` — the result carries the picture, needs `dsh-vision-bridge` or a vision-capable model. |
-| `outputDir` | `generated/fal` | Output folder. A relative path resolves against the session working directory; an absolute path is used as given. |
-| `numImagesMax` | `4` | Max images per call. |
+| `customBaseURL` | — | `provider=custom`: API root, e.g. `https://api.openai.com/v1`. |
+| `customModel` | — | `provider=custom`: model id, e.g. `gpt-image-1`. |
+| `customKeyEnv` | `OPENAI_API_KEY` | `provider=custom`: key reference. Empty means no authorization header. |
+| `customSize` | — | `provider=custom`: fixed size sent verbatim. Empty means the named size is translated. |
+| `outputDir` | `generated/images` | Output folder. A relative path resolves against the session working directory; an absolute path is used as given. |
 
 Equivalent values can be set in `$DSH_HOME/settings.yaml` under `dsh-fal-image-gen:` — the GUI writes to the same settings document, so both ways are equivalent.
 
@@ -103,8 +137,10 @@ Tool parameters (all except `prompt` are optional):
 dsh-fal-image-gen/
 ├── package.json            # dsh bundle/plugin metadata + peerDependencies
 ├── cordis.patch.yml        # bundle layer: inserts the plugin row
-├── lib/index.js            # host: generate_image tool + FAL queue client
+├── lib/index.js            # host: generate_image tool, attachment and file handling
+├── lib/providers.js        # host: the providers — FAL queue, OpenAI-compatible API
 ├── lib/client.js           # browser: settings card + the generate_image tool card
+├── test/                   # unit tests for the providers, on a fake fetch
 ├── README.md
 └── LICENSE                 # MIT
 ```
