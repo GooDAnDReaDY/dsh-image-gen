@@ -1,27 +1,28 @@
 {
-  "name": "@goodandready/dsh-fal-image-gen",
-  "version": "0.7.2",
-  "description": "Image generation for DeepSeek Harness: a generate_image tool with pluggable providers — the FAL queue API or any OpenAI-compatible images API. The picture is shown inline in the conversation; the model receives either a link (works with any chat model) or the image itself (needs dsh-vision-bridge or a vision-capable model).",
+  "name": "@goodandready/dsh-image-gen",
+  "version": "0.8.0",
+  "description": "Image generation for DeepSeek Harness: a generate_image tool with pluggable providers — the FAL queue, any OpenAI-compatible images API, or a ChatGPT/Grok subscription with no API key at all. The picture is shown inline in the conversation; the model receives either a link (works with any chat model) or the image itself (needs dsh-vision-bridge or a vision-capable model).",
   "keywords": [
     "deepseek-harness",
     "dsh",
     "dsh-plugin",
+    "image-generation",
+    "text-to-image",
     "fal",
     "fal.ai",
-    "image-generation",
     "flux",
-    "flux-2",
-    "text-to-image",
-    "aigc",
-    "openai"
+    "openai",
+    "gpt-image",
+    "grok",
+    "aigc"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/GooDAnDReaDY/dsh-fal-image-gen.git"
+    "url": "https://github.com/GooDAnDReaDY/dsh-image-gen.git"
   },
-  "homepage": "https://github.com/GooDAnDReaDY/dsh-fal-image-gen",
+  "homepage": "https://github.com/GooDAnDReaDY/dsh-image-gen",
   "bugs": {
-    "url": "https://github.com/GooDAnDReaDY/dsh-fal-image-gen/issues"
+    "url": "https://github.com/GooDAnDReaDY/dsh-image-gen/issues"
   },
   "type": "module",
   "main": "./lib/index.js",
