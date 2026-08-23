@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  SUBSCRIPTION_SIZES,
   makeProviders,
   falAuthHeader,
   normalizeMediaType,
@@ -47,8 +48,8 @@ function bytesRes(bytes, contentType = 'image/png') {
   }
 }
 
-test('оба провайдера объявлены', () => {
-  assert.deepEqual(PROVIDER_KEYS, ['fal', 'custom'])
+test('все провайдеры объявлены', () => {
+  assert.deepEqual(PROVIDER_KEYS, ['fal', 'custom', 'codex', 'grok'])
   const providers = makeProviders(deps(async () => jsonRes({})), job())
   assert.equal(typeof providers.fal, 'function')
   assert.equal(typeof providers.custom, 'function')
@@ -180,4 +181,49 @@ test('ошибка своего API доносит текст провайдер
 test('ответ без картинки не выдаётся за успех', async () => {
   const fetchImpl = async () => jsonRes({ data: [] })
   await assert.rejects(makeProviders(deps(fetchImpl), job()).custom(), /returned no images/)
+})
+
+// ------------------------------------------------- генерация на подписке
+
+function subsDeps(images) {
+  return { ...deps(async () => { throw new Error('сеть здесь ни при чём') }), subscriptionImages: images }
+}
+
+test('подписка отдаёт картинку, а размер переводится в её систему', async () => {
+  let asked = null
+  const images = { generate: async (request) => { asked = request; return [{ b64_json: PNG.toString('base64'), revisedPrompt: 'уточнено' }] } }
+  const out = await makeProviders(subsDeps(images), job({ size: 'landscape_4_3' })).codex()
+  assert.deepEqual(Buffer.from(out.bytes), PNG)
+  assert.equal(out.mediaType, 'image/png')
+  assert.equal(out.revisedPrompt, 'уточнено')
+  assert.equal(asked.provider, 'codex')
+  assert.equal(asked.size, SUBSCRIPTION_SIZES.landscape_4_3)
+  assert.equal(asked.prompt, 'кот в скафандре')
+})
+
+test('grok идёт тем же путём, но со своим именем', async () => {
+  let asked = null
+  const images = { generate: async (request) => { asked = request; return [{ b64_json: PNG.toString('base64') }] } }
+  await makeProviders(subsDeps(images), job()).grok()
+  assert.equal(asked.provider, 'grok')
+})
+
+test('без плагина подписок провайдер объясняет, чего не хватает', async () => {
+  const out = await makeProviders(subsDeps(undefined), job()).codex()
+  assert.equal(out.ok, false)
+  assert.match(out.reason, /плагин подписок/)
+})
+
+test('отказ подписки становится отказом цепочки, а не падением', async () => {
+  const images = { generate: async () => { throw new Error('нет входа в codex') } }
+  const out = await makeProviders(subsDeps(images), job()).codex()
+  assert.equal(out.ok, false)
+  assert.match(out.reason, /нет входа/)
+})
+
+test('пустой ответ подписки не выдаётся за успех', async () => {
+  const images = { generate: async () => [] }
+  const out = await makeProviders(subsDeps(images), job()).codex()
+  assert.equal(out.ok, false)
+  assert.match(out.reason, /нет картинки/)
 })
