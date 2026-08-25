@@ -6,6 +6,7 @@ import {
   falAuthHeader,
   normalizeMediaType,
   buildSidecar,
+  normalizeCount,
   PROVIDER_KEYS,
   SIZE_PIXELS,
 } from '../lib/providers.js'
@@ -248,5 +249,33 @@ test('sidecar: seed 0 сохраняется, дефолты дополняют�
   assert.equal(side.width, undefined)
   assert.ok(typeof side.createdAt === 'string' && side.createdAt.length > 0)
   assert.equal(typeof side.provider, 'undefined')
+})
+
+
+test('count: normalizeCount зажимает в 1..4 и валидирует нечисло', () => {
+  assert.equal(normalizeCount(undefined), 1)
+  assert.equal(normalizeCount(''), 1)
+  assert.equal(normalizeCount(0), 1)
+  assert.equal(normalizeCount(2), 2)
+  assert.equal(normalizeCount(4), 4)
+  assert.equal(normalizeCount(9), 4)
+  assert.equal(normalizeCount('3'), 3)
+  assert.equal(normalizeCount(NaN), 1)
+})
+
+test('провайдер принимает per-call seed и отдаёт его в результате', async () => {
+  let sent = null
+  const d = deps((url, init) => {
+    if (String(url).endsWith('/fal-ai/flux-2/klein/9b')) {
+      sent = JSON.parse(init.body).seed
+      return jsonRes({ request_id: 'r1', status_url: 'https://q/s', response_url: 'https://q/r' })
+    }
+    if (String(url) === 'https://q/s') return jsonRes({ status: 'COMPLETED', response_url: 'https://q/r' })
+    if (String(url) === 'https://q/r') return jsonRes({ images: [{ url: 'https://cdn/x.png' }] })
+    return bytesRes(PNG, 'image/png')
+  })
+  const out = await makeProviders(d, job()).fal(12345)
+  assert.equal(sent, 12345)
+  assert.equal(out.seed, 12345)
 })
 
