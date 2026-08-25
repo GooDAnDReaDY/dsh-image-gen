@@ -1,6 +1,6 @@
 {
   "name": "@goodandready/dsh-image-gen",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Image generation for DeepSeek Harness: a generate_image tool with pluggable providers — the FAL queue, any OpenAI-compatible images API, or a ChatGPT/Grok subscription with no API key at all. The picture is shown inline in the conversation; the model receives either a link (works with any chat model) or the image itself (needs dsh-vision-bridge or a vision-capable model).",
   "keywords": [
     "deepseek-harness",
