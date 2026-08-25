@@ -5,6 +5,7 @@ import {
   makeProviders,
   falAuthHeader,
   normalizeMediaType,
+  buildSidecar,
   PROVIDER_KEYS,
   SIZE_PIXELS,
 } from '../lib/providers.js'
@@ -227,3 +228,25 @@ test('пустой ответ подписки не выдаётся за усп
   assert.equal(out.ok, false)
   assert.match(out.reason, /нет картинки/)
 })
+
+
+test('sidecar: buildSidecar отдаёт полные метаданные и round-trip через JSON', () => {
+  const input = {
+    prompt: 'кот в скафандре', size: 'landscape_4_3', format: 'png', seed: 0,
+    provider: 'fal', deliverAs: 'link', width: 1024, height: 768,
+    mediaType: 'image/png', attachmentId: 'sha256:abc', url: '/dsh-image-gen/image?id=sha256:abc',
+    createdAt: '2026-08-25T00:00:00.000Z',
+  }
+  const side = buildSidecar(input)
+  for (const k of Object.keys(input)) assert.equal(side[k], input[k])
+  assert.deepEqual(JSON.parse(JSON.stringify(side)), input)
+})
+
+test('sidecar: seed 0 сохраняется, дефолты дополняются', () => {
+  const side = buildSidecar({ prompt: 'p', size: 'square', format: 'png', seed: 0 })
+  assert.equal(side.seed, 0)
+  assert.equal(side.width, undefined)
+  assert.ok(typeof side.createdAt === 'string' && side.createdAt.length > 0)
+  assert.equal(typeof side.provider, 'undefined')
+})
+
