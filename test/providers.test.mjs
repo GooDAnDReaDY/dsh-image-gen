@@ -10,6 +10,7 @@ import {
   tryGenerate,
   fallbackOrder,
   sizeToPixels,
+  buildEditForm,
   PROVIDER_KEYS,
   SIZE_PIXELS,
 } from '../lib/providers.js'
@@ -379,5 +380,42 @@ test('local ComfyUI: очередь + опрос до готовности', asy
   assert.deepEqual(Buffer.from(out.bytes), PNG)
   assert.ok(calls.some((u) => u.endsWith('/prompt')))
   assert.ok(calls.some((u) => u.includes('/history/p1')))
+})
+
+
+test('custom edit: source_image уходит на /images/edits с multipart', async () => {
+  let url = ''
+  let body = null
+  const fetchImpl = async (u, init) => {
+    url = String(u)
+    body = init.body
+    return { ok: true, status: 200, json: async () => ({ data: [{ b64_json: PNG.toString('base64') }] }) }
+  }
+  const d = deps(fetchImpl, { cfg: { customBaseURL: 'https://api.example.com/v1', customModel: 'gpt-image-1' } })
+  const src = { bytes: PNG, mediaType: 'image/png' }
+  await makeProviders(d, job({ source: src, strength: 0.5 })).custom()
+  assert.ok(url.endsWith('/images/edits'))
+  assert.ok(body instanceof FormData)
+  assert.equal(body.get('prompt'), 'кот в скафандре')
+  assert.equal(body.get('strength'), '0.5')
+})
+
+test('custom без source: обычный /images/generations', async () => {
+  let url = ''
+  const fetchImpl = async (u, init) => {
+    url = String(u)
+    return { ok: true, status: 200, json: async () => ({ data: [{ b64_json: PNG.toString('base64') }] }) }
+  }
+  const d = deps(fetchImpl, { cfg: { customBaseURL: 'https://api.example.com/v1', customModel: 'gpt-image-1' } })
+  await makeProviders(d, job()).custom()
+  assert.ok(url.endsWith('/images/generations'))
+})
+
+test('подписка отказывает при source_image с понятной причиной', async () => {
+  const images = { generate: async () => { throw new Error('не должно вызываться') } }
+  const d = { ...deps(async () => { throw new Error('no net') }), subscriptionImages: images }
+  const out = await makeProviders(d, job({ source: { bytes: PNG, mediaType: 'image/png' } })).codex()
+  assert.equal(out.ok, false)
+  assert.match(out.reason, /не умеет править изображения/)
 })
 
