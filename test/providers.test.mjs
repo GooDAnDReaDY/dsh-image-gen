@@ -55,7 +55,7 @@ function bytesRes(bytes, contentType = 'image/png') {
 }
 
 test('все провайдеры объявлены', () => {
-  assert.deepEqual(PROVIDER_KEYS, ['fal', 'custom', 'codex', 'grok', 'local'])
+  assert.deepEqual(PROVIDER_KEYS, ['fal', 'custom', 'codex', 'grok', 'local', 'seedream', 'gemini'])
   const providers = makeProviders(deps(async () => jsonRes({})), job())
   assert.equal(typeof providers.fal, 'function')
   assert.equal(typeof providers.custom, 'function')
@@ -332,8 +332,8 @@ test('tryGenerate: все отказали — перечисляет причи
 })
 
 test('fallbackOrder: основной первым, остальные по порядку', () => {
-  assert.deepEqual(fallbackOrder('codex'), ['codex', 'fal', 'custom', 'grok', 'local'])
-  assert.deepEqual(fallbackOrder('fal'), ['fal', 'custom', 'codex', 'grok', 'local'])
+  assert.deepEqual(fallbackOrder('codex'), ['codex', 'fal', 'custom', 'grok', 'local', 'seedream', 'gemini'])
+  assert.deepEqual(fallbackOrder('fal'), ['fal', 'custom', 'codex', 'grok', 'local', 'seedream', 'gemini'])
 })
 
 
@@ -417,5 +417,38 @@ test('подписка отказывает при source_image с понятн�
   const out = await makeProviders(d, job({ source: { bytes: PNG, mediaType: 'image/png' } })).codex()
   assert.equal(out.ok, false)
   assert.match(out.reason, /не умеет править изображения/)
+})
+
+
+test('seedream: OpenAI-совместимый запрос и разбор base64', async () => {
+  let body = null
+  let auth = ''
+  const fetchImpl = async (url, init) => {
+    body = JSON.parse(init.body)
+    auth = init.headers.Authorization
+    return { ok: true, status: 200, json: async () => ({ data: [{ b64_json: PNG.toString('base64') }] }) }
+  }
+  const d = deps(fetchImpl, { keys: { SEEDREAM_API_KEY: 'sk-seed' }, cfg: { seedreamKeyEnv: 'SEEDREAM_API_KEY', seedreamModel: 'seedream-4.0' } })
+  const out = await makeProviders(d, job()).seedream()
+  assert.deepEqual(Buffer.from(out.bytes), PNG)
+  assert.equal(auth, 'Bearer sk-seed')
+  assert.equal(body.model, 'seedream-4.0')
+  assert.equal(body.prompt, 'кот в скафандре')
+})
+
+test('gemini: generateContent запрос и разбор inlineData', async () => {
+  let url = ''
+  let body = null
+  const fetchImpl = async (u, init) => {
+    url = String(u)
+    body = JSON.parse(init.body)
+    return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: PNG.toString('base64') } }] } }] }) }
+  }
+  const d = deps(fetchImpl, { keys: { GEMINI_API_KEY: 'g-key' }, cfg: { geminiKeyEnv: 'GEMINI_API_KEY', geminiModel: 'gemini-2.0-flash-exp-image-generation' } })
+  const out = await makeProviders(d, job()).gemini()
+  assert.deepEqual(Buffer.from(out.bytes), PNG)
+  assert.ok(url.includes('gemini-2.0-flash-exp-image-generation'))
+  assert.ok(url.includes('g-key'))
+  assert.equal(body.contents[0].parts[0].text, 'кот в скафандре')
 })
 
