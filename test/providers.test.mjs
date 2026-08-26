@@ -7,6 +7,8 @@ import {
   normalizeMediaType,
   buildSidecar,
   normalizeCount,
+  tryGenerate,
+  fallbackOrder,
   PROVIDER_KEYS,
   SIZE_PIXELS,
 } from '../lib/providers.js'
@@ -302,5 +304,33 @@ test('negative_prompt и guidance_scale доезжают до custom API', async
   await makeProviders(deps(fetchImpl), job({ negativePrompt: 'no x', guidanceScale: 10 })).custom()
   assert.equal(body.negative_prompt, 'no x')
   assert.equal(body.guidance_scale, 10)
+})
+
+
+test('tryGenerate: падает до следующего провайдера', async () => {
+  const generators = {
+    fal: async () => { throw new Error('FAL down') },
+    custom: async () => ({ bytes: 1 }),
+    codex: async () => ({ bytes: 2 }),
+  }
+  const out = await tryGenerate(generators, ['fal', 'custom', 'codex'], 42)
+  assert.equal(out.bytes, 1)
+})
+
+test('tryGenerate: все отказали — перечисляет причины', async () => {
+  const generators = {
+    fal: async () => { throw new Error('FAL down') },
+    custom: async () => { throw new Error('custom 401') },
+    codex: async () => { throw new Error('no subscription') },
+  }
+  await assert.rejects(
+    tryGenerate(generators, ['fal', 'custom', 'codex'], 1),
+    /FAL down.*custom 401.*no subscription/s,
+  )
+})
+
+test('fallbackOrder: основной первым, остальные по порядку', () => {
+  assert.deepEqual(fallbackOrder('codex'), ['codex', 'fal', 'custom', 'grok'])
+  assert.deepEqual(fallbackOrder('fal'), ['fal', 'custom', 'codex', 'grok'])
 })
 
