@@ -279,3 +279,28 @@ test('провайдер принимает per-call seed и отдаёт его
   assert.equal(out.seed, 12345)
 })
 
+
+test('negative_prompt и guidance_scale доезжают до FAL', async () => {
+  let body = null
+  const fetchImpl = async (url, init) => {
+    if (String(url).endsWith('/fal-ai/flux-2/klein/9b')) { body = JSON.parse(init.body); return jsonRes({ request_id: 'r1', status_url: 'https://q/s', response_url: 'https://q/r' }) }
+    if (String(url) === 'https://q/s') return jsonRes({ status: 'COMPLETED', response_url: 'https://q/r' })
+    if (String(url) === 'https://q/r') return jsonRes({ images: [{ url: 'https://cdn/x.png' }] })
+    return bytesRes(PNG, 'image/png')
+  }
+  await makeProviders(deps(fetchImpl), job({ negativePrompt: 'no text', guidanceScale: 7.5 })).fal()
+  assert.equal(body.negative_prompt, 'no text')
+  assert.equal(body.guidance_scale, 7.5)
+})
+
+test('negative_prompt и guidance_scale доезжают до custom API', async () => {
+  let body = null
+  const fetchImpl = async (_url, init) => {
+    body = JSON.parse(init.body)
+    return jsonRes({ data: [{ b64_json: PNG.toString('base64') }] })
+  }
+  await makeProviders(deps(fetchImpl), job({ negativePrompt: 'no x', guidanceScale: 10 })).custom()
+  assert.equal(body.negative_prompt, 'no x')
+  assert.equal(body.guidance_scale, 10)
+})
+
