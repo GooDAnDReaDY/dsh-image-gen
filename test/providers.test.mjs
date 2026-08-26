@@ -9,6 +9,7 @@ import {
   normalizeCount,
   tryGenerate,
   fallbackOrder,
+  sizeToPixels,
   PROVIDER_KEYS,
   SIZE_PIXELS,
 } from '../lib/providers.js'
@@ -53,7 +54,7 @@ function bytesRes(bytes, contentType = 'image/png') {
 }
 
 test('все провайдеры объявлены', () => {
-  assert.deepEqual(PROVIDER_KEYS, ['fal', 'custom', 'codex', 'grok'])
+  assert.deepEqual(PROVIDER_KEYS, ['fal', 'custom', 'codex', 'grok', 'local'])
   const providers = makeProviders(deps(async () => jsonRes({})), job())
   assert.equal(typeof providers.fal, 'function')
   assert.equal(typeof providers.custom, 'function')
@@ -330,7 +331,53 @@ test('tryGenerate: все отказали — перечисляет причи
 })
 
 test('fallbackOrder: основной первым, остальные по порядку', () => {
-  assert.deepEqual(fallbackOrder('codex'), ['codex', 'fal', 'custom', 'grok'])
-  assert.deepEqual(fallbackOrder('fal'), ['fal', 'custom', 'codex', 'grok'])
+  assert.deepEqual(fallbackOrder('codex'), ['codex', 'fal', 'custom', 'grok', 'local'])
+  assert.deepEqual(fallbackOrder('fal'), ['fal', 'custom', 'codex', 'grok', 'local'])
+})
+
+
+test('sizeToPixels: именованный размер -> [w,h]', () => {
+  assert.deepEqual(sizeToPixels('landscape_4_3'), [1024, 768])
+  assert.deepEqual(sizeToPixels('square_hd'), [1024, 1024])
+  assert.deepEqual(sizeToPixels('unknown'), [1024, 1024])
+})
+
+test('local A1111: txt2img собирает запрос и разбирает base64', async () => {
+  let body = null
+  const fetchImpl = async (_url, init) => {
+    body = JSON.parse(init.body)
+    return { ok: true, status: 200, json: async () => ({ images: [PNG.toString('base64')] }) }
+  }
+  const d = deps(fetchImpl, { cfg: { localKind: 'a1111', localBaseURL: 'http://127.0.0.1:7860', localModel: 'sd15', localSteps: 25, localCfg: 8 } })
+  const out = await makeProviders(d, job()).local()
+  assert.deepEqual(Buffer.from(out.bytes), PNG)
+  assert.equal(body.width, 1024)
+  assert.equal(body.height, 768)
+  assert.equal(body.steps, 25)
+  assert.equal(body.cfg_scale, 8)
+  assert.equal(body.override_settings.sd_model_checkpoint, 'sd15')
+})
+
+test('local A1111: без адреса — понятная ошибка', async () => {
+  const d = deps(async () => { throw new Error('no net') }, { cfg: { localBaseURL: '' } })
+  await assert.rejects(makeProviders(d, job()).local(), /server address is not configured/)
+})
+
+test('local ComfyUI: очередь + опрос до готовности', async () => {
+  const calls = []
+  const fetchImpl = async (url, init) => {
+    calls.push(String(url))
+    if (String(url).endsWith('/prompt')) return { ok: true, status: 200, json: async () => ({ prompt_id: 'p1' }) }
+    if (String(url).includes('/history/p1')) {
+      return { ok: true, status: 200, json: async () => ({ p1: { outputs: { '9': { images: [{ filename: 'x.png', subfolder: '', type: 'output' }] } } } }) }
+    }
+    if (String(url).includes('/view?')) return { ok: true, status: 200, arrayBuffer: async () => PNG.buffer.slice(PNG.byteOffset, PNG.byteOffset + PNG.byteLength) }
+    return { ok: false, status: 404, json: async () => ({}) }
+  }
+  const d = deps(fetchImpl, { cfg: { localKind: 'comfyui', localBaseURL: 'http://127.0.0.1:8188', pollIntervalMs: 0, timeoutMs: 5000 } })
+  const out = await makeProviders(d, job()).local()
+  assert.deepEqual(Buffer.from(out.bytes), PNG)
+  assert.ok(calls.some((u) => u.endsWith('/prompt')))
+  assert.ok(calls.some((u) => u.includes('/history/p1')))
 })
 
