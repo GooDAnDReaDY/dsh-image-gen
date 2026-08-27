@@ -10,6 +10,8 @@ import {
   tryGenerate,
   fallbackOrder,
   sizeToPixels,
+  pxSize,
+  ASPECT_RATIOS,
   buildEditForm,
   PROVIDER_KEYS,
   SIZE_PIXELS,
@@ -450,5 +452,13 @@ test('gemini: generateContent запрос и разбор inlineData', async ()
   assert.ok(url.includes('gemini-2.0-flash-exp-image-generation'))
   assert.ok(url.includes('g-key'))
   assert.equal(body.contents[0].parts[0].text, 'кот в скафандре')
+})
+
+
+test('pxSize: aspect_ratio приоритетнее именованного размера', () => {
+  assert.deepEqual(pxSize([1344, 768], 'square_hd'), [1344, 768])
+  assert.deepEqual(pxSize(undefined, 'landscape_4_3'), [1024, 768])
+  assert.deepEqual(ASPECT_RATIOS['16:9'], [1344, 768])
+  assert.deepEqual(ASPECT_RATIOS['1:1'], [1024, 1024])
 })
 
