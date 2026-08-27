@@ -12,6 +12,7 @@ import {
   sizeToPixels,
   pxSize,
   ASPECT_RATIOS,
+  pixelDiff,
   buildEditForm,
   PROVIDER_KEYS,
   SIZE_PIXELS,
@@ -460,5 +461,16 @@ test('pxSize: aspect_ratio приоритетнее именованного р�
   assert.deepEqual(pxSize(undefined, 'landscape_4_3'), [1024, 768])
   assert.deepEqual(ASPECT_RATIOS['16:9'], [1344, 768])
   assert.deepEqual(ASPECT_RATIOS['1:1'], [1024, 1024])
+})
+
+
+test('pixelDiff: одинаковые байты — 0, разные — доля', async () => {
+  const a = Buffer.from([1, 2, 3, 4])
+  const same = await pixelDiff(a, Buffer.from([1, 2, 3, 4]))
+  assert.equal(same.diffRatio, 0)
+  const diff = await pixelDiff(a, Buffer.from([1, 9, 3, 4]))
+  assert.equal(diff.diffRatio, 0.25)
+  const size = await pixelDiff(a, Buffer.from([1, 2]))
+  assert.equal(size.error, 'size mismatch')
 })
 
