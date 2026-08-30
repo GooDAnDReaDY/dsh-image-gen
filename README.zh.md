@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<h3>DeepSeek Harness 智能体图像生成扩展插件（支持 FAL、OpenAI 与订阅通道）</h3>
+<h3>DeepSeek Harness 智能体图像生成扩展插件（支持 FAL、OpenAI 规范与免 Key 订阅账号）</h3>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@goodandready/dsh-image-gen"><img src="https://img.shields.io/npm/v/@goodandready/dsh-image-gen.svg?style=for-the-badge&color=6366f1&labelColor=1e1b4b" alt="npm version"></a>
@@ -23,21 +23,43 @@
 
 ## ⚡ 插件概览
 
-**`dsh-image-gen`** 为 **DeepSeek Harness** 智能体提供 `generate_image` 图像生成工具，并将生成的画作直接内嵌渲染在聊天会话中。
+**`dsh-image-gen`** 为 **DeepSeek Harness** 智能体赋予 `generate_image` 图像生成能力，并将生成的画作直接在聊天流中内嵌渲染，支持缩放与一键下载。
 
 ```mermaid
 graph LR
-    Agent[🤖 DSH 智能体 / 工具调用] -->|generate_image 提示词| Plugin[dsh-image-gen 核心引擎]
-    Plugin --> Switch{配置的绘图后端}
-    
-    Switch -->|默认极速队列| FAL[FAL.ai / FLUX.1 / SDXL]
-    Switch -->|OpenAI 规范| Custom[自定义 API / ComfyUI]
-    Switch -->|免 Key 订阅账号| Codex[ChatGPT / Grok 订阅通道]
-    
-    FAL --> Viewer[🖼️ 聊天卡片交互式查看器]
-    Custom --> Viewer
-    Codex --> Viewer
+    subgraph Trigger [智能体交互]
+        Agent[🤖 提示词: 帮我画一张图] --> ToolCall[调用工具: generate_image]
+    end
+
+    subgraph Dispatcher [dsh-image-gen 调度中枢]
+        ToolCall --> Router{服务商分发}
+        Router -->|FAL 极速队列| FAL[FAL.ai: FLUX.1 / SDXL]
+        Router -->|OpenAI 规范接口| Custom[自定义 API / SiliconFlow / ComfyUI]
+        Router -->|免 Key 订阅账号| Codex[ChatGPT Plus/Pro / Grok 订阅通道]
+    end
+
+    subgraph Delivery [聊天面板展示]
+        FAL --> Handler[附件处理 / GET /dsh-image-gen/image]
+        Custom --> Handler
+        Codex --> Handler
+        Handler --> Viewer[🖼️ 交互式图片卡片查看器]
+    end
+
+    style Trigger fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+    style Dispatcher fill:#181825,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
+    style Delivery fill:#11111b,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4
 ```
+
+---
+
+## 🎨 支持的绘图后端
+
+| 服务商 | 后端服务 | 鉴权要求 | 说明与常用模型 |
+|---|---|---|---|
+| `fal` (默认) | [FAL.ai](https://fal.ai) Queue | `FAL_API_KEY` | 极速生图网络 (`fal-ai/flux-2/klein/9b`, `FLUX.1-schnell`, `SDXL`) |
+| `custom` | OpenAI 格式接口 | `OPENAI_API_KEY` | 支持 DALL-E 3、硅基流动、Together 或本地 ComfyUI |
+| `codex` | ChatGPT 订阅绘图 (`gpt-image-2`) | *免 Key (OAuth)* | 直接复用 `dsh-subscriptions` 中的 ChatGPT 账号 |
+| `grok` | Grok 订阅绘图 (`grok-imagine-image-2.0`) | *免 Key (OAuth)* | 直接复用 `dsh-subscriptions` 中的 Grok 账号 |
 
 ---
 

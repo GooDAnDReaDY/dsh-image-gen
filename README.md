@@ -23,30 +23,72 @@
 
 ## ⚡ Overview
 
-**`dsh-image-gen`** equips your **DeepSeek Harness** agent with a versatile `generate_image` tool, rendering generated artwork directly in the conversation with zoom, parameter inspect, and instant download.
+**`dsh-image-gen`** gives your **DeepSeek Harness** agent a versatile `generate_image` tool and renders generated artwork directly where it belongs — inside the chat conversation with zoom, parameter inspection, and one-click download.
 
 ```mermaid
 graph LR
-    Agent[🤖 DSH Agent / Tool Call] -->|generate_image prompt| Plugin[dsh-image-gen Engine]
-    Plugin --> Switch{Configured Backend}
-    
-    Switch -->|Default Queue| FAL[FAL.ai / FLUX.1 / SDXL]
-    Switch -->|OpenAI Format| Custom[Custom API / ComfyUI]
-    Switch -->|Subscription OAuth| Codex[ChatGPT / Grok Subscription]
-    
-    FAL --> Viewer[🖼️ Inline Chat Card Viewer]
-    Custom --> Viewer
-    Codex --> Viewer
+    subgraph Trigger [DSH Agent Interaction]
+        Agent[🤖 Agent Prompt: Generate Image] --> ToolCall[Tool: generate_image]
+    end
+
+    subgraph Dispatcher [dsh-image-gen Backend Dispatcher]
+        ToolCall --> Router{Provider Switch}
+        Router -->|FAL Queue API| FAL[FAL.ai: FLUX.1-schnell / dev / SDXL]
+        Router -->|OpenAI Format| Custom[Custom API / SiliconFlow / ComfyUI]
+        Router -->|Zero-Fee OAuth| Codex[ChatGPT Plus/Pro / Grok Subscription]
+    end
+
+    subgraph Delivery [Conversation Presentation]
+        FAL --> Handler[Attachment Handler / GET /dsh-image-gen/image]
+        Custom --> Handler
+        Codex --> Handler
+        Handler --> Viewer[🖼️ Interactive Chat Card Viewer with Zoom]
+    end
+
+    style Trigger fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+    style Dispatcher fill:#181825,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
+    style Delivery fill:#11111b,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4
 ```
 
 ---
 
-## ✨ Key Features
+## 🎨 Supported Generation Backends
 
-* 🎨 **Multi-Backend Architecture**: Supports FAL Queue API, OpenAI-compatible image endpoints (DALL-E 3, SiliconFlow, Together), and ChatGPT/Grok OAuth subscriptions (via `dsh-subscriptions`).
-* 🖼️ **Dedicated Tool Card Viewer**: Renders generated images with full-width responsive preview, lightbox zoom, and one-click download.
-* 📦 **Flexible Delivery Modes**: Choose `link` (universal for text-only models) or `image` (for multimodal reasoning with `dsh-vision-bridge`).
-* 🔒 **Subscription Support**: Leverage ChatGPT Plus/Pro or Grok subscriptions without paying per-image API costs.
+| Provider | Backend Service | Credential Requirement | Description & Models |
+|---|---|---|---|
+| `fal` (default) | [FAL.ai](https://fal.ai) Queue | `FAL_API_KEY` | Ultra-fast queue inference (`fal-ai/flux-2/klein/9b`, `FLUX.1-schnell`, `SDXL`) |
+| `custom` | OpenAI-compatible Image API | `OPENAI_API_KEY` (or custom) | Connect DALL-E 3, SiliconFlow, Together, or local ComfyUI/Automatic1111 |
+| `codex` | ChatGPT Subscription (`gpt-image-2`) | *None (OAuth)* | Uses connected ChatGPT account in `dsh-subscriptions` without API fees |
+| `grok` | Grok Subscription (`grok-imagine-image-2.0`) | *None (OAuth)* | Uses connected Grok account in `dsh-subscriptions` without API fees |
+
+---
+
+## 📦 Delivery Modes: `link` vs `image`
+
+| Feature Comparison | `link` Mode (Default) | `image` Mode |
+|---|---|---|
+| **What the chat model receives** | Text and an attachment link | Raw image binary payload |
+| **Rendered in Web UI** | Yes, full-width interactive card | Yes |
+| **Works with text-only chat models** | **Yes, fully standalone** | Requires [`dsh-vision-bridge`](https://github.com/GooDAnDReaDY/dsh-vision-bridge) |
+| **Model can reason about the picture** | Based on prompt and link text | Full visual multimodal reasoning |
+| **Storage link durability** | Permanent host route (`GET /image`) | Provider CDN (temporary expiry) |
+
+---
+
+## 🎮 Usage Example
+
+Simply ask your agent:
+> "Generate a photorealistic cyberpunk street in Tokyo during rain, neon lights reflections, 16:9"
+
+### Tool Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `prompt` | `string` (Required) | Detailed text description of the image to generate |
+| `image_size` | `string` | `square_hd` (1024x1024), `landscape_4_3` (1024x768), `landscape_16_9`, `portrait_4_3`, `portrait_16_9` |
+| `seed` | `number` | Random seed for deterministic reproducibility |
+| `output_format` | `string` | `png` (default), `jpeg`, or `webp` |
+| `output_name` | `string` | Custom filename without extension |
 
 ---
 
@@ -55,6 +97,43 @@ graph LR
 ```bash
 dsh plugin --profile web add @goodandready/dsh-image-gen
 ```
+
+---
+
+## ⚙️ Configuration Reference (**Settings → Image generation**)
+
+```yaml
+dsh-image-gen:
+  provider: fal
+  model: fal-ai/flux-2/klein/9b
+  apiKeyEnv: FAL_API_KEY
+  defaultSize: landscape_4_3
+  defaultFormat: png
+  pollIntervalMs: 2000
+  timeoutMs: 180000
+  deliverAs: link
+  outputDir: generated/images
+```
+
+| Parameter | Default | Description |
+|---|---|---|
+| `provider` | `fal` | Active drawing provider: `fal`, `custom`, `codex`, `grok` |
+| `model` | `fal-ai/flux-2/klein/9b` | Model identifier for FAL or custom endpoints |
+| `apiKeyEnv` | `FAL_API_KEY` | Credential reference name for API key |
+| `baseURL` | `https://queue.fal.run` | FAL queue endpoint root |
+| `defaultSize` | `landscape_4_3` | Default size if omitted in tool call |
+| `defaultFormat` | `png` | Image format: `png`, `jpeg`, `webp` |
+| `deliverAs` | `link` | Delivery mode: `link` (universal) or `image` (multimodal) |
+| `customBaseURL` | — | Root URL for OpenAI-compatible endpoint |
+| `customModel` | — | Model ID for custom provider (e.g. `dall-e-3`) |
+| `customKeyEnv` | `OPENAI_API_KEY` | Credential reference for custom API key |
+| `outputDir` | `generated/images` | Storage folder for saved image files |
+
+---
+
+## 🔄 Upgrading from `dsh-fal-image-gen`
+
+Installing `@goodandready/dsh-image-gen` automatically migrates your previous configuration namespace, and legacy image links in past conversations remain fully visible without breaking.
 
 ---
 
