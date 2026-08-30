@@ -23,7 +23,9 @@
 
 ## ⚡ Обзор
 
-**`dsh-image-gen`** предоставляет агенту **DeepSeek Harness** инструмент `generate_image` и отображает результат генерации прямо в окне диалога с возможностью зума, просмотра параметров и скачивания в 1 клик.
+**`dsh-image-gen`** предоставляет агенту **DeepSeek Harness** инструмент `generate_image` и размещает сгенерированные изображения прямо в ленте диалога с поддержкой зума, просмотра метаданных и скачивания в 1 клик.
+
+Выбор сервиса для отрисовки настраивается в параметрах без изменения кода: переключайтесь между очередью FAL, сторонними OpenAI-совместимыми эндпоинтами или личными подписками ChatGPT/Grok.
 
 ```mermaid
 graph LR
@@ -63,6 +65,33 @@ graph LR
 
 ---
 
+## 📐 Таблица трансляции именованных размеров
+
+Агент задает размер в универсальном именованном виде (`image_size`). Плагин автоматически переводит его под формат активного сервиса:
+
+| Имя размера | Имя в FAL | Пиксели для OpenAI / Custom | Пропорции для Grok |
+|---|---|---|---|
+| `square_hd` (дефолт) | `square_hd` | `1024x1024` | `1:1` |
+| `square` | `square` | `512x512` | `1:1` |
+| `landscape_4_3` | `landscape_4_3` | `1024x768` | `4:3` |
+| `landscape_16_9` | `landscape_16_9` | `1792x1024` | `16:9` |
+| `portrait_4_3` | `portrait_4_3` | `768x1024` | `3:4` |
+| `portrait_16_9` | `portrait_16_9` | `1024x1792` | `9:16` |
+
+> [!TIP]
+> Если кастомный эндпоинт требует нестандартного разрешения, укажите `customSize` (например `1280x720`) в настройках для передачи точной строки.
+
+---
+
+## 🔑 Генерация через подписки без API-ключей (`codex` и `grok`)
+
+`codex` и `grok` **не требуют API-ключей**. Они используют активную сессию из [`dsh-subscriptions`](https://github.com/GooDAnDReaDY/dsh-subscriptions):
+* **Внутрипроцессный обмен**: плагины общаются через сервисы Cordis внутри процесса Node.js без сетевых HTTP-вызовов, что исключает утечку сессионных токенов.
+* **Качество подписки**: настройка детализации через `subscriptionQuality` (`low`, `medium`, `high`).
+* **Понятные ошибки**: если `dsh-subscriptions` не установлен или аккаунт отключен, инструмент выдаёт понятное предупреждение.
+
+---
+
 ## 📦 Режимы доставки: `link` или `image`
 
 | Сравнение | Режим `link` (По умолчанию) | Режим `image` |
@@ -85,9 +114,9 @@ graph LR
 | Параметр | Тип | Описание |
 |---|---|---|
 | `prompt` | `string` (Обязательный) | Детальное текстовое описание генерируемого изображения |
-| `image_size` | `string` | `square_hd` (1024x1024), `landscape_4_3` (1024x768), `landscape_16_9`, `portrait_4_3`, `portrait_16_9` |
-| `seed` | `number` | Сид для воспроизводимости результата |
-| `output_format` | `string` | `png` (по умолчанию), `jpeg` или `webp` |
+| `image_size` | `string` | `square_hd`, `square`, `landscape_4_3`, `landscape_16_9`, `portrait_4_3`, `portrait_16_9` |
+| `seed` | `number` | Сид для детерминированной повторяемости результата |
+| `output_format` | `string` | Формат файла: `png` (по умолчанию), `jpeg` или `webp` |
 | `output_name` | `string` | Пользовательское имя файла без расширения |
 
 ---
@@ -100,8 +129,9 @@ dsh plugin --profile web add @goodandready/dsh-image-gen
 
 ---
 
-## ⚙️ Настройки в Web GUI (**Настройки → Генерация изображений**)
+## ⚙️ Рецепты конфигурации (`settings.yaml`)
 
+### 1. Настройка FAL.ai (По умолчанию)
 ```yaml
 dsh-image-gen:
   provider: fal
@@ -109,11 +139,41 @@ dsh-image-gen:
   apiKeyEnv: FAL_API_KEY
   defaultSize: landscape_4_3
   defaultFormat: png
-  pollIntervalMs: 2000
-  timeoutMs: 180000
-  deliverAs: link
   outputDir: generated/images
 ```
+
+### 2. Подключение OpenAI / SiliconFlow
+```yaml
+dsh-image-gen:
+  provider: custom
+  customBaseURL: https://api.siliconflow.cn/v1
+  customModel: black-forest-labs/FLUX.1-schnell
+  customKeyEnv: SILICONFLOW_API_KEY
+  defaultSize: square_hd
+```
+
+### 3. Локальный ComfyUI / Шлюз (Без авторизации)
+```yaml
+dsh-image-gen:
+  provider: custom
+  customBaseURL: http://127.0.0.1:8188/v1
+  customModel: sd-xl-base-1.0
+  customKeyEnv: ""   # Пусто = без заголовка Authorization
+```
+
+### 4. Генерация через подписку ChatGPT / Grok
+```yaml
+dsh-image-gen:
+  provider: codex   # или 'grok'
+  subscriptionQuality: high
+  defaultSize: landscape_16_9
+```
+
+---
+
+## 🖼️ Почему у плагина собственная карточка инструмента
+
+Стандартные карточки DSH отображают только JSON. `dsh-image-gen` регистрирует слот `tool.call.toolview` для инструмента `generate_image` и отдаёт картинку через свой защищённый маршрут (`GET /dsh-image-gen/image`), показывая изображение прямо в интерфейсе чата.
 
 ---
 

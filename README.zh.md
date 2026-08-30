@@ -23,7 +23,7 @@
 
 ## ⚡ 插件概览
 
-**`dsh-image-gen`** 为 **DeepSeek Harness** 智能体赋予 `generate_image` 图像生成能力，并将生成的画作直接在聊天流中内嵌渲染，支持缩放与一键下载。
+**`dsh-image-gen`** 为 **DeepSeek Harness** 智能体赋予 `generate_image` 图像生成能力，并将生成的画作直接在聊天流中内嵌渲染，支持缩放、参数查看与一键下载。
 
 ```mermaid
 graph LR
@@ -60,6 +60,21 @@ graph LR
 | `custom` | OpenAI 格式接口 | `OPENAI_API_KEY` | 支持 DALL-E 3、硅基流动、Together 或本地 ComfyUI |
 | `codex` | ChatGPT 订阅绘图 (`gpt-image-2`) | *免 Key (OAuth)* | 直接复用 `dsh-subscriptions` 中的 ChatGPT 账号 |
 | `grok` | Grok 订阅绘图 (`grok-imagine-image-2.0`) | *免 Key (OAuth)* | 直接复用 `dsh-subscriptions` 中的 Grok 账号 |
+
+---
+
+## 📐 命名尺寸自动转换对照表
+
+智能体可使用易读的语义命名尺寸，插件根据底层服务商自动转换：
+
+| 语义尺寸 | FAL 原生名称 | OpenAI / Custom 像素分辨率 | Grok 画面比例 |
+|---|---|---|---|
+| `square_hd` (默认) | `square_hd` | `1024x1024` | `1:1` |
+| `square` | `square` | `512x512` | `1:1` |
+| `landscape_4_3` | `landscape_4_3` | `1024x768` | `4:3` |
+| `landscape_16_9` | `landscape_16_9` | `1792x1024` | `16:9` |
+| `portrait_4_3` | `portrait_4_3` | `768x1024` | `3:4` |
+| `portrait_16_9` | `portrait_16_9` | `1024x1792` | `9:16` |
 
 ---
 
