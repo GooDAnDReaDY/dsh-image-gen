@@ -1,93 +1,134 @@
-# dsh-image-gen
+# 📦 @goodandready/dsh-image-gen
 
-**Image generation** for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh).
+<div align="center">
 
-The plugin gives the agent one tool, `generate_image`, and puts the result where
-a picture belongs — in the conversation. Which service actually draws it is a
-setting, not a rewrite: a paid API key, your own OpenAI-compatible endpoint, or a
-consumer subscription you are already paying for.
+<h3>Native Image Generation Tool with FAL Queue, OpenAI APIs, and Subscription Backends</h3>
 
-A generated image is:
+<p align="center">
+  <a href="https://www.npmjs.com/package/@goodandready/dsh-image-gen"><img src="https://img.shields.io/npm/v/@goodandready/dsh-image-gen.svg?style=for-the-badge&color=6366f1&labelColor=1e1b4b" alt="npm version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-10b981.svg?style=for-the-badge&color=10b981&labelColor=064e3b" alt="license"></a>
+  <a href="https://github.com/topics/dsh-plugin"><img src="https://img.shields.io/badge/DSH-Plugin-8b5cf6.svg?style=for-the-badge&labelColor=2e1065" alt="DSH Plugin"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node-20%2B-f59e0b.svg?style=for-the-badge&labelColor=451a03" alt="Node version"></a>
+</p>
 
-- shown inline in the conversation, in the plugin's own tool card;
-- saved into the session working directory (`<session cwd>/generated/images/*.png`);
-- returned to the model with its path, size and seed.
+<p align="center">
+  <a href="https://goodandready.app/"><img src="https://img.shields.io/badge/All_Author_Projects-goodandready.app-ff4500.svg?style=for-the-badge&logo=rocket&logoColor=white&labelColor=1a1a2e" alt="All Author Projects"></a>
+</p>
 
-> **Renamed.** This plugin used to be `dsh-fal-image-gen`. FAL is now one
-> provider out of four, and the old name said otherwise. Upgrading carries your
-> settings over by itself, and images in existing conversations keep working —
-> see [Upgrading from dsh-fal-image-gen](#upgrading-from-dsh-fal-image-gen).
+<p align="center">
+  <a href="README.md"><b>🇬🇧 English</b></a> •
+  <a href="README.ru.md"><b>🇷🇺 Русский</b></a> •
+  <a href="README.zh.md"><b>🇨🇳 中文说明</b></a>
+</p>
 
-## Providers
+</div>
 
-| `provider` | What it is | What it needs |
-|---|---|---|
-| `fal` (default) | the [FAL](https://fal.ai) queue, default model `fal-ai/flux-2/klein/9b` | a FAL API key |
-| `custom` | any OpenAI-compatible images API — OpenAI itself, a local gateway, anything speaking that shape | a base URL, a model id, usually a key |
-| `codex` | ChatGPT's image model (`gpt-image-2`) on your ChatGPT subscription | no key — a ChatGPT account connected in `dsh-subscriptions` |
-| `grok` | Grok's image model (`grok-imagine-image-2.0`) on your Grok subscription | no key — a Grok account connected in `dsh-subscriptions` |
+---
 
-The named sizes stay the same whichever provider runs — they are the tool's
-language, and the agent should not have to know who is drawing. FAL takes them as
-they are; an OpenAI-compatible API gets them translated into pixels (`square_hd`
-→ `1024x1024`, `landscape_4_3` → `1024x768`); Grok thinks in aspect ratios and
-gets `1:1`, `2:3`, `3:2`. An API picky about sizes gets `customSize`, which is
-sent verbatim instead.
+## ⚡ Overview
 
-`response_format` is deliberately not sent: newer OpenAI models reject it, and
-the answer is accepted either way — base64 inline, or a link that gets
-downloaded.
+**`dsh-image-gen`** gives your **DeepSeek Harness** agent a versatile `generate_image` tool and puts the generated artwork directly where it belongs — in the conversation stream with responsive zoom, metadata inspection, and one-click download.
 
-### Drawing on a subscription
+Which service actually draws the picture is a setting, not a code rewrite: switch seamlessly between FAL queue infrastructure, arbitrary OpenAI-compatible endpoints, or personal ChatGPT/Grok subscriptions.
 
-`codex` and `grok` need no API key at all. They borrow an account that
-[`dsh-subscriptions`](https://github.com/GooDAnDReaDY/dsh-subscriptions) already
-holds: connect ChatGPT or Grok there once, pick the provider here, and generation
-goes through the same subscription you use for chat.
+```mermaid
+graph LR
+    subgraph Trigger [DSH Agent Interaction]
+        Agent[🤖 Agent Prompt: Generate Image] --> ToolCall[Tool: generate_image]
+    end
 
-The token never leaves the Host. The two plugins talk through a service inside
-the process rather than over the network — a route handing out a live
-subscription token would be a hole in a harness that is otherwise reachable
-without a password.
+    subgraph Dispatcher [dsh-image-gen Backend Dispatcher]
+        ToolCall --> Router{Provider Switch}
+        Router -->|FAL Queue API| FAL[FAL.ai: FLUX.1-schnell / dev / SDXL]
+        Router -->|OpenAI Format| Custom[Custom API / SiliconFlow / ComfyUI]
+        Router -->|Zero-Fee OAuth| Codex[ChatGPT Plus/Pro / Grok Subscription]
+    end
 
-If `dsh-subscriptions` is not installed, or no account of that vendor is
-connected, these two providers say so instead of failing silently.
+    subgraph Delivery [Conversation Presentation]
+        FAL --> Handler[Attachment Handler / GET /dsh-image-gen/image]
+        Custom --> Handler
+        Codex --> Handler
+        Handler --> Viewer[🖼️ Interactive Chat Card Viewer with Zoom]
+    end
 
-### Example: OpenAI
-
-```yaml
-- id: dsh-image-gen
-  config:
-    provider: custom
-    customBaseURL: https://api.openai.com/v1
-    customModel: gpt-image-1
-    customKeyEnv: OPENAI_API_KEY
+    style Trigger fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+    style Dispatcher fill:#181825,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
+    style Delivery fill:#11111b,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4
 ```
 
-An empty `customKeyEnv` means no authorization header at all, for a local
-gateway that needs none.
+---
 
-## Two delivery modes
+## 🎨 Supported Generation Backends
 
-The picture appears in the conversation either way. What differs is **what the
-chat model receives** — and that decides whether the turn survives a text-only
-model.
+| Provider | Backend Service | Credential Requirement | Description & Models |
+|---|---|---|---|
+| `fal` (default) | [FAL.ai](https://fal.ai) Queue | `FAL_API_KEY` | Ultra-fast queue inference (`fal-ai/flux-2/klein/9b`, `FLUX.1-schnell`, `SDXL`) |
+| `custom` | OpenAI-compatible Image API | `OPENAI_API_KEY` (or custom) | Connect DALL-E 3, SiliconFlow, Together, or local ComfyUI/Automatic1111 |
+| `codex` | ChatGPT Subscription (`gpt-image-2`) | *None (OAuth)* | Uses connected ChatGPT account in `dsh-subscriptions` without API fees |
+| `grok` | Grok Subscription (`grok-imagine-image-2.0`) | *None (OAuth)* | Uses connected Grok account in `dsh-subscriptions` without API fees |
 
-| | `link` (default) | `image` |
+---
+
+## 📐 Named Sizes Translation Matrix
+
+The agent specifies sizes in universal human-readable names (`image_size`). The plugin automatically translates them according to the active provider's native format:
+
+| Named Size | FAL Native Name | OpenAI / Custom Pixels | Grok Aspect Ratio |
+|---|---|---|---|
+| `square_hd` (default) | `square_hd` | `1024x1024` | `1:1` |
+| `square` | `square` | `512x512` | `1:1` |
+| `landscape_4_3` | `landscape_4_3` | `1024x768` | `4:3` |
+| `landscape_16_9` | `landscape_16_9` | `1792x1024` | `16:9` |
+| `portrait_4_3` | `portrait_4_3` | `768x1024` | `3:4` |
+| `portrait_16_9` | `portrait_16_9` | `1024x1792` | `9:16` |
+
+> [!TIP]
+> If a custom endpoint has strict non-standard size requirements, configure `customSize` (e.g. `1280x720`) in settings to send that exact string verbatim.
+
+---
+
+## 🔑 Zero-Fee Subscription Drawing (`codex` & `grok`)
+
+`codex` and `grok` require **no API keys**. They borrow an active session from [`dsh-subscriptions`](https://github.com/GooDAnDReaDY/dsh-subscriptions):
+* **In-Process Communication**: The two plugins interact via internal Cordis service calls inside the Node process rather than over the network, ensuring OAuth session tokens never leave the host.
+* **Subscription Quality**: Control rendering detail via `subscriptionQuality` (`low`, `medium`, `high`, or vendor default).
+* **Graceful Fallback**: If `dsh-subscriptions` is not installed or no account is connected, the tool returns an informative warning instead of failing silently.
+
+---
+
+## 📦 Delivery Modes: `link` vs `image`
+
+| Feature Comparison | `link` Mode (Default) | `image` Mode |
 |---|---|---|
-| The model receives | text and a link | the image itself |
-| Shown in the chat | yes, the card renders it from the link | yes |
-| Works with a text-only chat model | **yes, on its own** | **no** — needs [`dsh-vision-bridge`](https://github.com/GooDAnDReaDY/dsh-vision-bridge) or a vision-capable chat model |
-| The model can reason about the picture | no, only about the prompt and the link | yes |
-| The link points to | this plugin's own route, as durable as the attachment | the provider's CDN, which expires |
+| **What the chat model receives** | Text and an attachment link | Raw image binary payload |
+| **Rendered in Web UI** | Yes, full-width interactive card | Yes |
+| **Works with text-only chat models** | **Yes, fully standalone** | Requires [`dsh-vision-bridge`](https://github.com/GooDAnDReaDY/dsh-vision-bridge) |
+| **Model can reason about the picture** | Based on prompt and link text | Full visual multimodal reasoning |
+| **Storage link durability** | Permanent host route (`GET /image`) | Provider CDN (temporary expiry) |
 
-Pick `image` when the conversation should be able to discuss what was drawn —
-"make the cat bluer" needs a model that can actually see it. Without a vision
-model in the chat that mode fails the turn with `does not support image input`,
-which is precisely what `dsh-vision-bridge` exists to prevent: it swaps the
-picture for a description from a vision model you choose.
+> [!NOTE]
+> Choose `image` mode when you want multi-turn visual discussions (e.g. "make the background darker"). When using a text-only LLM, combine with `dsh-vision-bridge` so the model receives structured descriptions without crashing.
 
-## Install
+---
+
+## 🎮 Usage Examples & Prompting
+
+Ask your agent naturally:
+> "Generate an image: neon cyberpunk street in Tokyo at night during rain, reflections in puddles, 16:9"
+
+### Tool Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `prompt` | `string` (Required) | Detailed text prompt describing the desired image |
+| `image_size` | `string` | `square_hd`, `square`, `landscape_4_3`, `landscape_16_9`, `portrait_4_3`, `portrait_16_9` |
+| `seed` | `number` | Deterministic seed for reproducible artwork |
+| `output_format` | `string` | File format: `png` (default), `jpeg`, or `webp` |
+| `output_name` | `string` | Custom output filename without extension |
+
+---
+
+## 📦 Quick Installation
 
 ```bash
 # From npm:
@@ -95,108 +136,64 @@ dsh plugin --profile web add @goodandready/dsh-image-gen
 
 # From GitHub:
 dsh plugin --profile web add github:GooDAnDReaDY/dsh-image-gen
-
-# Locally from a checkout:
-dsh plugin --profile web add /path/to/dsh-image-gen
 ```
 
-Restart the Web UI afterwards.
+---
 
-## Configure
+## ⚙️ Configuration Recipes (`settings.yaml`)
 
-Everything lives in its own settings section: **Settings → Image generation**.
-
-| Field | Default | Description |
-|---|---|---|
-| `provider` | `fal` | Who draws: `fal`, `custom`, `codex` or `grok`. |
-| `model` | `fal-ai/flux-2/klein/9b` | FAL model id, called as `{baseURL}/{model}`. Used when `provider` is `fal`. |
-| `apiKeyEnv` | `FAL_API_KEY` | API key reference (credentials / env var). |
-| `baseURL` | `https://queue.fal.run` | FAL queue base URL. |
-| `defaultSize` | `landscape_4_3` | Default image size when the tool call omits one. |
-| `defaultFormat` | `png` | Default output format: `png`, `jpeg` or `webp`. |
-| `pollIntervalMs` | `2000` | Job status poll interval. |
-| `timeoutMs` | `180000` | Total generation timeout — submit, poll and download together. |
-| `deliverAs` | `link` | `link` — the result is text with a link, works with any chat model. `image` — the result carries the picture, needs `dsh-vision-bridge` or a vision-capable model. |
-| `customBaseURL` | — | `provider=custom`: API root, e.g. `https://api.openai.com/v1`. |
-| `customModel` | — | `provider=custom`: model id, e.g. `gpt-image-1`. |
-| `customKeyEnv` | `OPENAI_API_KEY` | `provider=custom`: key reference. Empty means no authorization header. |
-| `customSize` | — | `provider=custom`: fixed size sent verbatim. Empty means the named size is translated. |
-| `subscriptionQuality` | — | `provider=codex` or `grok`: quality asked of the subscription — `low`, `medium`, `high`, or empty for the vendor default. |
-| `outputDir` | `generated/images` | Output folder. A relative path resolves against the session working directory; an absolute path is used as given. |
-
-The same values can be set in `$DSH_HOME/settings.yaml` under `dsh-image-gen:`.
-The card writes to that same document, so neither way is second-class.
-
-## API key
-
-Only `fal` and `custom` need one. Store it in **Credentials** (Web:
-**Settings → Credentials**) or in `$DSH_HOME/.credentials.yaml`:
-
+### 1. FAL.ai Configuration (Default)
 ```yaml
-FAL_API_KEY: <your key from https://fal.ai/dashboard/keys>
+dsh-image-gen:
+  provider: fal
+  model: fal-ai/flux-2/klein/9b
+  apiKeyEnv: FAL_API_KEY
+  defaultSize: landscape_4_3
+  defaultFormat: png
+  outputDir: generated/images
 ```
 
-The plugin prepends FAL's `Key ` auth prefix automatically when it is missing.
-
-## Usage
-
-Just ask the model to draw something:
-
-> Generate an image: neon cyberpunk city at night in the rain, 16:9
-
-Tool parameters (all except `prompt` are optional):
-
-| Parameter | Description |
-|---|---|
-| `prompt` | required, detailed image description |
-| `image_size` | `square_hd` / `square` / `portrait_4_3` / `portrait_16_9` / `landscape_4_3` / `landscape_16_9` |
-| `seed` | seed for reproducibility |
-| `output_format` | `png` (default) / `jpeg` / `webp` |
-| `output_name` | file name without extension |
-
-## Upgrading from dsh-fal-image-gen
-
-Install `@goodandready/dsh-image-gen` and remove
-`@goodandready/dsh-fal-image-gen` from the profile. Two things are carried for
-you:
-
-- **Your settings.** They lived under the `dsh-fal-image-gen` namespace. On the
-  first start the plugin reads that block and copies it under the new name —
-  once, and only when you have not configured the new name yourself. The old
-  block is left in the file untouched: deleting lines from someone's settings is
-  not a plugin's business.
-- **Images in existing conversations.** Their links point at the old route, so
-  the plugin still answers on it alongside the new one. Nothing in your history
-  goes blank.
-
-The npm package `@goodandready/dsh-fal-image-gen` is deprecated and will not
-receive further releases.
-
-## Structure
-
-```
-dsh-image-gen/
-├── package.json            # dsh bundle/plugin metadata + peerDependencies
-├── cordis.patch.yml        # bundle layer: inserts the plugin row
-├── lib/index.js            # host: generate_image tool, attachment and file handling
-├── lib/providers.js        # host: the providers — FAL queue, OpenAI-compatible API, subscriptions
-├── lib/client.js           # browser: settings card + the generate_image tool card
-├── test/                   # unit tests for the providers, on a fake fetch
-├── README.md
-└── LICENSE                 # MIT
+### 2. OpenAI / SiliconFlow Endpoint
+```yaml
+dsh-image-gen:
+  provider: custom
+  customBaseURL: https://api.siliconflow.cn/v1
+  customModel: black-forest-labs/FLUX.1-schnell
+  customKeyEnv: SILICONFLOW_API_KEY
+  defaultSize: square_hd
 ```
 
-## Why the plugin ships its own tool card
+### 3. Local ComfyUI / Gateway (No Authentication)
+```yaml
+dsh-image-gen:
+  provider: custom
+  customBaseURL: http://127.0.0.1:8188/v1
+  customModel: sd-xl-base-1.0
+  customKeyEnv: ""   # Empty means no Authorization header
+```
 
-Tool cards in dsh do not render image blocks — only user and assistant messages
-do — so a picture returned by a tool would otherwise show up as JSON. The plugin
-registers a keyed `tool.call.toolview` entry for `generate_image` and serves the
-stored bytes from its own route (`GET /dsh-image-gen/image`), which is what puts
-the image in the conversation.
+### 4. ChatGPT / Grok Subscription
+```yaml
+dsh-image-gen:
+  provider: codex   # or 'grok'
+  subscriptionQuality: high
+  defaultSize: landscape_16_9
+```
 
-No npm runtime dependencies (the `@deepseek-ai/*` peer deps resolve from the dsh
-install), no build step — plain ESM.
+---
 
-## License
+## 🖼️ Why the Plugin Ships its Own Tool Card
 
-MIT
+Standard DSH tool result cards only render raw JSON. `dsh-image-gen` registers a keyed `tool.call.toolview` entry for `generate_image` and serves generated files from its authenticated route (`GET /dsh-image-gen/image`), displaying the full image directly in the conversation flow.
+
+---
+
+## 🔄 Upgrading from `dsh-fal-image-gen`
+
+Installing `@goodandready/dsh-image-gen` automatically migrates your previous configuration namespace, and legacy image links in past conversations remain fully visible without breaking.
+
+---
+
+## 📄 License
+
+MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
