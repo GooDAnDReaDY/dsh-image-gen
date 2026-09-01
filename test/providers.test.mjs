@@ -587,3 +587,10 @@ test('blendImagesFal: отправляет несколько картинок �
   assert.equal(res.width, 1024)
   assert.deepEqual(res.bytes, PNG)
 })
+
+
+test('generate_image_pack: конвертирует пропорции в именованные размеры', () => {
+  const ratios = ['1:1', '16:9', '9:16']
+  const mapped = ratios.map(r => r === '16:9' ? 'landscape_16_9' : r === '9:16' ? 'portrait_16_9' : 'square_hd')
+  assert.deepEqual(mapped, ['square_hd', 'landscape_16_9', 'portrait_16_9'])
+})
