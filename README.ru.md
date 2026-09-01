@@ -2,11 +2,11 @@
 
 <div align="center">
 
-<h3>Инструмент генерации изображений через FAL Queue, OpenAI API и личные подписки</h3>
+<h3>Комплексный графический комбайн и генератор изображений для DeepSeek Harness</h3>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@goodandready/dsh-image-gen"><img src="https://img.shields.io/npm/v/@goodandready/dsh-image-gen.svg?style=for-the-badge&color=6366f1&labelColor=1e1b4b" alt="npm version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-10b981.svg?style=for-the-badge&color=10b981&labelColor=064e3b" alt="license"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/GooDAnDReaDY/dsh-image-gen.svg?style=for-the-badge&color=10b981&labelColor=064e3b" alt="license"></a>
   <a href="https://github.com/topics/dsh-plugin"><img src="https://img.shields.io/badge/DSH-Plugin-8b5cf6.svg?style=for-the-badge&labelColor=2e1065" alt="DSH Plugin"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node-20%2B-f59e0b.svg?style=for-the-badge&labelColor=451a03" alt="Node version"></a>
 </p>
@@ -25,103 +25,113 @@
 
 ---
 
-## ⚡ Обзор
+## ⚡ Обзор возможностей
 
-**`dsh-image-gen`** предоставляет агенту **DeepSeek Harness** инструмент `generate_image` и размещает сгенерированные изображения прямо в ленте диалога с поддержкой зума, просмотра метаданных и скачивания в 1 клик.
-
-Выбор сервиса для отрисовки настраивается в параметрах без изменения кода: переключайтесь между очередью FAL, сторонними OpenAI-совместимыми эндпоинтами или личными подписками ChatGPT/Grok.
+**`@goodandready/dsh-image-gen`** — флагманский графический плагин для экосистемы DeepSeek Harness, превращающий агента в полноценную творческую студию. Плагин предоставляет богатый набор инструментов для генерации, трансформации, апскейла, векторизации и анализа изображений с поддержкой 8 провайдеров генерации и интерактивной карточкой в чате.
 
 ```mermaid
 graph LR
-    subgraph Trigger [Вызов агента]
-        Agent[🤖 Промпт агента: Нарисуй картинку] --> ToolCall[Инструмент: generate_image]
+    subgraph Input [🤖 Агент и Пользователь]
+        Agent[Промпт / Задача агента]
+        UserUI[Интерактивные кнопки / Чат]
     end
 
-    subgraph Dispatcher [Диспетчер бэкендов dsh-image-gen]
-        ToolCall --> Router{Выбор провайдера}
-        Router -->|Очередь FAL API| FAL[FAL.ai: FLUX.1-schnell / dev / SDXL]
-        Router -->|Формат OpenAI| Custom[OpenAI API / SiliconFlow / ComfyUI]
-        Router -->|Подписки OAuth| Codex[Подписка ChatGPT Plus/Pro / Grok]
+    subgraph Tools [🛠️ Пакет инструментов]
+        T1[generate_image]
+        T2[remove_background]
+        T3[upscale_image]
+        T4[vectorize_image]
+        T5[blend_images]
+        T6[generate_image_pack]
+        T7[compare_images]
+        T8[inspect_image_quality]
     end
 
-    subgraph Delivery [Отображение в чате]
-        FAL --> Handler[Обработчик / GET /dsh-image-gen/image]
-        Custom --> Handler
-        Codex --> Handler
-        Handler --> Viewer[🖼️ Интерактивная карточка в чате с зумом]
+    subgraph Engine [⚙️ Диспетчер бэкендов]
+        Router{Умный маршрутизатор}
+        P_FAL[FAL.ai Queue]
+        P_REP[Replicate API]
+        P_CUST[OpenAI / SiliconFlow]
+        P_COD[ChatGPT Plus/Pro OAuth]
+        P_GROK[Grok Imagine OAuth]
+        P_LOC[ComfyUI / A1111]
+        P_SEA[ByteDance SeaDream]
+        P_GEM[Google Imagen 3]
     end
 
-    style Trigger fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
-    style Dispatcher fill:#181825,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
-    style Delivery fill:#11111b,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4
+    subgraph Store [💾 Хранение и UI]
+        Sidecar[.json Sidecar + PNG tEXt]
+        Attach[ctx.attachments & Disk]
+        Card[🖼️ Карточка в чате с Re-roll, Upscale, NoBG]
+    end
+
+    Input --> Tools
+    Tools --> Router
+    Router --> P_FAL & P_REP & P_CUST & P_COD & P_GROK & P_LOC & P_SEA & P_GEM
+    P_FAL & P_REP & P_CUST & P_COD & P_GROK & P_LOC & P_SEA & P_GEM --> Sidecar
+    Sidecar --> Attach --> Card
+
+    style Input fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+    style Tools fill:#181825,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
+    style Engine fill:#11111b,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4
+    style Store fill:#1e1e2e,stroke:#f38ba8,stroke-width:2px,color:#cdd6f4
 ```
 
 ---
 
-## 🎨 Поддерживаемые бэкенды генерации
+## 🛠️ Полный реестр инструментов
 
-| Провайдер | Бэкенд | Учётные данные | Описание и модели |
-|---|---|---|---|
-| `fal` (дефолт) | [FAL.ai](https://fal.ai) Queue | `FAL_API_KEY` | Сверхбыстрая генерация (`fal-ai/flux-2/klein/9b`, `FLUX.1-schnell`, `SDXL`) |
-| `custom` | OpenAI-совместимый API | `OPENAI_API_KEY` | Подключение DALL-E 3, SiliconFlow, Together или локального ComfyUI |
-| `codex` | Подписка ChatGPT (`gpt-image-2`) | *Без ключа (OAuth)* | Использование аккаунта ChatGPT из `dsh-subscriptions` без платы за API |
-| `grok` | Подписка Grok (`grok-imagine-image-2.0`) | *Без ключа (OAuth)* | Использование аккаунта Grok из `dsh-subscriptions` без платы за API |
-
----
-
-## 📐 Таблица трансляции именованных размеров
-
-Агент задает размер в универсальном именованном виде (`image_size`). Плагин автоматически переводит его под формат активного сервиса:
-
-| Имя размера | Имя в FAL | Пиксели для OpenAI / Custom | Пропорции для Grok |
-|---|---|---|---|
-| `square_hd` (дефолт) | `square_hd` | `1024x1024` | `1:1` |
-| `square` | `square` | `512x512` | `1:1` |
-| `landscape_4_3` | `landscape_4_3` | `1024x768` | `4:3` |
-| `landscape_16_9` | `landscape_16_9` | `1792x1024` | `16:9` |
-| `portrait_4_3` | `portrait_4_3` | `768x1024` | `3:4` |
-| `portrait_16_9` | `portrait_16_9` | `1024x1792` | `9:16` |
-
-> [!TIP]
-> Если кастомный эндпоинт требует нестандартного разрешения, укажите `customSize` (например `1280x720`) в настройках для передачи точной строки.
-
----
-
-## 🔑 Генерация через подписки без API-ключей (`codex` и `grok`)
-
-`codex` и `grok` **не требуют API-ключей**. Они используют активную сессию из [`dsh-subscriptions`](https://github.com/GooDAnDReaDY/dsh-subscriptions):
-* **Внутрипроцессный обмен**: плагины общаются через сервисы Cordis внутри процесса Node.js без сетевых HTTP-вызовов, что исключает утечку сессионных токенов.
-* **Качество подписки**: настройка детализации через `subscriptionQuality` (`low`, `medium`, `high`).
-* **Понятные ошибки**: если `dsh-subscriptions` не установлен или аккаунт отключен, инструмент выдаёт понятное предупреждение.
-
----
-
-## 📦 Режимы доставки: `link` или `image`
-
-| Сравнение | Режим `link` (По умолчанию) | Режим `image` |
+| Инструмент | Назначение | Ключевые параметры |
 |---|---|---|
-| **Что получает модель чата** | Текст и ссылку на файл | Бинарные данные картинки |
-| **Отображение в Web UI** | Да, интерактивная карточка | Да |
-| **Работа с текстовыми LLM** | **Да, полностью самостоятельно** | Требуется [`dsh-vision-bridge`](https://github.com/GooDAnDReaDY/dsh-vision-bridge) |
-| **Анализ картинки моделью** | По тексту промпта и ссылке | Полноценный визуальный анализ |
-| **Долговечность ссылки** | Постоянный роут хоста (`GET /image`) | CDN провайдера (срок жизни ограничен) |
+| **`generate_image`** | Генерация изображения по тексту | `prompt`, `image_size`, `seed`, `style`, `negative_prompt`, `count` |
+| **`remove_background`** | Удаление фона с сохранением прозрачного PNG | `image`, `model`, `output_name` |
+| **`upscale_image`** | Увеличение разрешения в 2x / 4x с детализацией | `image`, `scale` (2/4), `prompt`, `creativity` |
+| **`vectorize_image`** | Векторизация растра в чистый SVG | `image`, `color_mode` (`color`/`binary`) |
+| **`blend_images`** | Смешивание нескольких изображений в единую композицию | `images`, `weights`, `prompt` |
+| **`generate_image_pack`** | Пакетный рендеринг форматов 1:1, 16:9, 9:16 под соцсети | `prompt`, `aspect_ratios` |
+| **`compare_images`** | Сравнение двух картинок (доля различий пикселей) | `image_a`, `image_b` |
+| **`inspect_image_quality`** | Аудит качества и артефактов генерации | `image`, `expected_elements` |
 
 ---
 
-## 🎮 Пример использования
+## 🎨 Поддерживаемые провайдеры генерации
 
-Просто попросите агента:
-> "Сгенерируй фотореалистичную улицу Токио ночью в стиле киберпанк под дождём, неоновые отражения, 16:9"
+| Провайдер | Бэкенд | Ключи / Доступ | Назначение и особенности |
+|---|---|---|---|
+| **`fal`** *(дефолт)* | FAL.ai Queue | `FAL_API_KEY` | Сверхбыстрая генерация (`FLUX.1-schnell`, `FLUX-dev`, `SDXL`), Upscaler, BiRefNet |
+| **`replicate`** | Replicate API | `REPLICATE_API_TOKEN` | Модели сообщества (`black-forest-labs/flux-schnell`, `stability-ai/sdxl`) |
+| **`custom`** | OpenAI-совместимый эндпоинт | `OPENAI_API_KEY` | DALL-E 3, SiliconFlow, Together AI, локальный OpenAI шлюз |
+| **`codex`** | ChatGPT Plus/Pro | *Без ключа (OAuth)* | Использование учетной записи из `dsh-subscriptions` без тарификации API |
+| **`grok`** | Grok Imagine | *Без ключа (OAuth)* | Использование учетной записи Grok из `dsh-subscriptions` без тарификации API |
+| **`local`** | Локальный сервер | *Не требуется* | ComfyUI (граф нод / prompt queue) или Automatic1111 (txt2img/img2img) |
+| **`seedream`** | ByteDance Doubao / SeaDream | `SEEDREAM_API_KEY` | Азиатские фотореалистичные генеративные модели |
+| **`gemini`** | Google GenAI API | `GEMINI_API_KEY` | Imagen 3 через официальный Gemini API |
 
-### Параметры инструмента
+---
 
-| Параметр | Тип | Описание |
-|---|---|---|
-| `prompt` | `string` (Обязательный) | Детальное текстовое описание генерируемого изображения |
-| `image_size` | `string` | `square_hd`, `square`, `landscape_4_3`, `landscape_16_9`, `portrait_4_3`, `portrait_16_9` |
-| `seed` | `number` | Сид для детерминированной повторяемости результата |
-| `output_format` | `string` | Формат файла: `png` (по умолчанию), `jpeg` или `webp` |
-| `output_name` | `string` | Пользовательское имя файла без расширения |
+## 🎭 Библиотека стилей (`style_presets`)
+
+Плагин содержит встроенные профили стилизации:
+* **`cinematic`**: Кинематографичный кадр, 35mm оптика, естественный свет и глубина резкости.
+* **`anime`**: Аниме-эстетика в стиле Макото Синкая, сочные цвета, тонкий лайн-арт.
+* **`isometric`**: Изометрический 3D-рендер, пластилиновый стиль, мягкий студийный свет.
+* **`cyberpunk`**: Киберпанк, неоновые отражения, объемный туман, ночная атмосфера.
+* **`pixel_art`**: 16-битный ретро пиксель-арт, четкие контуры, дизеринг.
+* **`oil_painting`**: Классическая масляная живопись, фактура холста, пастозные мазки.
+* **`minimalist`**: Минималистичный плоский вектор, чистые линии, строгая геометрия.
+
+---
+
+## 🖼️ Интерактивная карточка в чате
+
+Встроенный слот Web UI (`tool.call.toolview`) обеспечивает:
+* **Кнопки быстрых действий**:
+  * 🔄 **Re-roll**: повторная генерация со следующим сидом;
+  * 🔍 **2x Upscale**: быстрый вызов инструмента увеличения разрешения;
+  * ✂️ **Remove BG**: вырезание фона в прозрачный PNG;
+  * 📋 **Копирование промпта и сида** в буфер обмена в один клик.
+* **Вшивание метаданных**: параметры генерации (промпт, сид, модель) автоматически внедряются в `tEXt` чанки PNG-файлов.
+* **Sidecar JSON**: для каждого файла создается `.json` файл с полными параметрами генерации, стоимостью и таймстемпом.
 
 ---
 
@@ -133,57 +143,19 @@ dsh plugin --profile web add @goodandready/dsh-image-gen
 
 ---
 
-## ⚙️ Рецепты конфигурации (`settings.yaml`)
+## ⚙️ Пример конфигурации (`settings.yaml`)
 
-### 1. Настройка FAL.ai (По умолчанию)
 ```yaml
 dsh-image-gen:
-  provider: fal
-  model: fal-ai/flux-2/klein/9b
-  apiKeyEnv: FAL_API_KEY
-  defaultSize: landscape_4_3
-  defaultFormat: png
-  outputDir: generated/images
+  provider: fal                          # fal | replicate | custom | codex | grok | local | seedream | gemini
+  model: fal-ai/flux-2/klein/9b          # Идентификатор модели по умолчанию
+  apiKeyEnv: FAL_API_KEY                 # Переменная окружения для ключа
+  defaultSize: landscape_4_3             # square_hd | landscape_4_3 | landscape_16_9 | portrait_4_3 | portrait_16_9
+  defaultFormat: png                     # png | jpeg | webp
+  replicateModel: black-forest-labs/flux-schnell
+  replicateKeyEnv: REPLICATE_API_TOKEN
+  outputDir: generated/images            # Каталог сохранения готовых изображений
 ```
-
-### 2. Подключение OpenAI / SiliconFlow
-```yaml
-dsh-image-gen:
-  provider: custom
-  customBaseURL: https://api.siliconflow.cn/v1
-  customModel: black-forest-labs/FLUX.1-schnell
-  customKeyEnv: SILICONFLOW_API_KEY
-  defaultSize: square_hd
-```
-
-### 3. Локальный ComfyUI / Шлюз (Без авторизации)
-```yaml
-dsh-image-gen:
-  provider: custom
-  customBaseURL: http://127.0.0.1:8188/v1
-  customModel: sd-xl-base-1.0
-  customKeyEnv: ""   # Пусто = без заголовка Authorization
-```
-
-### 4. Генерация через подписку ChatGPT / Grok
-```yaml
-dsh-image-gen:
-  provider: codex   # или 'grok'
-  subscriptionQuality: high
-  defaultSize: landscape_16_9
-```
-
----
-
-## 🖼️ Почему у плагина собственная карточка инструмента
-
-Стандартные карточки DSH отображают только JSON. `dsh-image-gen` регистрирует слот `tool.call.toolview` для инструмента `generate_image` и отдаёт картинку через свой защищённый маршрут (`GET /dsh-image-gen/image`), показывая изображение прямо в интерфейсе чата.
-
----
-
-## 🔄 Миграция с `dsh-fal-image-gen`
-
-Установка `@goodandready/dsh-image-gen` автоматически подхватывает настройки из пространства `dsh-fal-image-gen`, а все ранее сгенерированные изображения в старых сессиях продолжают корректно отображаться.
 
 ---
 
