@@ -21,6 +21,9 @@ import {
   upscaleImageFal,
   traceToSvg,
   estimateCost,
+  STYLE_PRESETS,
+  applyStylePreset,
+  blendImagesFal,
 } from '../lib/providers.js'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
@@ -558,4 +561,29 @@ test('replicate: submit и опрос до готовности', async () => {
   assert.equal(res.mediaType, 'image/png')
   assert.deepEqual(res.bytes, PNG)
   assert.equal(res.cost, 0.003)
+})
+
+
+test('applyStylePreset: подставляет пресет по ключу или оставляет кастомный', () => {
+  assert.ok(applyStylePreset('пейзаж', 'cinematic').includes('cinematic film still'))
+  assert.ok(applyStylePreset('девушка', 'anime').includes('Makoto Shinkai'))
+  assert.equal(applyStylePreset('дом', 'custom_3d_style'), 'дом, custom_3d_style')
+})
+
+test('blendImagesFal: отправляет несколько картинок на слияние в FAL', async () => {
+  const fetchImpl = async (url, init) => {
+    if (String(url).endsWith('/fal-ai/flux/dev/image-to-image')) {
+      const parsed = JSON.parse(init.body)
+      assert.ok(parsed.image_url.startsWith('data:image/png;base64,'))
+      return jsonRes({ request_id: 'b1', status_url: 'https://q/b_status', response_url: 'https://q/b_result' })
+    }
+    if (String(url) === 'https://q/b_status') return jsonRes({ status: 'COMPLETED', response_url: 'https://q/b_result' })
+    if (String(url) === 'https://q/b_result') {
+      return jsonRes({ image: { url: 'https://cdn/blended.png', width: 1024, height: 1024 } })
+    }
+    return bytesRes(PNG)
+  }
+  const res = await blendImagesFal(deps(fetchImpl), { images: [{ bytes: PNG, mediaType: 'image/png' }], prompt: 'mix', signal })
+  assert.equal(res.width, 1024)
+  assert.deepEqual(res.bytes, PNG)
 })
