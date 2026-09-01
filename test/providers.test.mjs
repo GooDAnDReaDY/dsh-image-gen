@@ -16,6 +16,10 @@ import {
   buildEditForm,
   PROVIDER_KEYS,
   SIZE_PIXELS,
+  embedPngMetadata,
+  removeBackgroundFal,
+  upscaleImageFal,
+  traceToSvg,
 } from '../lib/providers.js'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
@@ -474,3 +478,58 @@ test('pixelDiff: одинаковые байты — 0, разные — дол�
   assert.equal(size.error, 'size mismatch')
 })
 
+
+
+test('embedPngMetadata: вшивает tEXt чанк с параметрами в PNG', () => {
+  const ihdr = Buffer.from([0,0,0,13, 0x49,0x48,0x44,0x52, 0,0,0,1, 0,0,0,1, 8,2,0,0,0, 0x90,0x77,0x53,0xde])
+  const iend = Buffer.from([0,0,0,0, 0x49,0x45,0x4e,0x44, 0xae,0x42,0x60,0x82])
+  const rawPng = Buffer.concat([Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]), ihdr, iend])
+  const tagged = embedPngMetadata(rawPng, { prompt: 'space cat', seed: 123 })
+  assert.ok(tagged.length > rawPng.length)
+  assert.ok(tagged.includes(Buffer.from('Parameters')))
+  assert.ok(tagged.includes(Buffer.from('space cat')))
+})
+
+test('removeBackgroundFal: отправляет запрос в очередь и скачивает результат', async () => {
+  const fetchImpl = async (url, init) => {
+    if (String(url).endsWith('/fal-ai/birefnet')) {
+      return jsonRes({ request_id: 'rem1', status_url: 'https://q/rem_status', response_url: 'https://q/rem_result' })
+    }
+    if (String(url) === 'https://q/rem_status') return jsonRes({ status: 'COMPLETED', response_url: 'https://q/rem_result' })
+    if (String(url) === 'https://q/rem_result') {
+      return jsonRes({ image: { url: 'https://cdn/nobg.png', width: 512, height: 512 } })
+    }
+    return bytesRes(PNG)
+  }
+  const res = await removeBackgroundFal(deps(fetchImpl), { imageBytes: PNG, signal })
+  assert.equal(res.mediaType, 'image/png')
+  assert.equal(res.width, 512)
+  assert.equal(res.height, 512)
+  assert.deepEqual(res.bytes, PNG)
+})
+
+test('upscaleImageFal: отправляет масштаб и параметры в очередь FAL', async () => {
+  const fetchImpl = async (url, init) => {
+    if (String(url).endsWith('/fal-ai/clarity-upscaler')) {
+      const parsed = JSON.parse(init.body)
+      assert.equal(parsed.upscale_factor, 4)
+      assert.equal(parsed.prompt, 'high detail')
+      return jsonRes({ request_id: 'up1', status_url: 'https://q/up_status', response_url: 'https://q/up_result' })
+    }
+    if (String(url) === 'https://q/up_status') return jsonRes({ status: 'COMPLETED', response_url: 'https://q/up_result' })
+    if (String(url) === 'https://q/up_result') {
+      return jsonRes({ image: { url: 'https://cdn/up.png', width: 2048, height: 2048 } })
+    }
+    return bytesRes(PNG)
+  }
+  const res = await upscaleImageFal(deps(fetchImpl), { imageBytes: PNG, scale: 4, prompt: 'high detail', signal })
+  assert.equal(res.width, 2048)
+  assert.equal(res.height, 2048)
+})
+
+test('traceToSvg: генерирует валидную SVG разметку', () => {
+  const res = traceToSvg(PNG, { colorMode: 'color' })
+  assert.equal(res.mediaType, 'image/svg+xml')
+  assert.ok(res.svg.includes('<svg'))
+  assert.ok(res.svg.includes('<image href="data:image/png;base64,'))
+})
