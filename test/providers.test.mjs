@@ -20,6 +20,7 @@ import {
   removeBackgroundFal,
   upscaleImageFal,
   traceToSvg,
+  estimateCost,
 } from '../lib/providers.js'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
@@ -62,7 +63,7 @@ function bytesRes(bytes, contentType = 'image/png') {
 }
 
 test('все провайдеры объявлены', () => {
-  assert.deepEqual(PROVIDER_KEYS, ['fal', 'custom', 'codex', 'grok', 'local', 'seedream', 'gemini'])
+  assert.deepEqual(PROVIDER_KEYS, ['fal', 'custom', 'codex', 'grok', 'local', 'seedream', 'gemini', 'replicate'])
   const providers = makeProviders(deps(async () => jsonRes({})), job())
   assert.equal(typeof providers.fal, 'function')
   assert.equal(typeof providers.custom, 'function')
@@ -339,8 +340,8 @@ test('tryGenerate: все отказали — перечисляет причи
 })
 
 test('fallbackOrder: основной первым, остальные по порядку', () => {
-  assert.deepEqual(fallbackOrder('codex'), ['codex', 'fal', 'custom', 'grok', 'local', 'seedream', 'gemini'])
-  assert.deepEqual(fallbackOrder('fal'), ['fal', 'custom', 'codex', 'grok', 'local', 'seedream', 'gemini'])
+  assert.deepEqual(fallbackOrder('codex'), ['codex', 'fal', 'custom', 'grok', 'local', 'seedream', 'gemini', 'replicate'])
+  assert.deepEqual(fallbackOrder('fal'), ['fal', 'custom', 'codex', 'grok', 'local', 'seedream', 'gemini', 'replicate'])
 })
 
 
@@ -532,4 +533,29 @@ test('traceToSvg: генерирует валидную SVG разметку', (
   assert.equal(res.mediaType, 'image/svg+xml')
   assert.ok(res.svg.includes('<svg'))
   assert.ok(res.svg.includes('<image href="data:image/png;base64,'))
+})
+
+
+test('estimateCost: корректно рассчитывает стоимость по провайдерам', () => {
+  assert.equal(estimateCost('fal', 'fal-ai/flux-schnell'), 0.003)
+  assert.equal(estimateCost('fal', 'fal-ai/flux-dev'), 0.025)
+  assert.equal(estimateCost('replicate', 'black-forest-labs/flux-schnell'), 0.003)
+  assert.equal(estimateCost('codex', 'gpt-image-1'), 0.0)
+  assert.equal(estimateCost('local', 'comfyui'), 0.0)
+})
+
+test('replicate: submit и опрос до готовности', async () => {
+  const fetchImpl = async (url, init) => {
+    if (String(url).includes('/models/black-forest-labs/flux-schnell/predictions')) {
+      return jsonRes({ id: 'p1', status: 'processing', urls: { get: 'https://api.replicate.com/v1/predictions/p1' } })
+    }
+    if (String(url).endsWith('/predictions/p1')) {
+      return jsonRes({ id: 'p1', status: 'succeeded', output: ['https://cdn/replicate.png'] })
+    }
+    return bytesRes(PNG)
+  }
+  const res = await makeProviders(deps(fetchImpl, { cfg: { replicateKeyEnv: 'REPLICATE_API_TOKEN' } }), job()).replicate()
+  assert.equal(res.mediaType, 'image/png')
+  assert.deepEqual(res.bytes, PNG)
+  assert.equal(res.cost, 0.003)
 })
