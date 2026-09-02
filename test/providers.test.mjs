@@ -26,6 +26,7 @@ import {
   resolveStylePreset,
   snapToMultipleOf64,
   snapDimensions,
+  formatA1111Parameters,
   blendImagesFal,
   calculateBackoff,
   isFatalClientError,
@@ -715,4 +716,38 @@ test('snapToMultipleOf64 & snapDimensions: гарантируют кратнос
   assert.equal(h % 64, 0)
   assert.equal(w, 1024)
   assert.equal(h, 768)
+})
+
+test('formatA1111Parameters: генерирует стандартный блок ComfyUI / Automatic1111', () => {
+  const formatted = formatA1111Parameters({
+    prompt: 'cyberpunk warrior',
+    negative_prompt: 'blurry, low quality',
+    seed: 987654,
+    width: 1024,
+    height: 768,
+    model: 'fal-ai/flux-dev',
+    guidance_scale: 7.5,
+    steps: 28,
+  })
+  assert.ok(formatted.startsWith('cyberpunk warrior'))
+  assert.ok(formatted.includes('Negative prompt: blurry, low quality'))
+  assert.ok(formatted.includes('Steps: 28'))
+  assert.ok(formatted.includes('Seed: 987654'))
+  assert.ok(formatted.includes('Size: 1024x768'))
+  assert.ok(formatted.includes('Model: fal-ai/flux-dev'))
+})
+
+test('embedPngMetadata: вшивает tEXt чанк с ключевым словом parameters для A1111 drag-and-drop', () => {
+  const validPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mNk+M9QzwAEjAwACXEB+V38FswAAAAASUVORK5CYII=', 'base64')
+  const embedded = embedPngMetadata(validPng, {
+    prompt: 'red sports car',
+    negative_prompt: 'ugly',
+    seed: 42,
+    model: 'flux-schnell',
+  })
+  const text = embedded.toString('utf8')
+  assert.ok(text.includes('Parameters'))
+  assert.ok(text.includes('red sports car'))
+  assert.ok(text.includes('Negative prompt: ugly'))
+  assert.ok(text.includes('Seed: 42'))
 })
