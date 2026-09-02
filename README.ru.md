@@ -27,7 +27,7 @@
 
 ## ⚡ Обзор возможностей
 
-**`@goodandready/dsh-image-gen`** — флагманский графический плагин для экосистемы DeepSeek Harness, превращающий агента в полноценную творческую студию. Плагин предоставляет богатый набор инструментов для генерации, трансформации, апскейла, векторизации и анализа изображений с поддержкой 8 провайдеров генерации и интерактивной карточкой в чате.
+**`@goodandready/dsh-image-gen`** — флагманский графический плагин для экосистемы DeepSeek Harness, превращающий агента в полноценную творческую студию. Плагин предоставляет богатый набор инструментов для генерации, трансформации, апскейла, векторизации и анализа изображений с поддержкой 8 провайдеров генерации, интеллектуальным кэшированием и интерактивной карточкой в чате.
 
 ```mermaid
 graph LR
@@ -47,8 +47,14 @@ graph LR
         T8[inspect_image_quality]
     end
 
+    subgraph Core [🛡️ Ядро надежности и кэша]
+        Cache[Детерминированный sha256 Hash Cache]
+        Backoff[Exponential Backoff + Jitter]
+        Classifier[Классификатор фатальных ошибок 400]
+        Snap64[VAE 64-Multiple Dimension Snapping]
+    end
+
     subgraph Engine [⚙️ Диспетчер бэкендов]
-        Router{Умный маршрутизатор}
         P_FAL[FAL.ai Queue]
         P_REP[Replicate API]
         P_CUST[OpenAI / SiliconFlow]
@@ -60,19 +66,19 @@ graph LR
     end
 
     subgraph Store [💾 Хранение и UI]
-        Sidecar[.json Sidecar + PNG tEXt]
-        Attach[ctx.attachments & Disk]
-        Card[🖼️ Карточка в чате с Re-roll, Upscale, NoBG]
+        Sidecar[.json Sidecar + Parameters tEXt]
+        A1111[Drag-and-Drop в ComfyUI / WebUI]
+        Card[🖼️ Карточка в чате с Re-roll, Правкой, NoBG]
     end
 
     Input --> Tools
-    Tools --> Router
-    Router --> P_FAL & P_REP & P_CUST & P_COD & P_GROK & P_LOC & P_SEA & P_GEM
-    P_FAL & P_REP & P_CUST & P_COD & P_GROK & P_LOC & P_SEA & P_GEM --> Sidecar
-    Sidecar --> Attach --> Card
+    Tools --> Core
+    Core --> Engine
+    Engine --> Store
 
     style Input fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
     style Tools fill:#181825,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
+    style Core fill:#11111b,stroke:#fab387,stroke-width:2px,color:#cdd6f4
     style Engine fill:#11111b,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4
     style Store fill:#1e1e2e,stroke:#f38ba8,stroke-width:2px,color:#cdd6f4
 ```
@@ -86,52 +92,35 @@ graph LR
 | **`generate_image`** | Генерация изображения по тексту | `prompt`, `image_size`, `seed`, `style`, `negative_prompt`, `count` |
 | **`remove_background`** | Удаление фона с сохранением прозрачного PNG | `image`, `model`, `output_name` |
 | **`upscale_image`** | Увеличение разрешения в 2x / 4x с детализацией | `image`, `scale` (2/4), `prompt`, `creativity` |
-| **`vectorize_image`** | Векторизация растра в чистый SVG | `image`, `color_mode` (`color`/`binary`) |
+| **`vectorize_image`** | Векторизация растра в чистый SVG с квантованием палитры | `image`, `color_mode`, `paletteSize` |
 | **`blend_images`** | Смешивание нескольких изображений в единую композицию | `images`, `weights`, `prompt` |
-| **`generate_image_pack`** | Пакетный рендеринг форматов 1:1, 16:9, 9:16 под соцсети | `prompt`, `aspect_ratios` |
+| **`generate_image_pack`** | Пакетный рендеринг форматов 1:1, 16:9, 9:16 с сохранением частичных результатов | `prompt`, `aspect_ratios` |
 | **`compare_images`** | Сравнение двух картинок (доля различий пикселей) | `image_a`, `image_b` |
-| **`inspect_image_quality`** | Аудит качества и артефактов генерации | `image`, `expected_elements` |
+| **`inspect_image_quality`** | Аудит качества, расчет резкости и проверка дефектов | `image`, `expected_elements` |
+
+---
+
+## 🛡️ Отказоустойчивость, производительность и качество (v0.10.0)
+
+* **Экспоненциальный Backoff с Jitter**: опрос очередей генерации (FAL, Replicate, ComfyUI) автоматически адаптирует задержки, исключая ошибки `429 Too Many Requests`.
+* **Классификатор ошибок в Fallback Cascade**: клиентские ошибки (Content Policy, 400 Bad Request, NSFW) отсекаются немедленно, предотвращая пустую трату денег на резервных провайдерах.
+* **Детерминированный хэш-кэш**: повторные генерации с тем же промптом, моделью и сидом отдаются мгновенно из локального кэша с нулевой стоимостью API.
+* **Совместимость с ComfyUI / Automatic1111**: метаданные вшиваются в PNG `tEXt` чанки в стандартном формате `Parameters: Prompt\nNegative prompt: ...\nSteps: ... Seed: ...`, обеспечивая нативный Drag-and-Drop.
+* **Кратность 64**: все пользовательские и адаптивные размеры автоматически округляются до кратных 64 для исключения искажений VAE.
+* **Обогащенные пресеты стилей**: каждый стиль в `STYLE_PRESETS` содержит индивидуальный `negative_prompt` и рекомендуемый `guidance_scale`.
 
 ---
 
 ## 🎨 Поддерживаемые провайдеры генерации
 
-| Провайдер | Бэкенд | Ключи / Доступ | Назначение и особенности |
-|---|---|---|---|
-| **`fal`** *(дефолт)* | FAL.ai Queue | `FAL_API_KEY` | Сверхбыстрая генерация (`FLUX.1-schnell`, `FLUX-dev`, `SDXL`), Upscaler, BiRefNet |
-| **`replicate`** | Replicate API | `REPLICATE_API_TOKEN` | Модели сообщества (`black-forest-labs/flux-schnell`, `stability-ai/sdxl`) |
-| **`custom`** | OpenAI-совместимый эндпоинт | `OPENAI_API_KEY` | DALL-E 3, SiliconFlow, Together AI, локальный OpenAI шлюз |
-| **`codex`** | ChatGPT Plus/Pro | *Без ключа (OAuth)* | Использование учетной записи из `dsh-subscriptions` без тарификации API |
-| **`grok`** | Grok Imagine | *Без ключа (OAuth)* | Использование учетной записи Grok из `dsh-subscriptions` без тарификации API |
-| **`local`** | Локальный сервер | *Не требуется* | ComfyUI (граф нод / prompt queue) или Automatic1111 (txt2img/img2img) |
-| **`seedream`** | ByteDance Doubao / SeaDream | `SEEDREAM_API_KEY` | Азиатские фотореалистичные генеративные модели |
-| **`gemini`** | Google GenAI API | `GEMINI_API_KEY` | Imagen 3 через официальный Gemini API |
-
----
-
-## 🎭 Библиотека стилей (`style_presets`)
-
-Плагин содержит встроенные профили стилизации:
-* **`cinematic`**: Кинематографичный кадр, 35mm оптика, естественный свет и глубина резкости.
-* **`anime`**: Аниме-эстетика в стиле Макото Синкая, сочные цвета, тонкий лайн-арт.
-* **`isometric`**: Изометрический 3D-рендер, пластилиновый стиль, мягкий студийный свет.
-* **`cyberpunk`**: Киберпанк, неоновые отражения, объемный туман, ночная атмосфера.
-* **`pixel_art`**: 16-битный ретро пиксель-арт, четкие контуры, дизеринг.
-* **`oil_painting`**: Классическая масляная живопись, фактура холста, пастозные мазки.
-* **`minimalist`**: Минималистичный плоский вектор, чистые линии, строгая геометрия.
-
----
-
-## 🖼️ Интерактивная карточка в чате
-
-Встроенный слот Web UI (`tool.call.toolview`) обеспечивает:
-* **Кнопки быстрых действий**:
-  * 🔄 **Re-roll**: повторная генерация со следующим сидом;
-  * 🔍 **2x Upscale**: быстрый вызов инструмента увеличения разрешения;
-  * ✂️ **Remove BG**: вырезание фона в прозрачный PNG;
-  * 📋 **Копирование промпта и сида** в буфер обмена в один клик.
-* **Вшивание метаданных**: параметры генерации (промпт, сид, модель) автоматически внедряются в `tEXt` чанки PNG-файлов.
-* **Sidecar JSON**: для каждого файла создается `.json` файл с полными параметрами генерации, стоимостью и таймстемпом.
+* **`fal`** *(дефолт)*: Сверхбыстрая очередь FAL.ai (`FLUX.1-schnell`, `FLUX-dev`, `SDXL`, BiRefNet, Clarity Upscaler).
+* **`replicate`**: Модели сообщества через Replicate API.
+* **`custom`**: Любой OpenAI-совместимый эндпоинт (DALL-E 3, SiliconFlow, Together AI, локальный шлюз).
+* **`codex`**: Генерация через ChatGPT Plus/Pro подписку (`dsh-subscriptions` OAuth без оплаты токенов).
+* **`grok`**: Генерация через Grok Imagine подписку (`dsh-subscriptions` OAuth).
+* **`local`**: Локальный ComfyUI (граф нод) или Automatic1111 (SD WebUI).
+* **`seedream`**: ByteDance Doubao / SeaDream API.
+* **`gemini`**: Google Imagen 3 через GenAI API.
 
 ---
 
@@ -148,12 +137,12 @@ dsh plugin --profile web add @goodandready/dsh-image-gen
 ```yaml
 dsh-image-gen:
   provider: fal                          # fal | replicate | custom | codex | grok | local | seedream | gemini
-  model: fal-ai/flux-2/klein/9b          # Идентификатор модели по умолчанию
+  model: fal-ai/flux-2/klein/9b          # Модель по умолчанию
   apiKeyEnv: FAL_API_KEY                 # Переменная окружения для ключа
   defaultSize: landscape_4_3             # square_hd | landscape_4_3 | landscape_16_9 | portrait_4_3 | portrait_16_9
   defaultFormat: png                     # png | jpeg | webp
-  replicateModel: black-forest-labs/flux-schnell
-  replicateKeyEnv: REPLICATE_API_TOKEN
+  cacheBySeed: true                      # Детерминированное кэширование повторных запросов
+  pruneDays: 30                          # Автоочистка файлов и sidecar старше 30 дней
   outputDir: generated/images            # Каталог сохранения готовых изображений
 ```
 

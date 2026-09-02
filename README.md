@@ -31,24 +31,35 @@
 
 ---
 
+## 🛡️ Reliability, Performance & Quality (v0.10.0)
+
+* **Exponential Backoff with Jitter**: Adaptive polling for FAL, Replicate, and ComfyUI queues protects against HTTP 429 rate limits.
+* **Error Classification in Fallback Cascade**: Client-side errors (Content Policy, 400 Bad Request, NSFW) fail fast without wasting API credits on other providers.
+* **Deterministic Hash Caching**: Exact matches of prompt, model, and seed return instantly from local storage with zero API expense.
+* **ComfyUI & Automatic1111 Drag-and-Drop**: Metadata is packed into PNG `Parameters` chunks in standard format.
+* **Dimension Snapping**: Automatic normalization to multiples of 64 guarantees VAE bucket compatibility.
+* **Enhanced Style Presets**: Built-in styles include tailor-made negative prompts and optimal guidance scale settings.
+
+---
+
 ## 🛠️ Complete Tools Reference
 
 * **`generate_image`**: Generate images with pluggable providers, seeds, aspect ratios, and style presets.
 * **`remove_background`**: Extract subject with transparent PNG output (FAL BiRefNet / Rembg).
 * **`upscale_image`**: 2x / 4x super-resolution with clarity reconstruction.
-* **`vectorize_image`**: Convert raster graphics to clean scalable SVG vectors.
+* **`vectorize_image`**: Convert raster graphics to clean scalable SVG vectors with palette quantization.
 * **`blend_images`**: Multi-reference composition mixing.
-* **`generate_image_pack`**: Simultaneous multi-aspect ratio rendering (1:1, 16:9, 9:16).
+* **`generate_image_pack`**: Simultaneous multi-aspect ratio rendering with graceful partial recovery.
 * **`compare_images`**: Pixel-level visual difference ratio comparison.
-* **`inspect_image_quality`**: Automated visual audit and defect detection.
+* **`inspect_image_quality`**: Automated visual audit, Laplacian sharpness scoring, and defect detection.
 
 ---
 
 ## 🎨 Supported Generation Backends
 
-* **`fal`** (Default): High-speed queue for FLUX.1, SDXL, Clarity Upscaler, and BiRefNet.
+* **`fal`** (Default): FAL.ai queue for FLUX.1, SDXL, Clarity Upscaler, and BiRefNet.
 * **`replicate`**: FLUX and SDXL models via Replicate API.
-* **`custom`**: OpenAI-compatible endpoint (DALL-E 3, SiliconFlow, Together AI, local ComfyUI).
+* **`custom`**: OpenAI-compatible endpoint (DALL-E 3, SiliconFlow, Together AI, local gateways).
 * **`codex`**: ChatGPT Plus/Pro subscription generation via `dsh-subscriptions` (OAuth).
 * **`grok`**: Grok Imagine subscription generation via `dsh-subscriptions` (OAuth).
 * **`local`**: Local ComfyUI workflow execution or Automatic1111 web API.

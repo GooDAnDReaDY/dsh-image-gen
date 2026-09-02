@@ -25,12 +25,15 @@
 
 ---
 
-## ⚡ 核心功能
+## ⚡ 核心功能与架构提升 (v0.10.0)
 
-**`@goodandready/dsh-image-gen`** 为 DeepSeek Harness 提供完整的图像生成与视觉处理工具链：
-* **8大后端支持**: FAL.ai、Replicate、OpenAI/SiliconFlow、ChatGPT Plus (OAuth)、Grok Imagine (OAuth)、ComfyUI/A1111 本地生成、ByteDance SeaDream 与 Google Imagen 3。
-* **丰富工具箱**: `generate_image`、`remove_background` (抠图)、`upscale_image` (超分辨率放大)、`vectorize_image` (转矢量 SVG)、`blend_images` (多图融合)、`generate_image_pack` (多比例适配) 与 `compare_images`。
-* **交互式卡片**: 聊天窗口内置 Re-roll 重新生成、2x 超分、一键抠图与 Prompt/Seed 快速复制。
+**`@goodandready/dsh-image-gen`** 为 DeepSeek Harness 提供工业级高可用的图像生成与视觉处理工具链：
+* **8大后端全面支持**: FAL.ai、Replicate、OpenAI/SiliconFlow、ChatGPT Plus (OAuth)、Grok Imagine (OAuth)、ComfyUI/A1111 本地生成、ByteDance SeaDream 与 Google Imagen 3。
+* **指数退避与 Jitter 队列防爆**: 针对 FAL 与 Replicate 异步队列引入智能 Backoff 轮询，彻底杜绝 429 报错。
+* **确定性哈希缓存 (Deterministic Cache)**: 相同 Prompt 与 Seed 的重复请求直接从本地秒级返回，零 API 消耗。
+* **ComfyUI / Automatic1111 拖拽直通**: PNG 元数据原生内嵌标准 `Parameters` 块，生成图片可直接拖入 WebUI/ComfyUI 还原参数。
+* **尺寸 64 倍数自动对齐**: 自动对齐 VAE 运算尺寸，避免图像失真。
+* **多风格预设增强**: 内置 `cinematic`、`anime` 等风格的独立 Negative Prompt 与 Guidance Scale 优化。
 
 ---
 
