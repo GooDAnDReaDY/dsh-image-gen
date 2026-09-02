@@ -23,6 +23,9 @@ import {
   estimateCost,
   STYLE_PRESETS,
   applyStylePreset,
+  resolveStylePreset,
+  snapToMultipleOf64,
+  snapDimensions,
   blendImagesFal,
   calculateBackoff,
   isFatalClientError,
@@ -689,4 +692,27 @@ test('computeGenerationHash: детерминированный sha256 хэш г
   assert.equal(h1.length, 64)
   assert.equal(h1, h2) // Case and trim normalization match
   assert.notEqual(h1, h3) // Different prompt produces different hash
+})
+
+test('resolveStylePreset: объединяет негативные промпты и проставляет guidanceScale', () => {
+  const anime = resolveStylePreset('anime', 'blurry', undefined)
+  assert.ok(anime.promptSuffix.includes('Makoto Shinkai'))
+  assert.ok(anime.negativePrompt.includes('blurry, photorealistic'))
+  assert.equal(anime.guidanceScale, 7.0)
+
+  const custom = resolveStylePreset('custom_watercolors', 'ugly', 5.5)
+  assert.equal(custom.promptSuffix, 'custom_watercolors')
+  assert.equal(custom.negativePrompt, 'ugly')
+  assert.equal(custom.guidanceScale, 5.5)
+})
+
+test('snapToMultipleOf64 & snapDimensions: гарантируют кратность 64', () => {
+  assert.equal(snapToMultipleOf64(1000), 1024)
+  assert.equal(snapToMultipleOf64(750), 768)
+  assert.equal(snapToMultipleOf64(500), 512)
+  const [w, h] = snapDimensions(1000, 750)
+  assert.equal(w % 64, 0)
+  assert.equal(h % 64, 0)
+  assert.equal(w, 1024)
+  assert.equal(h, 768)
 })
