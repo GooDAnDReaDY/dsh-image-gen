@@ -26,6 +26,7 @@ import {
   blendImagesFal,
   calculateBackoff,
   isFatalClientError,
+  computeGenerationHash,
 } from '../lib/providers.js'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
@@ -658,4 +659,34 @@ test('generate_image_pack: обрабатывает частичные резу�
   assert.equal(results.length, 1)
   assert.equal(warnings.length, 1)
   assert.ok(warnings[0].includes('Timeout on 9:16 ratio'))
+})
+
+test('computeGenerationHash: детерминированный sha256 хэш генерации', () => {
+  const h1 = computeGenerationHash({
+    provider: 'fal',
+    model: 'fal-ai/flux-dev',
+    prompt: 'red car',
+    seed: 42,
+    size: '1024x1024',
+    style: 'cinematic',
+  })
+  const h2 = computeGenerationHash({
+    provider: 'FAL ',
+    model: 'fal-ai/flux-dev',
+    prompt: 'red car',
+    seed: 42,
+    size: '1024x1024',
+    style: 'cinematic',
+  })
+  const h3 = computeGenerationHash({
+    provider: 'fal',
+    model: 'fal-ai/flux-dev',
+    prompt: 'blue car',
+    seed: 42,
+    size: '1024x1024',
+    style: 'cinematic',
+  })
+  assert.equal(h1.length, 64)
+  assert.equal(h1, h2) // Case and trim normalization match
+  assert.notEqual(h1, h3) // Different prompt produces different hash
 })
