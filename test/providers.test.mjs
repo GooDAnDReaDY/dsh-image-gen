@@ -29,6 +29,7 @@ import {
   formatA1111Parameters,
   estimateSharpnessAndVariance,
   quantizePalette,
+  pollStatus,
   blendImagesFal,
   calculateBackoff,
   isFatalClientError,
@@ -780,4 +781,13 @@ test('quantizePalette: возвращает палитру в зависимос
 
   const color = quantizePalette('color', 4)
   assert.equal(color.length, 4)
+})
+
+test('pollStatus: безопасно работает без переданного signal (signal = undefined)', async () => {
+  const fetchImpl = async (url) => ({
+    ok: true,
+    json: async () => ({ status: 'COMPLETED', response_url: 'https://fal/res' })
+  })
+  const res = await pollStatus(fetchImpl, 'https://fal/status', 'key-123', undefined, 10, 5000)
+  assert.equal(res.status, 'COMPLETED')
 })
