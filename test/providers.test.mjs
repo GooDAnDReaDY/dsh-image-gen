@@ -27,6 +27,8 @@ import {
   snapToMultipleOf64,
   snapDimensions,
   formatA1111Parameters,
+  estimateSharpnessAndVariance,
+  quantizePalette,
   blendImagesFal,
   calculateBackoff,
   isFatalClientError,
@@ -750,4 +752,32 @@ test('embedPngMetadata: вшивает tEXt чанк с ключевым сло�
   assert.ok(text.includes('red sports car'))
   assert.ok(text.includes('Negative prompt: ugly'))
   assert.ok(text.includes('Seed: 42'))
+})
+
+test('estimateSharpnessAndVariance: детектирует пустые/поврежденные буферы и валидные картинки', () => {
+  const corrupt = Buffer.alloc(10, 0)
+  const corruptRes = estimateSharpnessAndVariance(corrupt)
+  assert.equal(corruptRes.passed, false)
+  assert.equal(corruptRes.score, 0)
+
+  const solidBlank = Buffer.alloc(2048, 128)
+  const blankRes = estimateSharpnessAndVariance(solidBlank)
+  assert.equal(blankRes.isBlank, true)
+  assert.equal(blankRes.passed, false)
+
+  const validPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mNk+M9QzwAEjAwACXEB+V38FswAAAAASUVORK5CYII=', 'base64')
+  const validRes = estimateSharpnessAndVariance(validPng)
+  assert.equal(validRes.isBlank, false)
+  assert.ok(validRes.score >= 0.5)
+})
+
+test('quantizePalette: возвращает палитру в зависимости от режима', () => {
+  const binary = quantizePalette('binary')
+  assert.deepEqual(binary, ['#000000', '#ffffff'])
+
+  const gray = quantizePalette('grayscale')
+  assert.ok(gray.length >= 3)
+
+  const color = quantizePalette('color', 4)
+  assert.equal(color.length, 4)
 })
