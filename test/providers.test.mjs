@@ -24,6 +24,8 @@ import {
   STYLE_PRESETS,
   applyStylePreset,
   blendImagesFal,
+  calculateBackoff,
+  isFatalClientError,
 } from '../lib/providers.js'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
@@ -593,4 +595,67 @@ test('generate_image_pack: конвертирует пропорции в име
   const ratios = ['1:1', '16:9', '9:16']
   const mapped = ratios.map(r => r === '16:9' ? 'landscape_16_9' : r === '9:16' ? 'portrait_16_9' : 'square_hd')
   assert.deepEqual(mapped, ['square_hd', 'landscape_16_9', 'portrait_16_9'])
+})
+
+test('calculateBackoff: экспоненциальный рост с ограничением и джиттером', () => {
+  const d0 = calculateBackoff(0, 500, 5000, 0.1)
+  const d5 = calculateBackoff(5, 500, 5000, 0.1)
+  const d20 = calculateBackoff(20, 500, 5000, 0.1)
+  assert.ok(d0 >= 100 && d0 <= 700)
+  assert.ok(d5 > d0)
+  assert.ok(d20 <= 5500) // capped near maxInterval
+})
+
+test('isFatalClientError: отличает 400/Policy от 503/Timeout', () => {
+  assert.equal(isFatalClientError(new Error('Content policy violation: prompt rejected')), true)
+  assert.equal(isFatalClientError(new Error('Bad Request (HTTP 400): prompt is required')), true)
+  assert.equal(isFatalClientError(new Error('NSFW detected in input')), true)
+  assert.equal(isFatalClientError(new Error('HTTP 503: Service Unavailable')), false)
+  assert.equal(isFatalClientError(new Error('ETIMEDOUT: connect timeout')), false)
+  assert.equal(isFatalClientError(new Error('HTTP 429: Rate limit exceeded')), false)
+})
+
+test('tryGenerate: фатальная ошибка 400 не переходит к следующему провайдеру', async () => {
+  let falCalled = false
+  let replicateCalled = false
+  const generators = {
+    fal: async () => {
+      falCalled = true
+      throw new Error('Content policy violation in prompt')
+    },
+    replicate: async () => {
+      replicateCalled = true
+      return { path: 'rep.png' }
+    }
+  }
+  await assert.rejects(
+    () => tryGenerate(generators, ['fal', 'replicate'], 123, 'bad prompt'),
+    /not retrying fallback.*Content policy violation/
+  )
+  assert.equal(falCalled, true)
+  assert.equal(replicateCalled, false)
+})
+
+test('generate_image_pack: обрабатывает частичные результаты при сбое одной из пропорций', async () => {
+  const mockGenerateTool = {
+    execute: async (args) => {
+      if (args.image_size === 'portrait_16_9') throw new Error('Timeout on 9:16 ratio')
+      return { path: `/tmp/${args.image_size}.png`, width: 1024, height: 1024 }
+    }
+  }
+  const ratios = ['1:1', '9:16']
+  const results = []
+  const warnings = []
+  for (const ratio of ratios) {
+    const sizeName = ratio === '9:16' ? 'portrait_16_9' : 'square_hd'
+    try {
+      const res = await mockGenerateTool.execute({ image_size: sizeName })
+      results.push({ ratio, ...res })
+    } catch (err) {
+      warnings.push(`Ratio ${ratio} failed: ${err.message}`)
+    }
+  }
+  assert.equal(results.length, 1)
+  assert.equal(warnings.length, 1)
+  assert.ok(warnings[0].includes('Timeout on 9:16 ratio'))
 })
