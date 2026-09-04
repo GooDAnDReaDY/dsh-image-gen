@@ -30,6 +30,10 @@ import {
   estimateSharpnessAndVariance,
   quantizePalette,
   pollStatus,
+  clampProviderCount,
+  buildEndpointUrl,
+  createAbortError,
+  PROVIDER_MAX_COUNTS,
   blendImagesFal,
   calculateBackoff,
   isFatalClientError,
@@ -790,4 +794,69 @@ test('pollStatus: безопасно работает без переданно�
   })
   const res = await pollStatus(fetchImpl, 'https://fal/status', 'key-123', undefined, 10, 5000)
   assert.equal(res.status, 'COMPLETED')
+})
+
+test('ASPECT_RATIOS: поддерживает классические фото-форматы 3:2 и 2:3', () => {
+  assert.deepEqual(ASPECT_RATIOS['3:2'], [1152, 768])
+  assert.deepEqual(ASPECT_RATIOS['2:3'], [768, 1152])
+})
+
+test('clampProviderCount: ограничивает количество генераций по возможностям провайдера', () => {
+  assert.equal(clampProviderCount('fal', 10), 4)
+  assert.equal(clampProviderCount('custom', 10), 10)
+  assert.equal(clampProviderCount('codex', 4), 1)
+  assert.equal(clampProviderCount('grok', 3), 1)
+  assert.equal(clampProviderCount('fal', 2), 2)
+  assert.equal(clampProviderCount('fal', 0), 1)
+})
+
+test('buildEndpointUrl: корректно объединяет базовый URL с подпутями без дублирования слэшей', () => {
+  assert.equal(
+    buildEndpointUrl('https://gateway.internal/v1/team-ai/', '/images/generations'),
+    'https://gateway.internal/v1/team-ai/images/generations'
+  )
+  assert.equal(
+    buildEndpointUrl('https://api.openai.com/v1', 'images/generations'),
+    'https://api.openai.com/v1/images/generations'
+  )
+})
+
+test('createAbortError: создает объект AbortError для отмены задач', () => {
+  const err = createAbortError('Custom abort')
+  assert.equal(err.name, 'AbortError')
+  assert.equal(err.message, 'Custom abort')
+})
+
+test('custom: распознает 503 ошибки шлюзов (no available channel)', async () => {
+  const fetchImpl = async () => ({
+    ok: false,
+    status: 503,
+    json: async () => ({ error: { message: '503 no available channel for model gpt-image-2' } })
+  })
+  const providers = makeProviders(
+    { fetchImpl, resolveKey: async () => 'test-key', cfg: { customBaseURL: 'https://gateway/v1', customModel: 'gpt-image-2' } },
+    { prompt: 'a photo', size: 'square' }
+  )
+  await assert.rejects(
+    async () => providers.custom(),
+    /Custom image API has no provisioned channel for "gpt-image-2"/
+  )
+})
+
+test('custom: передает quality при генерации через gpt-image-2', async () => {
+  let capturedBody = null
+  const fetchImpl = async (url, opts) => {
+    capturedBody = JSON.parse(opts.body)
+    return {
+      ok: true,
+      json: async () => ({ data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg==' }] })
+    }
+  }
+  const providers = makeProviders(
+    { fetchImpl, resolveKey: async () => 'test-key', cfg: { customBaseURL: 'https://api.openai.com/v1', customModel: 'gpt-image-2' } },
+    { prompt: 'a photo', size: 'square', quality: 'high' }
+  )
+  const res = await providers.custom()
+  assert.ok(res)
+  assert.equal(capturedBody.quality, 'high')
 })
