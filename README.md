@@ -70,6 +70,13 @@
 - **React Cleanup (#139)**: removed dead state hooks from `FalImageCard`.
 - **Complete Localization (#140)**: eliminated hardcoded strings, wiring comprehensive dictionaries for en, ru, and zh.
 
+
+### 🚀 What's New in v0.10.7 (#197)
+* **Robust Error Formatting**: completely prevents `[object Object]` from appearing in provider refusal chains, extracting deep `.message`, `.detail`, and `.error` objects cleanly.
+* **Deduplicated Provider Prefixes**: eliminates redundant `codex: codex: ...` prefixes.
+* **FAL Credential Aliasing**: seamless fallback between `FAL_API_KEY` and `FAL_KEY` in credentials and environment.
+* **Subscription Aspect Ratio Mapping**: maps aspect ratios (`16:9`, `3:2`, `9:16`, `2:3`) to appropriate subscription dimensions (`1536x1024` / `1024x1536`) instead of falling back to default square `1024x1024`.
+
 ## 🎨 Supported Generation Backends
 
 * **`fal`** (Default): FAL.ai queue for FLUX.1, SDXL, Clarity Upscaler, and BiRefNet.
