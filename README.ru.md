@@ -45,6 +45,8 @@ graph LR
         T6[generate_image_pack]
         T7[compare_images]
         T8[inspect_image_quality]
+        T9[edit_image]
+        T10[vary_image]
     end
 
     subgraph Core [🛡️ Ядро надежности и кэша]
@@ -90,6 +92,8 @@ graph LR
 | Инструмент | Назначение | Ключевые параметры |
 |---|---|---|
 | **`generate_image`** | Генерация изображения по тексту | `prompt`, `image_size`, `seed`, `style`, `negative_prompt`, `count` |
+| **`edit_image`** | Направленное редактирование / inpainting с авто-поиском оригинала (#142, #144, #145) | `prompt`, `image` (по умолч. `latest`), `mask`, `strength` |
+| **`vary_image`** | Генерация вариаций существующей картинки (#143, #144) | `image` (по умолч. `latest`), `prompt`, `variation_strength` (0.1–0.9), `count` |
 | **`remove_background`** | Удаление фона с сохранением прозрачного PNG | `image`, `model`, `output_name` |
 | **`upscale_image`** | Увеличение разрешения в 2x / 4x с детализацией | `image`, `scale` (2/4), `prompt`, `creativity` |
 | **`vectorize_image`** | Векторизация растра в чистый SVG с квантованием палитры | `image`, `color_mode`, `paletteSize` |

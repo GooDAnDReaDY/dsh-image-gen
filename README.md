@@ -45,6 +45,8 @@
 ## 🛠️ Complete Tools Reference
 
 * **`generate_image`**: Generate images with pluggable providers, seeds, aspect ratios, and style presets.
+* **`edit_image`**: Targeted inpainting and modification with automatic session reference resolution (#142, #144, #145).
+* **`vary_image`**: Controlled variation generation preserving composition (#143, #144).
 * **`remove_background`**: Extract subject with transparent PNG output (FAL BiRefNet / Rembg).
 * **`upscale_image`**: 2x / 4x super-resolution with clarity reconstruction.
 * **`vectorize_image`**: Convert raster graphics to clean scalable SVG vectors with palette quantization.
