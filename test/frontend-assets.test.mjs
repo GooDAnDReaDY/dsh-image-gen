@@ -128,3 +128,38 @@ test('frontend-assets (#190): generatePwaIconSuite manifest and html snippet', a
   assert.ok(pwa.htmlHeadSnippet.includes('<link rel="manifest" href="/manifest.json">'))
   assert.ok(pwa.htmlHeadSnippet.includes('<meta name="theme-color" content="#1e293b">'))
 })
+
+import { toLosslessJson } from "../lib/providers.js"
+
+test("lossless JSON (#195): strips undefined properties recursively and maintains lossless validity", () => {
+  const dirty = {
+    str: "hello",
+    num: 42,
+    bool: true,
+    nil: null,
+    und: undefined,
+    nested: {
+      a: 1,
+      bad: undefined,
+      deep: {
+        x: "ok",
+        y: undefined,
+      },
+    },
+    arr: [
+      { id: 1, skip: undefined },
+      { id: 2, valid: "yes" },
+    ],
+  }
+
+  const clean = toLosslessJson(dirty)
+  assert.equal(Object.prototype.hasOwnProperty.call(clean, "und"), false)
+  assert.equal(Object.prototype.hasOwnProperty.call(clean.nested, "bad"), false)
+  assert.equal(Object.prototype.hasOwnProperty.call(clean.nested.deep, "y"), false)
+  assert.equal(Object.prototype.hasOwnProperty.call(clean.arr[0], "skip"), false)
+  assert.equal(clean.str, "hello")
+  assert.equal(clean.nested.deep.x, "ok")
+  assert.equal(clean.arr[1].valid, "yes")
+
+  assert.deepEqual(JSON.parse(JSON.stringify(clean)), clean)
+})
