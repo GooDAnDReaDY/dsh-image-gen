@@ -55,6 +55,14 @@
 
 ---
 
+
+## 🚀 Updates in v0.10.4: Cordis Lifecycle, Full Settings GUI, and i18n
+- **Cordis Lifecycle (#136)**: wrapped all 7 tool registrations in `ctx.effect` for proper disposal on reload.
+- **Settings GUI Completeness (#137)**: exposed fields for Replicate, SeaDream, Gemini, Local ComfyUI/A1111, style presets, and LLM enhancer.
+- **Package Manifest (#138)**: declared kernel `peerDependencies` (`host-webserver`, `settings`, `llm`, `system-prompt`).
+- **React Cleanup (#139)**: removed dead state hooks from `FalImageCard`.
+- **Complete Localization (#140)**: eliminated hardcoded strings, wiring comprehensive dictionaries for en, ru, and zh.
+
 ## 🎨 Supported Generation Backends
 
 * **`fal`** (Default): FAL.ai queue for FLUX.1, SDXL, Clarity Upscaler, and BiRefNet.

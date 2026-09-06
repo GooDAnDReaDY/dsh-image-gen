@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
@@ -859,4 +860,27 @@ test('custom: передает quality при генерации через gpt-
   const res = await providers.custom()
   assert.ok(res)
   assert.equal(capturedBody.quality, 'high')
+})
+
+test('audit: package.json объявляет все необходимые peerDependencies', () => {
+  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+  const peers = pkg.peerDependencies || {}
+  assert.ok(peers['@deepseek-ai/cordis'])
+  assert.ok(peers['@deepseek-ai/dsh-tools'])
+  assert.ok(peers['@deepseek-ai/dsh-attachment'])
+  assert.ok(peers['@deepseek-ai/dsh-credentials'])
+  assert.ok(peers['@deepseek-ai/dsh-host-webserver'])
+  assert.ok(peers['@deepseek-ai/dsh-settings'])
+  assert.ok(peers['@deepseek-ai/dsh-llm'])
+  assert.ok(peers['@deepseek-ai/dsh-system-prompt'])
+  assert.ok(peers['@deepseek-ai/schemastery'])
+})
+
+test('audit: lib/client.js не содержит мертвого React-стейта', () => {
+  const clientCode = fs.readFileSync('lib/client.js', 'utf8')
+  assert.ok(!clientCode.includes('setInpaintOpen'))
+  assert.ok(!clientCode.includes('setCompareSlider'))
+  assert.ok(!clientCode.includes('setShowCompare'))
+  assert.ok(!clientCode.includes('setDrawing'))
+  assert.ok(!clientCode.includes('canvasRef'))
 })
