@@ -3,6 +3,9 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   SUBSCRIPTION_SIZES,
+  formatErrorMessage,
+  resolveSubscriptionSize,
+  resolveApiKeyCandidates,
   makeProviders,
   falAuthHeader,
   normalizeMediaType,
@@ -883,4 +886,58 @@ test('audit: lib/client.js не содержит мертвого React-стей
   assert.ok(!clientCode.includes('setShowCompare'))
   assert.ok(!clientCode.includes('setDrawing'))
   assert.ok(!clientCode.includes('canvasRef'))
+})
+
+
+test('formatErrorMessage: корректно извлекает сообщение из строковых и объектных ошибок без [object Object]', () => {
+  assert.equal(formatErrorMessage('Direct error'), 'Direct error')
+  assert.equal(formatErrorMessage(new Error('Simple error')), 'Simple error')
+  assert.equal(formatErrorMessage({ message: 'Object with message' }), 'Object with message')
+  assert.equal(formatErrorMessage({ detail: 'FAL detail error' }), 'FAL detail error')
+  assert.equal(formatErrorMessage({ error: { message: 'Nested error message' } }), 'Nested error message')
+  assert.equal(formatErrorMessage({ status: 503, statusText: 'Service Unavailable' }), 'HTTP 503 Service Unavailable')
+  assert.equal(formatErrorMessage(null), 'unknown error')
+  assert.equal(formatErrorMessage(undefined), 'unknown error')
+  assert.equal(formatErrorMessage({}), 'unknown error object')
+
+  const noMsgObj = Object.create(null)
+  noMsgObj.code = 'ERR_TIMEOUT'
+  assert.ok(!formatErrorMessage(noMsgObj).includes('[object Object]'))
+})
+
+test('formatErrorMessage: удаляет повторные префиксы провайдера (codex: codex: ...)', () => {
+  assert.equal(formatErrorMessage(new Error('codex: quota exceeded'), 'codex'), 'codex: quota exceeded')
+  assert.equal(formatErrorMessage(new Error('codex: codex: [object Object]'), 'codex'), 'codex: unknown error object')
+  assert.equal(formatErrorMessage('fal: queue full', 'fal'), 'fal: queue full')
+  assert.equal(formatErrorMessage('quota exceeded', 'codex'), 'codex: quota exceeded')
+})
+
+test('resolveSubscriptionSize: корректно сопоставляет именованные размеры, пропорции и размеры в пикселях', () => {
+  // Named sizes
+  assert.equal(resolveSubscriptionSize('square_hd'), '1024x1024')
+  assert.equal(resolveSubscriptionSize('landscape_16_9'), '1536x1024')
+  assert.equal(resolveSubscriptionSize('portrait_16_9'), '1024x1536')
+
+  // Aspect ratios (preventing default square fallback)
+  assert.equal(resolveSubscriptionSize('custom', undefined, '16:9'), '1536x1024')
+  assert.equal(resolveSubscriptionSize('custom', undefined, '3:2'), '1536x1024')
+  assert.equal(resolveSubscriptionSize('custom', undefined, '9:16'), '1024x1536')
+  assert.equal(resolveSubscriptionSize('custom', undefined, '2:3'), '1024x1536')
+  assert.equal(resolveSubscriptionSize('custom', undefined, '1:1'), '1024x1024')
+
+  // Aspect pixels
+  assert.equal(resolveSubscriptionSize('custom', [1344, 768]), '1536x1024')
+  assert.equal(resolveSubscriptionSize('custom', [768, 1344]), '1024x1536')
+  assert.equal(resolveSubscriptionSize('custom', [1024, 1024]), '1024x1024')
+
+  // Unknown fallback
+  assert.equal(resolveSubscriptionSize('unknown_size'), '1024x1024')
+})
+
+test('resolveApiKeyCandidates: возвращает порядок поиска с учетом алиасов FAL_API_KEY <-> FAL_KEY', () => {
+  assert.deepEqual(resolveApiKeyCandidates('FAL_API_KEY'), ['FAL_API_KEY', 'FAL_KEY'])
+  assert.deepEqual(resolveApiKeyCandidates('FAL_KEY'), ['FAL_KEY', 'FAL_API_KEY'])
+  assert.deepEqual(resolveApiKeyCandidates('OPENAI_API_KEY'), ['OPENAI_API_KEY'])
+  assert.deepEqual(resolveApiKeyCandidates(''), [])
+  assert.deepEqual(resolveApiKeyCandidates(null), [])
 })
