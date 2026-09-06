@@ -54,6 +54,11 @@
 * **`generate_image_pack`**: Simultaneous multi-aspect ratio rendering with graceful partial recovery.
 * **`compare_images`**: Pixel-level visual difference ratio comparison.
 * **`inspect_image_quality`**: Automated visual audit, Laplacian sharpness scoring, and defect detection.
+* **`extract_design_tokens`**: Extract CSS Variables, Tailwind color palettes, and W3C Design Tokens from concept art (#172).
+* **`image_to_css_gradient`**: Generate lightweight pure CSS Mesh / Radial / Linear gradients (< 1KB) from image colors (#174).
+* **`check_image_contrast`**: Evaluate background luminance and WCAG 2.1 AA/AAA contrast for text with scrim suggestions (#175).
+* **`optimize_vector_svg`**: Clean and sanitize SVG, normalize viewBox, and export ready-to-use React TSX components (#176).
+* **`generate_pwa_icon_suite`**: Generate full PWA icon sets, HTML meta tags, and web app manifest.json (#190).
 
 ---
 

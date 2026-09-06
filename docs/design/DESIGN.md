@@ -74,3 +74,11 @@
   - Не оставлять мёртвый React-стейт в компонентах.
   - Не хардкодить русскоязычный текст в коде карточек и подсказок.
   - Не создавать скрытых настроек в `Config`, недоступных пользователю в GUI.
+
+## Frontend & Design Assets Tools (v0.10.5)
+
+* **`extract_design_tokens` (#172)**: Extracts dominant & semantic colors into CSS Variables (`:root`), Tailwind color config, and W3C JSON.
+* **`image_to_css_gradient` (#174)**: Creates lightweight pure CSS Mesh / Radial / Linear gradients (< 1KB).
+* **`check_image_contrast` (#175)**: Computes WCAG 2.1 AA/AAA contrast ratios and provides CSS scrim overlays.
+* **`optimize_vector_svg` (#176)**: Strips SVG metadata, normalizes viewBox, and exports clean React TSX components.
+* **`generate_pwa_icon_suite` (#190)**: Provides complete PWA icon specs (16px to 512px maskable) and web app manifest.json.
