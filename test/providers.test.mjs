@@ -879,6 +879,30 @@ test('audit: package.json объявляет все необходимые peerD
   assert.ok(peers['@deepseek-ai/schemastery'])
 })
 
+test('audit (#201): lib/client.js booleanField spec and dictionary coverage', () => {
+  const clientCode = fs.readFileSync('lib/client.js', 'utf8')
+  assert.ok(!clientCode.includes('booleanField = (name) =>'), 'booleanField must not use (name) =>')
+  assert.ok(clientCode.includes('booleanField = (field) =>'), 'booleanField must use (field) =>')
+
+  // Verify dictionaries have all field keys
+  const labelKeys = Array.from(clientCode.matchAll(/labelKey:\s*['"]([^'"]+)['"]/g), m => m[1])
+  const hintKeys = Array.from(clientCode.matchAll(/hintKey:\s*['"]([^'"]+)['"]/g), m => m[1])
+  const placeholderKeys = Array.from(clientCode.matchAll(/placeholderKey:\s*['"]([^'"]+)['"]/g), m => m[1])
+
+  const enMatch = clientCode.match(/const en = \{([\s\S]*?)\n    \}/)
+  assert.ok(enMatch, 'en dictionary must be present')
+  const enText = enMatch[1]
+
+  const ruMatch = clientCode.match(/const ru = \{([\s\S]*?)\n    \}/)
+  assert.ok(ruMatch, 'ru dictionary must be present')
+  const ruText = ruMatch[1]
+
+  for (const k of [...new Set([...labelKeys, ...hintKeys, ...placeholderKeys])]) {
+    assert.ok(enText.includes(`'${k}'`), `Missing key in en dictionary: ${k}`)
+    assert.ok(ruText.includes(`'${k}'`), `Missing key in ru dictionary: ${k}`)
+  }
+})
+
 test('audit: lib/client.js не содержит мертвого React-стейта', () => {
   const clientCode = fs.readFileSync('lib/client.js', 'utf8')
   assert.ok(!clientCode.includes('setInpaintOpen'))
