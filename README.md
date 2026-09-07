@@ -1,3 +1,9 @@
+
+## 🚀 Updates v0.10.8: Lossless JSON Unification, Dual-Output & Strict Validation (#199)
+- **Lossless JSON & Dual-Output Unification**: `upscale_image`, `remove_background`, `blend_images`, and `vectorize_image` now consistently return `toLosslessJson` and formatted markdown `summary` for text-only LLMs.
+- **Strict Input Image Validation**: `extract_design_tokens`, `image_to_css_gradient`, and `check_image_contrast` explicitly validate source image readability instead of silent fallback.
+- **Unit Testing Suite**: Added `test/tool-consistency.test.mjs` covering tokenization, gradient generator, and PWA suite.
+
 # 📦 @goodandready/dsh-image-gen
 
 <div align="center">
