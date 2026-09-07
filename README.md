@@ -83,6 +83,13 @@
 * **FAL Credential Aliasing**: seamless fallback between `FAL_API_KEY` and `FAL_KEY` in credentials and environment.
 * **Subscription Aspect Ratio Mapping**: maps aspect ratios (`16:9`, `3:2`, `9:16`, `2:3`) to appropriate subscription dimensions (`1536x1024` / `1024x1536`) instead of falling back to default square `1024x1024`.
 
+
+### 🚀 What's New in v0.10.10 (#201, #203)
+* **Settings GUI Stabilization (#201)**: Fixed `booleanField` spec in client runtime that prevented the settings configuration pane from rendering in DSH Web UI. All configuration fields (providers, model identifiers, API credentials, style presets, LLM enhancer, timeouts, cache retention) render cleanly.
+* **Streamlined Settings UI (#203)**: Removed the bulky in-settings history gallery to keep the configuration panel focused, fast, and organized.
+* **Comprehensive Localization (#201)**: Added 100% dictionary coverage for all provider credentials, endpoints, and field hints in English and Russian.
+* **Robust Slot Mounting**: Implemented `registerFirst` helper with graceful fallback between `settings.plugin.item` and `settings.section`.
+
 ## 🎨 Supported Generation Backends
 
 * **`fal`** (Default): FAL.ai queue for FLUX.1, SDXL, Clarity Upscaler, and BiRefNet.
