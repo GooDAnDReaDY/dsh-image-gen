@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { execSync } from 'node:child_process'
 import { trackAndAssertLoopGuard, resetLoopGuard, getLoopGuardState } from '../lib/loop-guard.js'
 import { maskApiKey, sanitizeErrorAndLogs, enforceSecurePermissions } from '../lib/security.js'
 import { getCachedGeneration, setCachedGeneration, pruneCacheToLimit } from '../lib/generation-cache.js'
@@ -71,4 +72,9 @@ test('generation-cache: stores and retrieves identical generation by hash', () =
   // Force bypass cache
   const bypassed = getCachedGeneration(hash, { force: true })
   assert.equal(bypassed, null)
+})
+
+test('syntax audit: all lib files must pass node syntax check', () => {
+  const out = execSync('node --check lib/index.js lib/client.js lib/providers.js lib/cost-meter.js lib/generation-cache.js lib/loop-guard.js lib/negative-sanitizer.js lib/quality-gate.js lib/security.js', { encoding: 'utf8' })
+  assert.equal(out.trim(), '')
 })
