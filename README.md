@@ -84,6 +84,14 @@
 * **Subscription Aspect Ratio Mapping**: maps aspect ratios (`16:9`, `3:2`, `9:16`, `2:3`) to appropriate subscription dimensions (`1536x1024` / `1024x1536`) instead of falling back to default square `1024x1024`.
 
 
+### 🚀 What's New in v0.10.11 (#165, #166, #167, #168, #169, #170)
+* **Negative Prompt Sanitizer (#165)**: Automatic defect filtering and deduplication for diffusion models (SDXL, ComfyUI, Seedream, Local) with style-conflict protection (preserves intentional grainy, vintage, or dark aesthetics).
+* **Automated Quality Gate & Silent Re-roll (#166)**: Heuristic variance and sharpness inspection combined with `dsh-vision-bridge` hook; performs silent re-rolls (up to 2 attempts) for blank, corrupted, or solid frames before returning results.
+* **Cost Metering & Daily Budget (#167)**: Full rate card pricing per provider and resolution, spend tracking in `~/.dsh/storages/dsh-image-gen-spend.json`, dispatch to `dsh-cost-meter`, and hard daily budget enforcement via `dailyBudgetUsd`.
+* **Fail-Fast Loop Guard (#168)**: Session-scoped circuit breaker prevents runaway agent retry loops (default max 3 consecutive generations without user interaction).
+* **Secure Credential Masking (#169)**: Comprehensive masking of tokens in logs, URLs, and errors (`Bearer sk-...abcd`), with `0600` file permission enforcement.
+* **Content-Addressed Disk Cache (#170)**: Instant retrieval (<50ms, zero API cost) for identical requests by SHA-256 hash, with automated LRU disk eviction (500 MB limit) and `force: true` bypass.
+
 ### 🚀 What's New in v0.10.10 (#201, #203)
 * **Settings GUI Stabilization (#201)**: Fixed `booleanField` spec in client runtime that prevented the settings configuration pane from rendering in DSH Web UI. All configuration fields (providers, model identifiers, API credentials, style presets, LLM enhancer, timeouts, cache retention) render cleanly.
 * **Streamlined Settings UI (#203)**: Removed the bulky in-settings history gallery to keep the configuration panel focused, fast, and organized.
