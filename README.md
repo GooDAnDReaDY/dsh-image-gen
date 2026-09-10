@@ -84,6 +84,10 @@
 * **Subscription Aspect Ratio Mapping**: maps aspect ratios (`16:9`, `3:2`, `9:16`, `2:3`) to appropriate subscription dimensions (`1536x1024` / `1024x1536`) instead of falling back to default square `1024x1024`.
 
 
+### 🚀 What's New in v0.10.13
+* **Plugin Settings Location (#208)**: Moved settings card exclusively into the standard `Settings → Plugins → Plugin settings` section (`settings.plugin.item` slot). Removed the legacy fallback to `settings.section` that previously caused duplicate entries in the top-level sidebar navigation.
+* **Deferred Slot Injection (`registerSlotWhenReady`)**: Implemented robust deferred injection via `ctx.slots.inject` ensuring the settings card safely mounts when the parent settings container is rendered, eliminating timing collisions at startup.
+
 ### 🚀 What's New in v0.10.12
 * **Fix Syntax Error (#208)**: Resolved variable redeclaration collision (`const hPrompt`) in `checkCache` within `lib/index.js` which could prevent plugin initialization on strict Node.js runtimes. Added automated syntax check across all source modules to test suite.
 
