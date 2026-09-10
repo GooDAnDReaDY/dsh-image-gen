@@ -912,6 +912,13 @@ test('audit: lib/client.js не содержит мертвого React-стей
   assert.ok(!clientCode.includes('canvasRef'))
 })
 
+test('audit (#208): lib/client.js регистрирует карточку только в settings.plugin.item без settings.section', () => {
+  const clientCode = fs.readFileSync('lib/client.js', 'utf8')
+  assert.ok(!clientCode.includes("'settings.section'"), 'settings.section fallback must be removed')
+  assert.ok(clientCode.includes("'settings.plugin.item'"), 'settings.plugin.item slot must be registered')
+  assert.ok(clientCode.includes('registerSlotWhenReady'), 'must use registerSlotWhenReady')
+})
+
 
 test('formatErrorMessage: корректно извлекает сообщение из строковых и объектных ошибок без [object Object]', () => {
   assert.equal(formatErrorMessage('Direct error'), 'Direct error')
