@@ -84,6 +84,14 @@
 * **Subscription Aspect Ratio Mapping**: maps aspect ratios (`16:9`, `3:2`, `9:16`, `2:3`) to appropriate subscription dimensions (`1536x1024` / `1024x1536`) instead of falling back to default square `1024x1024`.
 
 
+### 🚀 What's New in v0.10.14
+* **dsh-clinebot Unified Visual Overhaul (#210)**: Redesigned client settings card following the high-end `dsh-clinebot` unified design system. Added top quick stats row (`.ig-grid-4`, `.ig-stat-box`) showing active provider, default specs, safety/loop guard, and daily budget/cache status. Integrated status badges (`.ig-badge-ok/warn/bad`).
+* **5 Categorized Settings Tabs**: Settings fields organized into intuitive tabs: ⚙️ General, 🔌 Provider, ✨ Prompt & Styles, 🛡️ Safety & Budget, ⚡ Cache & Storage.
+* **Client ErrorBoundary Protection**: Wrapped all settings forms and toolviews in an `ErrorBoundary` with retry capability, preventing any component render crash from affecting DSH core UI.
+* **Full Host Config ↔ Client Fields Synchronization**: Synchronized all 40 config properties between `Config` schema in `lib/index.js`, staged `FIELDS` in `lib/client.js`, and localization dictionaries (`en`/`ru`). Exposes controls: `qualityGate`, `dailyBudgetUsd`, `loopGuardLimit`, `diskCache`, `subscriptionQuality`, `cacheBySeed`, `cacheByPrompt`.
+* **Complete Toolview Registration**: Registered `tool.call.toolview` for all 8 visual tools (`generate_image`, `edit_image`, `vary_image`, `blend_images`, `generate_image_pack`, `remove_background`, `upscale_image`, `vectorize_image`).
+* **Safety, Budget & Loop Guard Hardening**: Extended `trackAndAssertLoopGuard`, `assertBudgetAvailable`, and `sanitizeErrorAndLogs` error masking across `edit_image`, `vary_image`, `blend_images`, `remove_background`, and `upscale_image`. Added `seedreamBaseURL` support.
+
 ### 🚀 What's New in v0.10.13
 * **Plugin Settings Location (#208)**: Moved settings card exclusively into the standard `Settings → Plugins → Plugin settings` section (`settings.plugin.item` slot). Removed the legacy fallback to `settings.section` that previously caused duplicate entries in the top-level sidebar navigation.
 * **Deferred Slot Injection (`registerSlotWhenReady`)**: Implemented robust deferred injection via `ctx.slots.inject` ensuring the settings card safely mounts when the parent settings container is rendered, eliminating timing collisions at startup.
