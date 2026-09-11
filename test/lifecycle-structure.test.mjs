@@ -71,3 +71,9 @@ test('docs: project meta files exist', () => {
   const design = readFileSync(path.join(root, 'docs/design/DESIGN.md'), 'utf8')
   assert.ok(!/встроенную галерею истории генераций \(`HistoryGallery`\)/.test(design), 'HistoryGallery must not be advertised as shipped UI')
 })
+
+test('lifecycle: index.js imports registerAllTools from register-tools.js', () => {
+  const src = readFileSync(path.join(lib, 'index.js'), 'utf8')
+  assert.match(src, /import \{ registerAllTools \} from '\.\/register-tools\.js'/)
+  assert.match(src, /registerAllTools\(ctx,/)
+})
