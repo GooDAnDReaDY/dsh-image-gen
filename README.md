@@ -31,6 +31,14 @@
 
 ---
 
+## 🚀 Updates v0.10.17: Modular Tool Lifecycle (#216, #217)
+* **Tool modules extracted from `apply()`**: host lifecycle in `lib/index.js` is now a thin cordis entry (~650 lines). Tool definitions live in `lib/tools/{generation,processing,editing,inspect,frontend}.js` behind `lib/register-tools.js`.
+* **Per-tool labeled `ctx.effect`**: each of the 15 tools registers in its own effect (`dsh-image-gen: tool <name>`) for clean unload/reload disposal.
+* **Project meta**: `AGENTS.md` and `index.md` document architecture, constraints, and the test matrix (internal workflow files — not shipped in the npm package).
+* **Design contract**: `docs/design/DESIGN.md` no longer advertises the removed HistoryGallery UI (#203).
+* **Regression lock**: `test/lifecycle-structure.test.mjs` asserts modular layout, labeled effects, and meta files. Suite: **132 unit tests**.
+
+
 ## ⚡ Overview
 
 **`@goodandready/dsh-image-gen`** is a premier graphic generation and visual processing suite for DeepSeek Harness. It equips autonomous agents with an extensible set of tools for image generation, transformation, background removal, upscaling, vectorization, multi-reference blending, and quality inspection across 8 generative backends.

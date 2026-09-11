@@ -3,7 +3,7 @@
 Multi-provider image generation & visual processing plugin for DeepSeek Harness.
 
 ## Status
-- Package version: see `package.json` (currently 0.10.16 lineage)
+- Package version: `0.10.17` (see `package.json`)
 - Unit tests: `npm test` — 128 tests, expected 100% pass
 - Design contract: `docs/design/DESIGN.md`
 
