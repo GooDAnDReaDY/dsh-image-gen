@@ -84,6 +84,16 @@
 * **Subscription Aspect Ratio Mapping**: maps aspect ratios (`16:9`, `3:2`, `9:16`, `2:3`) to appropriate subscription dimensions (`1536x1024` / `1024x1536`) instead of falling back to default square `1024x1024`.
 
 
+### 🚀 What's New in v0.10.15
+* **Loop Guard Zero-Limit Bypass (#212)**: Fixed an edge case where setting `loopGuardLimit: 0` (configured to disable protection) enforced a limit of 1 due to `Math.max(1, limit)`. Setting limit to 0 now properly bypasses loop checks.
+* **Security Hardening (Token Masking)**: Added automatic pattern masking for Replicate API tokens (`r8_...`) and Google Gemini API keys (`AIza...`) in `sanitizeErrorAndLogs`.
+* **Cache Resilience**: Isolated LRU touch updates in `getCachedGeneration` so that metadata write contention does not discard valid image bytes on cache hits.
+* **Defensive File Safety**: Added explicit file existence, empty file (0 bytes), and 50 MB maximum size cap checks in `resolveConversationImage` preventing OOM crashes on huge files.
+* **Vectorize Image Attachment & Toolview Preview**: `vectorize_image` now registers the SVG in `ctx.attachments` and provides `url`, enabling interactive preview in `tool.call.toolview`.
+* **SVG Markup Validation**: Added strict validation in `optimizeSvgContent` rejecting non-SVG strings with descriptive errors.
+* **Cost Meter Safety**: Hardened `assertBudgetAvailable` to handle string/undefined/NaN values safely.
+* **Expanded Test Suite**: Added `test/batch3-quality.test.mjs` expanding suite to **126 automated tests (100% pass)**.
+
 ### 🚀 What's New in v0.10.14
 * **dsh-clinebot Unified Visual Overhaul (#210)**: Redesigned client settings card following the high-end `dsh-clinebot` unified design system. Added top quick stats row (`.ig-grid-4`, `.ig-stat-box`) showing active provider, default specs, safety/loop guard, and daily budget/cache status. Integrated status badges (`.ig-badge-ok/warn/bad`).
 * **5 Categorized Settings Tabs**: Settings fields organized into intuitive tabs: ⚙️ General, 🔌 Provider, ✨ Prompt & Styles, 🛡️ Safety & Budget, ⚡ Cache & Storage.
