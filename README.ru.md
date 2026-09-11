@@ -24,6 +24,14 @@
 </div>
 
 ---
+## 🚀 Обновления v0.10.17: модульный жизненный цикл тулов (#216, #217)
+* **Тулы вынесены из `apply()`**: host `lib/index.js` — тонкая cordis-точка входа. Определения тулов — в `lib/tools/*` через `lib/register-tools.js`.
+* **Свой labeled `ctx.effect` на каждый tool** (`dsh-image-gen: tool <name>`) для корректной выгрузки.
+* **Meta-файлы проекта**: `AGENTS.md` и `index.md` (не попадают в npm-пакет).
+* **DESIGN.md** больше не упоминает удалённую HistoryGallery (#203).
+* **Тесты**: `lifecycle-structure` + полный suite — **132 unit tests**.
+
+
 
 ## ⚡ Обзор возможностей
 
