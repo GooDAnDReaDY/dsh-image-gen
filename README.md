@@ -84,6 +84,14 @@
 * **Subscription Aspect Ratio Mapping**: maps aspect ratios (`16:9`, `3:2`, `9:16`, `2:3`) to appropriate subscription dimensions (`1536x1024` / `1024x1536`) instead of falling back to default square `1024x1024`.
 
 
+### 🚀 What's New in v0.10.16
+* **Safe Attachment Service Fallback (#214)**: Added graceful fallback handling in `saveAttachmentSafe` across all 8 visual tools (`generate_image`, variations, `remove_background`, `upscale_image`, `blend_images`, etc.). When running in headless CLI mode or when the attachment store is unavailable, outputs are safely written to disk with full file paths and data references rather than crashing tool execution.
+* **HTTP Image Endpoint Strict Validation**: Hardened `/dsh-image-gen/image` route against malformed or NaN parameters (`b`, `w`, `h`), cleanly responding with HTTP 400 or 404 without leaking internal system traces.
+* **ComfyUI Node Error Extraction**: Integrated `extractComfyNodeErrors` to parse node execution errors from `/history/{pid}` status responses, immediately reporting root-cause node diagnostics rather than timing out.
+* **Custom Provider Error Normalization**: Standardized gateway error extracts through `formatErrorMessage`, eliminating raw JSON or `[object Object]` artifacts on 4xx/5xx API responses.
+* **Cache & History Consistency**: Ensured content-addressed disk cache hits synchronize seamlessly with generation history and sidecar metadata.
+* **Test Suite Expansion**: Added `test/batch4-hardening.test.mjs`, expanding test coverage to **128 automated unit tests (100% pass)**.
+
 ### 🚀 What's New in v0.10.15
 * **Loop Guard Zero-Limit Bypass (#212)**: Fixed an edge case where setting `loopGuardLimit: 0` (configured to disable protection) enforced a limit of 1 due to `Math.max(1, limit)`. Setting limit to 0 now properly bypasses loop checks.
 * **Security Hardening (Token Masking)**: Added automatic pattern masking for Replicate API tokens (`r8_...`) and Google Gemini API keys (`AIza...`) in `sanitizeErrorAndLogs`.
