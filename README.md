@@ -31,6 +31,13 @@
 
 ---
 
+## 🚀 Updates v0.10.18: Speed Acceleration & Quality Hardening (#222)
+* **Parallel Batch & Pack Generation**: Multi-variation requests (`count > 1`, `prompts` array) and `generate_image_pack` multi-ratio workflows now execute concurrently with a concurrency limit (`concurrency: 3`) via `asyncPool`, reducing generation wait times by up to **3x**.
+* **Zero-Delay Initial Polling**: Eliminated artificial initial delay in `pollStatus` and queue runners (Fal.ai, ComfyUI), inspecting generation status immediately on first attempt and shaving 1–1.5s off fast generative workflows.
+* **Sub-Millisecond L1 In-Memory Cache**: Built-in 32-entry in-memory LRU cache atop disk cache L2 provides instantaneous (< 0.1 ms) cache hits without synchronous disk I/O.
+* **Fast-Fail Quota Detection**: Added classification for HTTP 402 (Payment Required) and exhausted account quota/credits in `isFatalClientError`, enabling immediate, clean fallback transitions without fruitless retry loops.
+* **Expanded Test Suite**: Added `test/batch5-speed-quality.test.mjs`, bringing total test coverage to **136 automated unit tests (100% pass)**.
+
 ## 🚀 Updates v0.10.17: Modular Tool Lifecycle (#216, #217)
 * **Tool modules extracted from `apply()`**: host lifecycle in `lib/index.js` is now a thin cordis entry (~650 lines). Tool definitions live in `lib/tools/{generation,processing,editing,inspect,frontend}.js` behind `lib/register-tools.js`.
 * **Per-tool labeled `ctx.effect`**: each of the 15 tools registers in its own effect (`dsh-image-gen: tool <name>`) for clean unload/reload disposal.
