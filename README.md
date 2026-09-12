@@ -27,6 +27,16 @@
   <a href="README.zh.md"><b>🇨🇳 中文说明</b></a>
 </p>
 
+<table align="center">
+  <tr>
+    <td align="center">
+      ⭐ <strong>If you like this plugin, please star it on GitHub</strong> — it shows me that the plugin is useful to you and motivates me to keep developing it.
+      <br><br>
+      🐛 <strong>If you find a bug or would like to request a feature</strong>, open a GitHub issue in any language — I will review your proposal and implement useful suggestions in a future plugin version.
+    </td>
+  </tr>
+</table>
+
 </div>
 
 ---
@@ -44,7 +54,6 @@
 * **Project meta**: `AGENTS.md` and `index.md` document architecture, constraints, and the test matrix (internal workflow files — not shipped in the npm package).
 * **Design contract**: `docs/design/DESIGN.md` no longer advertises the removed HistoryGallery UI (#203).
 * **Regression lock**: `test/lifecycle-structure.test.mjs` asserts modular layout, labeled effects, and meta files. Suite: **132 unit tests**.
-
 
 ## ⚡ Overview
 
@@ -83,7 +92,6 @@
 
 ---
 
-
 ## 🚀 Updates in v0.10.4: Cordis Lifecycle, Full Settings GUI, and i18n
 - **Cordis Lifecycle (#136)**: wrapped all 7 tool registrations in `ctx.effect` for proper disposal on reload.
 - **Settings GUI Completeness (#137)**: exposed fields for Replicate, SeaDream, Gemini, Local ComfyUI/A1111, style presets, and LLM enhancer.
@@ -91,13 +99,11 @@
 - **React Cleanup (#139)**: removed dead state hooks from `FalImageCard`.
 - **Complete Localization (#140)**: eliminated hardcoded strings, wiring comprehensive dictionaries for en, ru, and zh.
 
-
 ### 🚀 What's New in v0.10.7 (#197)
 * **Robust Error Formatting**: completely prevents `[object Object]` from appearing in provider refusal chains, extracting deep `.message`, `.detail`, and `.error` objects cleanly.
 * **Deduplicated Provider Prefixes**: eliminates redundant `codex: codex: ...` prefixes.
 * **FAL Credential Aliasing**: seamless fallback between `FAL_API_KEY` and `FAL_KEY` in credentials and environment.
 * **Subscription Aspect Ratio Mapping**: maps aspect ratios (`16:9`, `3:2`, `9:16`, `2:3`) to appropriate subscription dimensions (`1536x1024` / `1024x1536`) instead of falling back to default square `1024x1024`.
-
 
 ### 🚀 What's New in v0.10.16
 * **Safe Attachment Service Fallback (#214)**: Added graceful fallback handling in `saveAttachmentSafe` across all 8 visual tools (`generate_image`, variations, `remove_background`, `upscale_image`, `blend_images`, etc.). When running in headless CLI mode or when the attachment store is unavailable, outputs are safely written to disk with full file paths and data references rather than crashing tool execution.
