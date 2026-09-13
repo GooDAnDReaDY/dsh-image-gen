@@ -41,6 +41,11 @@
 
 ---
 
+## 🚀 Updates v0.10.22: Referential Stability & React Error #185 Infinite Loop Fix (#230)
+* **Settings Card Referential Stability**: Resolved React Error #185 (`Maximum update depth exceeded`) in `FalSettingsCardController` and `CardForm.prototype.bind`. Store snapshots are referentially cached during render cycles (`Object.is(prev, next) === true`), completely preventing infinite re-render loops in React 18 / `useSyncExternalStore`.
+* **Deep DSH Store Integration**: Added seamless runtime integration with `@deepseek-ai/dsh-client-store` (`runtime.createSnapshotStore`) paired with a robust standalone snapshot caching fallback.
+* **Automated Regression Test Suite**: Added dedicated referential identity test in `test/client-syntax.test.mjs` verifying snapshot immutability across repeated reads, single-notification publish triggers, and clean listener lifecycle.
+
 ## 🚀 Updates v0.10.21: Variations Workbench, Smart Aspect Ratio Crop & Brand Asset Pack (#228)
 * **Variations & Style Remix Workbench**: Interactive visual drawer embedded directly in `FalImageCard` and Gallery. Fine-tune variations with a continuous creativity / denoising strength slider (0.05 to 0.95), preset quick buttons ("Subtle 0.25", "Creative 0.65"), and prompt modifier guidance.
 * **Intelligent Aspect-Ratio Canvas Cropper & Resizer (`smart_crop_image`)**: Instant lossless aspect ratio framing for social and responsive surfaces (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`) supporting focal heuristics (`auto_focus`, `center`, `rule_of_thirds`, `letterbox`) via zero-dependency pure Node.js SVG vector raster wrapper.

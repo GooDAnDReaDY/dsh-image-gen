@@ -47,6 +47,11 @@
 
 ---
 
+## 🚀 更新 v0.10.22: 设置卡片状态引用稳定性与修复 React Error #185 无限循环 (#230)
+* **设置卡片状态引用稳定性**: 修复了 `FalSettingsCardController` 和 `CardForm.prototype.bind` 中引发的 React Error #185（`Maximum update depth exceeded`）。快照在渲染周期内进行引用缓存（`Object.is(prev, next) === true`），彻底杜绝 React 18 / `useSyncExternalStore` 的无限重新渲染死循环。
+* **深度 DSH 运行时集成**: 无缝集成官方 `@deepseek-ai/dsh-client-store`（`runtime.createSnapshotStore`），并提供零依赖的高性能独立快照缓存兜底。
+* **自动化回归测试集**: 在 `test/client-syntax.test.mjs` 中引入针对引用一致性的专项测试，严密校验多次连续读取的一致性、单次发布通知机制与监听器注销完整性。
+
 ## 🚀 更新 v0.10.21: 变体工作台、智能比例裁切与品牌资源包导出 (#228)
 * **交互式变体与风格重混工作台 (Remix Workbench)**: 直接集成在 `FalImageCard` 和图库中的交互抽屉。支持连续创意度/去噪强度滑块 (0.05 到 0.95)、预设快捷按钮（“微调 0.25”、“强创意 0.65”）及提示词引导。
 * **智能比例无损画布裁切器 (`smart_crop_image`)**: 快速裁切适配各大社交与设计标准比例 (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`)，支持自动对焦、三分法构图 (`rule_of_thirds`) 与黑边留白 (`letterbox`)。
