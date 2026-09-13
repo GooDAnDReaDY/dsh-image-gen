@@ -27,6 +27,11 @@
   - Строгая валидация query-параметров `/dsh-image-gen/image` и превентивная диагностика нод ComfyUI.
   - Параллельное выполнение вариаций и паков кадра (`asyncPool`) с ускорением ожидания до 3х.
   - Двухуровневый кэш (L1 RAM LRU + L2 Content-addressed disk) с отдачей < 0.1 мс.
+  - `assemble_image_grid` — компоновка 2–4 изображений в единую компактную сетку/сравнение (side-by-side, 2x2, vertical) на чистом SVG.
+  - `Sidebar Gallery & History Drawer` — нативный правый сайдбар DSH (`sidebarRightTabs`, `sidebar.right.pane.tab`, `betterSidebar`) и кнопка вызова в шапке чата (`conversation.session.header.utilities`).
+  - `Interactive Connection Diagnostics` — проверка статуса и сетевой задержки провайдеров в GUI (`/dsh-image-gen/diagnostics/test`).
+  - `Prompt Polisher & Style Presets` — каталог 10 пресетов стилей, авто-обогащение промптов и цветовые ограничения (`palette_colors`).
+  - `Inpainting & Strength` — точечное редактирование по маске (`mask_image`) и регулируемый коэффициент изменения (`strength`).
   - `blend_images` — слияние изображений.
   - `generate_image_pack` — пакетная генерация под разные платформы (1:1, 16:9, 9:16).
   - `inspect_image_quality` — анализ резкости и проверка элементов.

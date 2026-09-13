@@ -10,6 +10,7 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const lib = path.join(here, '..', 'lib')
 
 const EXPECTED_TOOLS = [
+  'assemble_image_grid',
   'generate_image',
   'generate_image_pack',
   'remove_background',

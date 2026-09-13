@@ -41,6 +41,15 @@
 
 ---
 
+## 🚀 Updates v0.10.19: Sidebar Gallery, Diagnostics & Style Engine (#224)
+* **Native Sidebar Gallery & History Drawer**: Integrated directly into DSH's native right sidebar pane (`sidebarRightTabs` and `sidebar.right.pane.tab`), `betterSidebar`, and a quick-access utility chip in the conversation header (`conversation.session.header.utilities`). Browse past generations, inspect metadata, copy prompts, and export links without cluttering the chat.
+* **Interactive Provider Diagnostics**: Real-time "Test Connection" button in the Settings Card under the Providers tab. Ping Fal.ai, ComfyUI, Automatic1111, or Custom OpenAI-compatible endpoints with live roundtrip latency tracking and status badges (Ready, High Latency, Unreachable).
+* **Curated Style Presets & Smart Prompt Polisher**: Built-in artistic engine with 10 curated styles (`cinematic`, `photorealistic`, `anime`, `minimalist_vector`, `isometric_3d`, `analog_film`, `cyberpunk`, `pixel_art`, `oil_painting`, `claymation`), optional `autoEnhancePrompt` setting, and `style_preset` tool parameter.
+* **Collage & Comparison Grid Assembler (`assemble_image_grid`)**: Stitch 2 to 4 images into clean side-by-side, 2x2 grid, or vertical collage comparison graphics via pure Node.js SVG raster rendering, zero heavy external binaries (< 250 KiB package size).
+* **Color Palette-Constrained Generation**: Pass `palette_colors` (hex color array) into `generate_image` to mathematically bias the prompt and negative prompt toward your exact brand color palette with automated WCAG contrast validation.
+* **Inpainting & Mask Support in `edit_image`**: Added `mask_image` (alias for `mask`) and fine-grained `strength` (0.0 to 1.0) control for localized inpainting in Fal.ai and custom gateways.
+* **Full Chinese & English UI Dictionaries**: Complete `zh` and `en` localization coverage in Web UI, with Russian translation registered via `goodandready/dsh-russian-lang`.
+
 ## 🚀 Updates v0.10.18: Speed Acceleration & Quality Hardening (#222)
 * **Parallel Batch & Pack Generation**: Multi-variation requests (`count > 1`, `prompts` array) and `generate_image_pack` multi-ratio workflows now execute concurrently with a concurrency limit (`concurrency: 3`) via `asyncPool`, reducing generation wait times by up to **3x**.
 * **Zero-Delay Initial Polling**: Eliminated artificial initial delay in `pollStatus` and queue runners (Fal.ai, ComfyUI), inspecting generation status immediately on first attempt and shaving 1–1.5s off fast generative workflows.

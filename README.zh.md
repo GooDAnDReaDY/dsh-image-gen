@@ -47,6 +47,15 @@
 
 ---
 
+## 🚀 更新 v0.10.19: 侧边栏内置图库、连接诊断与风格引擎 (#224)
+* **原生侧边栏图库与历史抽屉**: 直接集成至 DSH 原生右侧面板 (`sidebarRightTabs` 与 `sidebar.right.pane.tab`)、`betterSidebar`，并在对话会话顶部标题栏中新增快捷入口按钮 (`conversation.session.header.utilities`)。支持浏览历史生成、参数详情查看、一键复制提示词与 Markdown 链接。
+* **交互式提供商连接诊断**: 在设置卡片的“提供商”标签页新增“测试连接”按钮。实时检测 Fal.ai、ComfyUI、Automatic1111 或自定义 OpenAI 兼容接口的网络连通性与往返延迟。
+* **精选风格预设与提示词增强引擎**: 内置 10 款精心调校的艺术与摄影预设风格 (`cinematic`, `photorealistic`, `anime`, `minimalist_vector`, `isometric_3d`, `analog_film`, `cyberpunk`, `pixel_art`, `oil_painting`, `claymation`)，支持 `autoEnhancePrompt` 自动强化与 `style_preset` 工具参数。
+* **拼图与多图对比拼接工具 (`assemble_image_grid`)**: 将 2 至 4 张图像拼接为整齐紧凑的并排对比、2x2 网格或垂直长图，采用纯 Node.js SVG 矢量容器渲染，无需笨重外部二进制依赖（包体积严格保持在 250 KiB 以下）。
+* **品牌色板约束生成**: 在 `generate_image` 中传入 `palette_colors` (十六进制色值数组)，算法级引导正向与反向提示词紧密贴合特定色系，并提供 WCAG 对比度校验。
+* **局部重绘与遮罩编辑 (`edit_image`)**: 新增 `mask_image` 遮罩支持与精细 `strength` (0.0 至 1.0) 去噪强度调节。
+* **完整中英文界面语言包**: Web 界面全面支持 `zh` 和 `en` 语言。
+
 ## 🚀 v0.10.4 更新：Cordis 生命周期、完整设置界面与国际化
 - **Cordis 生命周期 (#136)**：将所有 7 个工具注册包装在 `ctx.effect` 中，以便在热重载时正常释放。
 - **设置界面完整性 (#137)**：添加了 Replicate、SeaDream、Gemini、本地 ComfyUI/A1111、风格预设和 LLM 增强器的配置字段。
