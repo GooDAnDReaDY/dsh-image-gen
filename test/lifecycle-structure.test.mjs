@@ -11,6 +11,9 @@ const lib = path.join(here, '..', 'lib')
 
 const EXPECTED_TOOLS = [
   'assemble_image_grid',
+  'export_asset_pack',
+  'remix_image',
+  'smart_crop_image',
   'generate_image',
   'generate_image_pack',
   'remove_background',

@@ -47,6 +47,13 @@
 
 ---
 
+## 🚀 更新 v0.10.21: 变体工作台、智能比例裁切与品牌资源包导出 (#228)
+* **交互式变体与风格重混工作台 (Remix Workbench)**: 直接集成在 `FalImageCard` 和图库中的交互抽屉。支持连续创意度/去噪强度滑块 (0.05 到 0.95)、预设快捷按钮（“微调 0.25”、“强创意 0.65”）及提示词引导。
+* **智能比例无损画布裁切器 (`smart_crop_image`)**: 快速裁切适配各大社交与设计标准比例 (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`)，支持自动对焦、三分法构图 (`rule_of_thirds`) 与黑边留白 (`letterbox`)。
+* **品牌资源套件导出器 (`export_asset_pack`)**: 一键生成生产级网站与 PWA 资源套件：SVG Favicon、PWA 推荐图标套件 (`icon-192.svg`, `icon-512.svg`)、`manifest.webmanifest`、1200×630 社交分享预览卡片 (`og-card.svg`) 与索引 `catalog.json`。
+* **覆盖 12 大视觉工具的交互 Toolview**: 在对话中直接提供重混、放大、裁切与栅格拼图的可视化操作。
+* **严谨的中英双语界面**: 完整的 `zh` 和 `en` 词典覆盖。
+
 ## 🚀 更新 v0.10.19: 侧边栏内置图库、连接诊断与风格引擎 (#224)
 * **原生侧边栏图库与历史抽屉**: 直接集成至 DSH 原生右侧面板 (`sidebarRightTabs` 与 `sidebar.right.pane.tab`)、`betterSidebar`，并在对话会话顶部标题栏中新增快捷入口按钮 (`conversation.session.header.utilities`)。支持浏览历史生成、参数详情查看、一键复制提示词与 Markdown 链接。
 * **交互式提供商连接诊断**: 在设置卡片的“提供商”标签页新增“测试连接”按钮。实时检测 Fal.ai、ComfyUI、Automatic1111 或自定义 OpenAI 兼容接口的网络连通性与往返延迟。

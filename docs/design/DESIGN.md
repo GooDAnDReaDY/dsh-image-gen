@@ -27,6 +27,10 @@
   - Строгая валидация query-параметров `/dsh-image-gen/image` и превентивная диагностика нод ComfyUI.
   - Параллельное выполнение вариаций и паков кадра (`asyncPool`) с ускорением ожидания до 3х.
   - Двухуровневый кэш (L1 RAM LRU + L2 Content-addressed disk) с отдачей < 0.1 мс.
+  - `remix_image` — управляемый ремикс изображений с регулировкой силы денойза (`creativity`), стилями и сохранением геометрии.
+  - `smart_crop_image` — интеллектуальное и безпотерьное кадрирование под стандарты пропорций (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`) с режимами (`auto_focus`, `center`, `rule_of_thirds`, `letterbox`).
+  - `export_asset_pack` — генерация полного набора веб/PWA ассетов (`favicon.svg`, `icon-192.svg`, `icon-512.svg`, `manifest.webmanifest`, `og-card.svg`, `catalog.json`).
+  - `Variations & Remix Workbench` — интерактивный верстак вариаций прямо в карточке генерации (`FalImageCard`) и галерее с ползунком креативности (0.05–0.95) и быстрыми пресетами.
   - `assemble_image_grid` — компоновка 2–4 изображений в единую компактную сетку/сравнение (side-by-side, 2x2, vertical) на чистом SVG.
   - `Sidebar Gallery & History Drawer` — нативный правый сайдбар DSH (`sidebarRightTabs`, `sidebar.right.pane.tab`, `betterSidebar`) и кнопка вызова в шапке чата (`conversation.session.header.utilities`).
   - `Interactive Connection Diagnostics` — проверка статуса и сетевой задержки провайдеров в GUI (`/dsh-image-gen/diagnostics/test`).

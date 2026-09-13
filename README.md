@@ -41,6 +41,13 @@
 
 ---
 
+## 🚀 Updates v0.10.21: Variations Workbench, Smart Aspect Ratio Crop & Brand Asset Pack (#228)
+* **Variations & Style Remix Workbench**: Interactive visual drawer embedded directly in `FalImageCard` and Gallery. Fine-tune variations with a continuous creativity / denoising strength slider (0.05 to 0.95), preset quick buttons ("Subtle 0.25", "Creative 0.65"), and prompt modifier guidance.
+* **Intelligent Aspect-Ratio Canvas Cropper & Resizer (`smart_crop_image`)**: Instant lossless aspect ratio framing for social and responsive surfaces (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`) supporting focal heuristics (`auto_focus`, `center`, `rule_of_thirds`, `letterbox`) via zero-dependency pure Node.js SVG vector raster wrapper.
+* **Project Asset Pack & Social Card Exporter (`export_asset_pack`)**: Production-ready automated brand asset generation producing SVG favicons, PWA application icon suite (`icon-192.svg`, `icon-512.svg`), `manifest.webmanifest`, high-resolution OpenGraph social banner preview (`og-card.svg` at 1200×630), and an asset manifest catalog (`catalog.json`).
+* **Dedicated Toolviews for 12 Visual Tools**: Direct interactive action buttons and visual renderers in conversation sessions for all generation, editing, inpainting, remix, crop, export, and collage tools.
+* **Strict Localization Standard**: Complete `zh` and `en` UI dictionary integration; Russian locale registered via `goodandready/dsh-russian-lang`.
+
 ## 🚀 Updates v0.10.19: Sidebar Gallery, Diagnostics & Style Engine (#224)
 * **Native Sidebar Gallery & History Drawer**: Integrated directly into DSH's native right sidebar pane (`sidebarRightTabs` and `sidebar.right.pane.tab`), `betterSidebar`, and a quick-access utility chip in the conversation header (`conversation.session.header.utilities`). Browse past generations, inspect metadata, copy prompts, and export links without cluttering the chat.
 * **Interactive Provider Diagnostics**: Real-time "Test Connection" button in the Settings Card under the Providers tab. Ping Fal.ai, ComfyUI, Automatic1111, or Custom OpenAI-compatible endpoints with live roundtrip latency tracking and status badges (Ready, High Latency, Unreachable).
