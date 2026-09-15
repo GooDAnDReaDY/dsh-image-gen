@@ -18,6 +18,7 @@ test('ui-stability: Config schema has all required keys synchronized with client
     'geminiModel', 'geminiKeyEnv',
     'localKind', 'localBaseURL', 'localModel', 'localSteps', 'localCfg',
     'subscriptionQuality',
+    'autoEnhancePrompt', 'defaultStylePreset',
     'enhancePrompt', 'enhanceModel', 'enhanceBelowChars', 'stylePreset',
     'qualityGate', 'dailyBudgetUsd', 'loopGuardLimit',
     'diskCache', 'cacheBySeed', 'cacheByPrompt',

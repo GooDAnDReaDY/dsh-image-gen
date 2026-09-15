@@ -41,6 +41,13 @@
 
 ---
 
+## 🚀 Updates v0.10.23: In-App Auto-Updater, Settings Synchronization, Active Probes & Language Purity (#232)
+* **One-Click In-App Auto-Updater**: Direct 1-click update support inside the plugin Settings Card (`UpdaterSection`) backed by `/api/dsh-image-gen/update`. Fetches the npm registry for release manifests, verifies semver differences, and securely triggers `dsh plugin add @goodandready/dsh-image-gen@latest` restricted to loopback and private LAN connections.
+* **1:1 Settings Synchronization**: Fully synchronized host `Config` schema in `lib/index.js` with client UI fields (`lib/client.js`), exposing `autoEnhancePrompt` and `defaultStylePreset` under the `✨ Enhancer` tab.
+* **Active Diagnostic Probes**: Added real HTTP network probes in `testProviderConnection` for Replicate (`/v1/models`), Google Gemini (`/v1beta/models`), and ByteDance Seedream with timeout protection and live roundtrip latency tracking.
+* **Strict Multi-Language Compliance**: Pure standard `en` and `zh` localization bundles embedded in core package; modularized Russian language support via `goodandready/dsh-russian-lang` per DSH plugin guidelines. Exactly 0 Cyrillic characters in product code (`lib/`).
+* **WAI-ARIA Accessibility Hardening**: Enhanced tab navigation and input form validation with `role="tablist"`, `role="tab"`, `aria-selected`, `aria-controls`, `role="tabpanel"`, `aria-describedby`, and `role="alert"`.
+
 ## 🚀 Updates v0.10.22: Referential Stability & React Error #185 Infinite Loop Fix (#230)
 * **Settings Card Referential Stability**: Resolved React Error #185 (`Maximum update depth exceeded`) in `FalSettingsCardController` and `CardForm.prototype.bind`. Store snapshots are referentially cached during render cycles (`Object.is(prev, next) === true`), completely preventing infinite re-render loops in React 18 / `useSyncExternalStore`.
 * **Deep DSH Store Integration**: Added seamless runtime integration with `@deepseek-ai/dsh-client-store` (`runtime.createSnapshotStore`) paired with a robust standalone snapshot caching fallback.

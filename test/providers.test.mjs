@@ -246,7 +246,7 @@ test('grok идёт тем же путём, но со своим именем', 
 test('без плагина подписок провайдер объясняет, чего не хватает', async () => {
   const out = await makeProviders(subsDeps(undefined), job()).codex()
   assert.equal(out.ok, false)
-  assert.match(out.reason, /плагин подписок/)
+  assert.match(out.reason, /dsh-subscriptions|плагин подписок/)
 })
 
 test('отказ подписки становится отказом цепочки, а не падением', async () => {
@@ -260,7 +260,7 @@ test('пустой ответ подписки не выдаётся за усп
   const images = { generate: async () => [] }
   const out = await makeProviders(subsDeps(images), job()).codex()
   assert.equal(out.ok, false)
-  assert.match(out.reason, /нет картинки/)
+  assert.match(out.reason, /no image returned|нет картинки/)
 })
 
 
@@ -445,7 +445,7 @@ test('подписка отказывает при source_image с понятн�
   const d = { ...deps(async () => { throw new Error('no net') }), subscriptionImages: images }
   const out = await makeProviders(d, job({ source: { bytes: PNG, mediaType: 'image/png' } })).codex()
   assert.equal(out.ok, false)
-  assert.match(out.reason, /не умеет править изображения/)
+  assert.match(out.reason, /does not support image editing|не умеет править изображения/)
 })
 
 
@@ -893,13 +893,15 @@ test('audit (#201): lib/client.js booleanField spec and dictionary coverage', ()
   assert.ok(enMatch, 'en dictionary must be present')
   const enText = enMatch[1]
 
-  const ruMatch = clientCode.match(/const ru = \{([\s\S]*?)\n    \}/)
-  assert.ok(ruMatch, 'ru dictionary must be present')
-  const ruText = ruMatch[1]
+  const zhMatch = clientCode.match(/const zh = \{([\s\S]*?)\n    \}/)
+  assert.ok(zhMatch, 'zh dictionary must be present')
+  const zhText = zhMatch[1]
+
+  assert.ok(!clientCode.includes('const ru = {'), 'ru dictionary must NOT be present in client.js per language purity standard')
 
   for (const k of [...new Set([...labelKeys, ...hintKeys, ...placeholderKeys])]) {
     assert.ok(enText.includes(`'${k}'`), `Missing key in en dictionary: ${k}`)
-    assert.ok(ruText.includes(`'${k}'`), `Missing key in ru dictionary: ${k}`)
+    assert.ok(zhText.includes(`'${k}'`), `Missing key in zh dictionary: ${k}`)
   }
 })
 

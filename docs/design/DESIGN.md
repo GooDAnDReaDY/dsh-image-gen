@@ -46,6 +46,21 @@
   - Многоязычные `README.md`, `README.ru.md`, `README.zh.md`.
 
 
+
+## In-App Auto-Updater & Accessibility Architecture (v0.10.23, #232)
+- **Host Endpoint (`lib/updater.js`)**:
+  - Registered route: `/api/dsh-image-gen/update` (GET for release check against npm registry, POST for execution).
+  - Security model: Strict verification via `isTrustedUpdateRequest`. Restricts triggering to loopback (`127.0.0.1`, `::1`) and private RFC 1918 subnets (`192.168.0.0/16`, `10.0.0.0/8`, `172.16.0.0/12`) with `x-dsh-plugin-update: 1` header and origin matching.
+  - Execution: Spawns `dsh plugin add @goodandready/dsh-image-gen@latest` via `child_process` without shell injection.
+- **Client UI (`lib/client.js` - `UpdaterSection`)**:
+  - Mounted inside `FalSettingsCard`. Displays live status badge (Up to date / Update available), current vs latest version, and a 1-click update button with loading states.
+- **Settings Synchronization (1:1)**:
+  - All keys in host `Config` (`lib/index.js`) are 1:1 represented in `FIELDS` (`lib/client.js`), specifically `autoEnhancePrompt` and `defaultStylePreset` under the Enhancer tab.
+- **WAI-ARIA Accessibility**:
+  - Full tablist/tab/tabpanel markup conforming to WAI-ARIA 1.2 authoring practices. Form input validation with `aria-invalid`, `aria-describedby`, and `role="alert"`.
+- **Diagnostic Network Probes**:
+  - Live probe in `testProviderConnection` for Replicate, Gemini, and Seedream with timeout protection.
+
 ## Dual-Output Contract (#150)
 - **Безопасность текстовых LLM**: Инструменты генерации и редактирования возвращают в контекст языковой модели структурированный Markdown-отчёт без base64 и бинарных данных (путь к файлу, габариты, сид, провайдер, ID вложения).
 - **Интерактивный UI**: Полноформатное изображение и интерактивные действия (re-roll, zoom, upscale, remove background) монтируются в веб-интерфейс DSH через системный механизм вложений `ctx.attachments`.

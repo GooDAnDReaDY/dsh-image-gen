@@ -47,6 +47,13 @@
 
 ---
 
+## 🚀 更新 v0.10.23: 应用内一键更新、设置同步、真实探针与语言规范 (#232)
+* **应用内一键自动更新**: 设置卡片内新增「插件更新」模块（`UpdaterSection`），配合 `/api/dsh-image-gen/update` 接口。自动查询 npm 官方注册表，对比语义化版本号，并在本地回环或私有局域网安全授权下执行 `dsh plugin add @goodandready/dsh-image-gen@latest`。
+* **1:1 核心配置与界面设置同步**: 严格对齐 `lib/index.js` 宿主 `Config` 与 `lib/client.js` 界面字段，在「✨ 提示词增强」标签页下完整呈现 `autoEnhancePrompt`（智能自动增强提示词）与 `defaultStylePreset`（默认风格预设）。
+* **真实网络诊断探针**: 在 `testProviderConnection` 中为 Replicate (`/v1/models`)、Google Gemini (`/v1beta/models`) 及字节跳动 Seedream 增加带超时保护的真实 HTTP 网络探测与延迟往返测速。
+* **严格多语言纯度标准**: 核心代码完全遵照 DSH 插件规范，内置纯净完整的 `en` 和 `zh` 词典；俄语支持通过 `goodandready/dsh-russian-lang` 独立注册。`lib/` 源码中完全清理非拉丁字符。
+* **WAI-ARIA 无障碍访问支持**: 为标签页切换与表单错误提示加入 `role="tablist"`, `role="tab"`, `aria-selected`, `aria-controls`, `role="tabpanel"`, `aria-describedby` 和 `role="alert"`。
+
 ## 🚀 更新 v0.10.22: 设置卡片状态引用稳定性与修复 React Error #185 无限循环 (#230)
 * **设置卡片状态引用稳定性**: 修复了 `FalSettingsCardController` 和 `CardForm.prototype.bind` 中引发的 React Error #185（`Maximum update depth exceeded`）。快照在渲染周期内进行引用缓存（`Object.is(prev, next) === true`），彻底杜绝 React 18 / `useSyncExternalStore` 的无限重新渲染死循环。
 * **深度 DSH 运行时集成**: 无缝集成官方 `@deepseek-ai/dsh-client-store`（`runtime.createSnapshotStore`），并提供零依赖的高性能独立快照缓存兜底。
