@@ -12,7 +12,7 @@ Multi-provider image generation & visual processing plugin for DeepSeek Harness.
 |---|---|---|
 | Host plugin | `lib/index.js` | cordis `name`/`inject`/`Config`/`apply` |
 | Tool suite | `lib/register-tools.js` + `lib/tools/*` | 15 tools, each in labeled `ctx.effect` |
-| Providers | `lib/providers.js` + `lib/provider-utils.js` | FAL, OpenAI-compatible, Replicate, Gemini, Seedream, Codex, Grok, local |
+| Providers | `lib/providers.js` (aggregator) + `lib/provider-utils.js` + `lib/providers/shared-helpers.js` + `lib/providers/backends/*` | FAL, OpenAI-compatible, Replicate, Gemini, Seedream, Codex, Grok, local |
 | Browser UI | `lib/client.js` (built from `src/client/*`) | settings card + toolviews |
 | Bundle patch | `cordis.patch.yml` | profile insert |
 
