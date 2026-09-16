@@ -9,6 +9,7 @@ import {
   buildSpritesheetCss,
   buildSpritesheetSvg,
   buildFramePrompts,
+  clampFrames,
 } from '../lib/spritesheet-helpers.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -47,4 +48,15 @@ test('spritesheet tool file declares tool name; helpers clamp frames', () => {
   assert.match(src, /from '\.\.\/spritesheet-helpers\.js'/)
   const helpers = readFileSync(path.join(here, '..', 'lib', 'spritesheet-helpers.js'), 'utf8')
   assert.match(helpers, /v === 4 \|\| v === 8 \|\| v === 12/)
+  assert.equal(clampFrames(12, 'walk'), 8)
+  assert.equal(clampFrames(12, 'idle'), 12)
+})
+
+test('buildSpritesheetCss: frame counts 4 and 12', () => {
+  const css4 = buildSpritesheetCss({ frameCount: 4, frameW: 512, frameH: 512, durationSec: 0.8, name: 'a' })
+  assert.match(css4, /steps\(4\)/)
+  assert.match(css4, /-2048px 0/)
+  const css12 = buildSpritesheetCss({ frameCount: 12, frameW: 512, frameH: 512, durationSec: 1.2, name: 'b' })
+  assert.match(css12, /steps\(12\)/)
+  assert.match(css12, /-6144px 0/)
 })
