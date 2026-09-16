@@ -41,6 +41,13 @@
 
 ---
 
+## 🚀 Updates v0.10.24: Quality Block — Publication Boundary, Settings Status, Theme Colors & Module Split (#235–#242)
+* **Publication Boundary**: Added `.gitattributes` with `export-ignore` for `AGENTS.md`, `index.md`, `docs/`, and `.gitea/` so GitHub source archives and `git archive` no longer ship internal workflow files.
+* **Settings Status Fallback**: Corrected provider/config status handling in the Settings Card so partial/unknown states no longer show a false “unavailable”.
+* **Design-System Alignment**: Renamed residual `fal-` CSS class prefixes to the `ig-` system and bound colors to DSH theme variables via `var(--dsw-alias-*, <fallback>)`.
+* **Sensitive File Hardening**: History, cache meta/data, and spend-meter writes now enforce `0600` permissions after write.
+* **Dead Code Removal & Module Split**: Removed unused `listCuratedStyles`; split oversized server modules — `providers.js` utils extracted to `provider-utils.js`, `processing.js` into `processing-basic.js` + `processing-advanced.js`. Client file split is tracked separately (#244).
+
 ## 🚀 Updates v0.10.23: In-App Auto-Updater, Settings Synchronization, Active Probes & Language Purity (#232)
 * **One-Click In-App Auto-Updater**: Direct 1-click update support inside the plugin Settings Card (`UpdaterSection`) backed by `/api/dsh-image-gen/update`. Fetches the npm registry for release manifests, verifies semver differences, and securely triggers `dsh plugin add @goodandready/dsh-image-gen@latest` restricted to loopback and private LAN connections.
 * **1:1 Settings Synchronization**: Fully synchronized host `Config` schema in `lib/index.js` with client UI fields (`lib/client.js`), exposing `autoEnhancePrompt` and `defaultStylePreset` under the `✨ Enhancer` tab.

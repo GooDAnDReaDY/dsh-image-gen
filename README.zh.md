@@ -47,6 +47,13 @@
 
 ---
 
+## 🚀 更新 v0.10.24: 质量加固 — 发布边界、设置状态、主题颜色与模块拆分 (#235–#242)
+* **发布边界**: 新增 `.gitattributes`，对 `AGENTS.md`、`index.md`、`docs/`、`.gitea/` 设置 `export-ignore`，GitHub source 归档与 `git archive` 不再包含内部工作流文件。
+* **设置状态回退**: 修正设置卡片中的提供方/配置状态处理，部分或未知状态不再误显示为 “unavailable”。
+* **对齐设计系统**: 将残留的 `fal-` CSS 类前缀改为 `ig-`，并以 `var(--dsw-alias-*, <fallback>)` 绑定 DSH 主题变量。
+* **敏感文件加固**: 历史记录、缓存 meta/data 与花费计量写入后强制 `0600` 权限。
+* **死代码清理与模块拆分**: 删除未使用的 `listCuratedStyles`；拆分过大的服务端模块 — `providers.js` 工具函数抽到 `provider-utils.js`，`processing.js` 拆为 `processing-basic.js` + `processing-advanced.js`。客户端拆分见 #244。
+
 ## 🚀 更新 v0.10.23: 应用内一键更新、设置同步、真实探针与语言规范 (#232)
 * **应用内一键自动更新**: 设置卡片内新增「插件更新」模块（`UpdaterSection`），配合 `/api/dsh-image-gen/update` 接口。自动查询 npm 官方注册表，对比语义化版本号，并在本地回环或私有局域网安全授权下执行 `dsh plugin add @goodandready/dsh-image-gen@latest`。
 * **1:1 核心配置与界面设置同步**: 严格对齐 `lib/index.js` 宿主 `Config` 与 `lib/client.js` 界面字段，在「✨ 提示词增强」标签页下完整呈现 `autoEnhancePrompt`（智能自动增强提示词）与 `defaultStylePreset`（默认风格预设）。
