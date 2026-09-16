@@ -48,6 +48,7 @@
         'remix_image',
         'blend_images',
         'generate_image_pack',
+        'generate_responsive_mockups',
         'remove_background',
         'upscale_image',
         'vectorize_image',

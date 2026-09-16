@@ -42,6 +42,7 @@
       'card.copyPrompt': 'Copy Prompt',
       'card.origPrompt': 'Original Prompt',
       'card.remix': 'Remix',
+      'card.responsiveTabs': 'Responsive viewports',
       'remix.drawer_title': 'Variations & Style Remix Workbench',
       'remix.creativity_label': 'Creativity / Denoising Strength',
       'remix.prompt_placeholder': 'Describe stylistic adjustments, new background, or variations...',

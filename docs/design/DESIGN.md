@@ -39,6 +39,7 @@
   - `Inpainting & Strength` — точечное редактирование по маске (`mask_image`) и регулируемый коэффициент изменения (`strength`).
   - `blend_images` — слияние изображений.
   - `generate_image_pack` — пакетная генерация под разные платформы (1:1, 16:9, 9:16).
+  - `generate_responsive_mockups` (#173) — пакетная адаптивная генерация одного продукта под Mobile (9:16), Tablet (3:4) и Desktop (16:9) с синхронизированным промптом/палитрой; файлы `mockup-mobile.png`, `mockup-tablet.png`, `mockup-desktop.png`; toolview-табы viewport switching.
   - `inspect_image_quality` — анализ резкости и проверка элементов.
 - **Web endpoints:**
   - `/dsh-image-gen/history` — REST-эндпоинт истории генераций с фильтрацией по провайдеру.
@@ -88,6 +89,7 @@
 - **FalImageCard:**
   - Состояния: `running` (анимация загрузки), `failed` (сообщение об ошибке), `success` (превью, метаданные, действия).
   - Быстрое действие смены промпта с подстановкой в инпут чата.
+  - Для `generate_responsive_mockups`: вкладки Mobile / Tablet / Desktop (WAI-ARIA tablist), активный viewport, метаданные W×H и path; fallback на single-image при отсутствии payload.
 
 ## User Flows
 1. **Генерация и визуальная проверка:**

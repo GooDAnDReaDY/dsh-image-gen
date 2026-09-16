@@ -71,6 +71,7 @@
 * **智能比例无损画布裁切器 (`smart_crop_image`)**: 快速裁切适配各大社交与设计标准比例 (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`)，支持自动对焦、三分法构图 (`rule_of_thirds`) 与黑边留白 (`letterbox`)。
 * **品牌资源套件导出器 (`export_asset_pack`)**: 一键生成生产级网站与 PWA 资源套件：SVG Favicon、PWA 推荐图标套件 (`icon-192.svg`, `icon-512.svg`)、`manifest.webmanifest`、1200×630 社交分享预览卡片 (`og-card.svg`) 与索引 `catalog.json`。
 * **覆盖 12 大视觉工具的交互 Toolview**: 在对话中直接提供重混、放大、裁切与栅格拼图的可视化操作。
+* **响应式多端 Mockup 套件 (`generate_responsive_mockups`, #173)**: 同一产品提示词并行生成 Mobile 9:16、Tablet 3:4、Desktop 16:9 三端 UI mockup，统一风格与品牌色，保存为 `mockup-mobile.png` / `mockup-tablet.png` / `mockup-desktop.png`，对话内以三标签页预览。
 * **严谨的中英双语界面**: 完整的 `zh` 和 `en` 词典覆盖。
 
 ## 🚀 更新 v0.10.19: 侧边栏内置图库、连接诊断与风格引擎 (#224)
