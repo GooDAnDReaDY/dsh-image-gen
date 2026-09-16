@@ -1,0 +1,114 @@
+# DESIGN.md — @goodandready/dsh-image-gen
+
+## Product / Purpose
+- **Назначение:** Мультипровайдерный комбайн генерации и визуальной обработки изображений для DeepSeek Harness. Позволяет агенту генерировать изображения по текстовому описанию, удалять фон, увеличивать разрешение, векторизовать в SVG, смешивать картинки и проводить автономную проверку качества (Vision Loop) в связке с `@goodandready/dsh-vision-bridge`.
+- **Аудитория:** Пользователи и разработчики DeepSeek Harness, создающие визуальный контент, иллюстрации, веб-ассеты и интерфейсы.
+- **Статус:** Production-ready комбайн (v0.10.x).
+
+## User Surfaces
+- **DSH UI / settings / slots:**
+  - Карточка настроек плагина монтируется в слот `settings.plugin.item` (`FalSettingsCard`) в едином дизайн-коде `dsh-clinebot`.
+  - Верхний информационный дашборд (`.ig-grid-4`, `.ig-stat-box`): активный провайдер, размер и формат кадра, статус Quality Gate и лимит Loop Guard, дневной бюджет и состояние кэша.
+  - 5 структурированных вкладок: ⚙️ Основные, 🔌 Провайдер, ✨ Промпт и стили, 🛡️ Безопасность и бюджет, ⚡ Кэш и хранение.
+  - Защитный контур `ErrorBoundary`: изоляция ошибок рендера пользовательского интерфейса с кнопкой повтора (Retry).
+  - Реактивный стор настроек с референциальной стабильностью (`CardForm.prototype.bind`, `runtime.createSnapshotStore`, `useSyncExternalStore`) исключает бесконечные циклы рендера React Error #185.
+  - Обеспечивает двухфазную буферизацию настроек (`StagedEdit`), маскирование секретов (`SecretField`), сброс к значениям по умолчанию (`resetField`), переключение активного провайдера. Галерея истории (`HistoryGallery`) удалена в #203 / v0.10.10 и больше не является частью UI.
+- **DSH Chat / Tool cards:**
+  - Интерактивная карточка `FalImageCard` для отображения результатов генерации в диалоге.
+  - Кнопки быстрого действия: перегенерация со следующим сидом, апскейл 2x, удаление фона, копирование промпта/сида, быстрая правка промпта.
+- **API / Tools:**
+  - `generate_image` — основная генерация с поддержкой `aspect_ratio`, `quality`, `output_dir`.
+  - `edit_image` — точечное редактирование и inpainting с автоматическим контекстным поиском исходного изображения (#142, #144).
+  - `vary_image` — генерация альтернативных вариаций с регулируемым коэффициентом сходства (#143, #144).
+  - `compare_images` — попиксельное сравнение двух изображений.
+  - `remove_background` — удаление фона с отдачей прозрачного PNG.
+  - `upscale_image` — увеличение разрешения 2x/4x.
+  - `vectorize_image` — векторизация растра в SVG с адаптивной палитрой, сохранением во вложения и предпросмотром в toolview.
+  - Безопасный fallback вложений (`saveAttachmentSafe`): надежная работа в CLI/автономном режиме при отсутствии сервиса вложений.
+  - Строгая валидация query-параметров `/dsh-image-gen/image` и превентивная диагностика нод ComfyUI.
+  - Параллельное выполнение вариаций и паков кадра (`asyncPool`) с ускорением ожидания до 3х.
+  - Двухуровневый кэш (L1 RAM LRU + L2 Content-addressed disk) с отдачей < 0.1 мс.
+  - `remix_image` — управляемый ремикс изображений с регулировкой силы денойза (`creativity`), стилями и сохранением геометрии.
+  - `smart_crop_image` — интеллектуальное и безпотерьное кадрирование под стандарты пропорций (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`) с режимами (`auto_focus`, `center`, `rule_of_thirds`, `letterbox`).
+  - `export_asset_pack` — генерация полного набора веб/PWA ассетов (`favicon.svg`, `icon-192.svg`, `icon-512.svg`, `manifest.webmanifest`, `og-card.svg`, `catalog.json`).
+  - `Variations & Remix Workbench` — интерактивный верстак вариаций прямо в карточке генерации (`FalImageCard`) и галерее с ползунком креативности (0.05–0.95) и быстрыми пресетами.
+  - `assemble_image_grid` — компоновка 2–4 изображений в единую компактную сетку/сравнение (side-by-side, 2x2, vertical) на чистом SVG.
+  - `Sidebar Gallery & History Drawer` — нативный правый сайдбар DSH (`sidebarRightTabs`, `sidebar.right.pane.tab`, `betterSidebar`) и кнопка вызова в шапке чата (`conversation.session.header.utilities`).
+  - `Interactive Connection Diagnostics` — проверка статуса и сетевой задержки провайдеров в GUI (`/dsh-image-gen/diagnostics/test`).
+  - `Prompt Polisher & Style Presets` — каталог 10 пресетов стилей, авто-обогащение промптов и цветовые ограничения (`palette_colors`).
+  - `Inpainting & Strength` — точечное редактирование по маске (`mask_image`) и регулируемый коэффициент изменения (`strength`).
+  - `blend_images` — слияние изображений.
+  - `generate_image_pack` — пакетная генерация под разные платформы (1:1, 16:9, 9:16).
+  - `inspect_image_quality` — анализ резкости и проверка элементов.
+- **Web endpoints:**
+  - `/dsh-image-gen/history` — REST-эндпоинт истории генераций с фильтрацией по провайдеру.
+- **Документация:**
+  - Многоязычные `README.md`, `README.ru.md`, `README.zh.md`.
+
+
+
+## In-App Auto-Updater & Accessibility Architecture (v0.10.23, #232)
+- **Host Endpoint (`lib/updater.js`)**:
+  - Registered route: `/api/dsh-image-gen/update` (GET for release check against npm registry, POST for execution).
+  - Security model: Strict verification via `isTrustedUpdateRequest`. Restricts triggering to loopback (`127.0.0.1`, `::1`) and private RFC 1918 subnets (`192.168.0.0/16`, `10.0.0.0/8`, `172.16.0.0/12`) with `x-dsh-plugin-update: 1` header and origin matching.
+  - Execution: Spawns `dsh plugin add @goodandready/dsh-image-gen@latest` via `child_process` without shell injection.
+- **Client UI (`lib/client.js` - `UpdaterSection`)**:
+  - Mounted inside `FalSettingsCard`. Displays live status badge (Up to date / Update available), current vs latest version, and a 1-click update button with loading states.
+- **Settings Synchronization (1:1)**:
+  - All keys in host `Config` (`lib/index.js`) are 1:1 represented in `FIELDS` (`lib/client.js`), specifically `autoEnhancePrompt` and `defaultStylePreset` under the Enhancer tab.
+- **WAI-ARIA Accessibility**:
+  - Full tablist/tab/tabpanel markup conforming to WAI-ARIA 1.2 authoring practices. Form input validation with `aria-invalid`, `aria-describedby`, and `role="alert"`.
+- **Diagnostic Network Probes**:
+  - Live probe in `testProviderConnection` for Replicate, Gemini, and Seedream with timeout protection.
+
+## Dual-Output Contract (#150)
+- **Безопасность текстовых LLM**: Инструменты генерации и редактирования возвращают в контекст языковой модели структурированный Markdown-отчёт без base64 и бинарных данных (путь к файлу, габариты, сид, провайдер, ID вложения).
+- **Интерактивный UI**: Полноформатное изображение и интерактивные действия (re-roll, zoom, upscale, remove background) монтируются в веб-интерфейс DSH через системный механизм вложений `ctx.attachments`.
+- **Семантический анализ (#145)**: Перед операциями модификации плагин запрашивает композиционную сводку у `@goodandready/dsh-vision-bridge`, защищая генеративный пайплайн от структурных галлюцинаций.
+
+## Visual Direction
+- **Атмосфера:** Нативный минималистичный интерфейс DeepSeek Harness, консистентный с дизайн-системой ядра Cordis/DSH.
+- **Утверждённые референсы:**
+  - Карточка инструмента DSH со статусными бейджами, прогресс-баром и компактным блоком метаданных.
+  - ComfyUI / Automatic1111 drag-and-drop метаданные параметров.
+- **Не копировать:**
+  - Не заимствовать стили сторонних сервисов; использовать только семантические CSS-модули и нативные компоненты DSH.
+
+## Foundations
+- **Цвета и роли:** Нативные переменные темы DSH (`var(--dsh-bg)`, `var(--dsh-border)`, `var(--dsh-text-primary)`, `var(--dsh-accent)`).
+- **Типографика:** Системные шрифты DSH UI, строгая иерархия размеров.
+- **Сетка и отступы:** Компактная сетка настроек, адаптивная галерея миниатюр (CSS Grid / Flex).
+- **Accessibility:** Полноценная поддержка интернационализации (ru, en, zh), контрастные индикаторы статуса, доступные подписи кнопок.
+
+## Components And States
+- **FalSettingsCard:**
+  - Защищённый ввод секретов без утечки значений.
+  - Индикатор `overridden` и кнопка сброса `resetField` (`↺`).
+  - Кнопки `Save` и `Discard` при наличии несохранённых правок (`unsaved`).
+- **FalImageCard:**
+  - Состояния: `running` (анимация загрузки), `failed` (сообщение об ошибке), `success` (превью, метаданные, действия).
+  - Быстрое действие смены промпта с подстановкой в инпут чата.
+
+## User Flows
+1. **Генерация и визуальная проверка:**
+   Пользователь/агент запрашивает генерацию ➔ плагин создает картинку ➔ карточка отображает результат в чате ➔ агент через системный промпт вызывает `analyze_image` из `@goodandready/dsh-vision-bridge` для проверки качества.
+2. **Итеративное редактирование:**
+   Клик по кнопкам действия карточки (апскейл, удаление фона, правка промпта) ➔ мгновенная отправка следующего шага в сессию.
+
+## Do / Don't
+- **Do:**
+  - Оборачивать регистрацию инструментов в `ctx.effect(() => { ... })`.
+  - Использовать `t(...)` для всех без исключения пользовательских строк.
+  - Декларировать все зависимости служб в `peerDependencies`.
+- **Don't:**
+  - Не оставлять мёртвый React-стейт в компонентах.
+  - Не хардкодить русскоязычный текст в коде карточек и подсказок.
+  - Не создавать скрытых настроек в `Config`, недоступных пользователю в GUI.
+
+## Frontend & Design Assets Tools (v0.10.5)
+
+* **`extract_design_tokens` (#172)**: Extracts dominant & semantic colors into CSS Variables (`:root`), Tailwind color config, and W3C JSON.
+* **`image_to_css_gradient` (#174)**: Creates lightweight pure CSS Mesh / Radial / Linear gradients (< 1KB).
+* **`check_image_contrast` (#175)**: Computes WCAG 2.1 AA/AAA contrast ratios and provides CSS scrim overlays.
+* **`optimize_vector_svg` (#176)**: Strips SVG metadata, normalizes viewBox, and exports clean React TSX components.
+* **`generate_pwa_icon_suite` (#190)**: Provides complete PWA icon specs (16px to 512px maskable) and web app manifest.json.
