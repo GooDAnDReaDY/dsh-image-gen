@@ -13,7 +13,7 @@ Multi-provider image generation & visual processing plugin for DeepSeek Harness.
 | Host plugin | `lib/index.js` | cordis `name`/`inject`/`Config`/`apply` |
 | Tool suite | `lib/register-tools.js` + `lib/tools/*` | 15 tools, each in labeled `ctx.effect` |
 | Providers | `lib/providers.js` + `lib/provider-utils.js` | FAL, OpenAI-compatible, Replicate, Gemini, Seedream, Codex, Grok, local |
-| Browser UI | `lib/client.js` | settings card + toolviews |
+| Browser UI | `lib/client.js` (built from `src/client/*`) | settings card + toolviews |
 | Bundle patch | `cordis.patch.yml` | profile insert |
 
 ## Tools
@@ -27,10 +27,11 @@ Server-side processing tools live in `lib/tools/processing-basic.js` and `lib/to
 
 ## Build / test
 ```bash
-npm test
+npm run build:client   # assemble lib/client.js from src/client/*
+npm test               # build + node --check client + unit tests
 node --check lib/*.js
 ```
-No compile step; ESM only (`"type": "module"`).
+Client is assembled from ordered `src/client/*` fragments (DSH loads one ModuleLoader entry). Server remains plain ESM (`"type": "module"`).
 
 ## Docs
 - `README.md` / `README.ru.md` / `README.zh.md`

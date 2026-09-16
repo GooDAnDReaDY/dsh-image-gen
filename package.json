@@ -66,6 +66,7 @@
     "@deepseek-ai/schemastery": "^3.18.1"
   },
   "scripts": {
-    "test": "node --check lib/client.js && node --test test/*.test.mjs"
+    "test": "node scripts/build-client.mjs && node --check lib/client.js && node --test test/*.test.mjs",
+    "build:client": "node scripts/build-client.mjs"
   }
 }
