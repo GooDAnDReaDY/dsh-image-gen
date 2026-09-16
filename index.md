@@ -19,7 +19,7 @@ Multi-provider image generation & visual processing plugin for DeepSeek Harness.
 ## Tools
 Server-side processing tools live in `lib/tools/processing-basic.js` and `lib/tools/processing-advanced.js`.
 
-`generate_image`, `edit_image`, `vary_image`, `compare_images`, `remove_background`, `upscale_image`, `vectorize_image`, `blend_images`, `generate_image_pack`, `inspect_image_quality`, `extract_design_tokens`, `image_to_css_gradient`, `check_image_contrast`, `optimize_vector_svg`, `generate_pwa_icon_suite`
+`generate_image`, `edit_image`, `vary_image`, `sketch_to_image`, `compare_images`, `remove_background`, `upscale_image`, `vectorize_image`, `blend_images`, `generate_image_pack`, `inspect_image_quality`, `extract_design_tokens`, `image_to_css_gradient`, `check_image_contrast`, `optimize_vector_svg`, `generate_pwa_icon_suite`
 
 ## Web routes
 - `GET /dsh-image-gen/image` (legacy alias `/dsh-fal-image-gen/image`)
