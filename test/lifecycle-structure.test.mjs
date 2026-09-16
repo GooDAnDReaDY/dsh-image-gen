@@ -81,3 +81,20 @@ test('lifecycle: index.js imports registerAllTools from register-tools.js', () =
   assert.match(src, /import \{ registerAllTools \} from '\.\/register-tools\.js'/)
   assert.match(src, /registerAllTools\(ctx,/)
 })
+
+test('identity: export const name matches package.json and client loader id', () => {
+  const pkg = JSON.parse(readFileSync(path.join(here, '..', 'package.json'), 'utf8'))
+  const indexSrc = readFileSync(path.join(lib, 'index.js'), 'utf8')
+  const clientSrc = readFileSync(path.join(lib, 'client.js'), 'utf8')
+  const cordis = readFileSync(path.join(here, '..', 'cordis.patch.yml'), 'utf8')
+
+  const m = indexSrc.match(/export const name = '([^']+)'/)
+  assert.ok(m, 'lib/index.js must export const name')
+  assert.equal(m[1], pkg.name, `export const name must equal package.json name`)
+
+  const loadId = clientSrc.match(/__ModuleLoader__\.load\(\{[\s\S]*?id:\s*'([^']+)'/)
+  assert.ok(loadId, 'client.js must declare ModuleLoader id')
+  assert.equal(loadId[1], pkg.name, 'client loader id must equal package.json name')
+
+  assert.ok(cordis.includes(`name: '${pkg.name}'`), 'cordis.patch.yml name must match package.json')
+})
