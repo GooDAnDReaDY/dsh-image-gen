@@ -15,7 +15,7 @@ Canonical source language: English (locale keys + UI strings). Russian translati
 - `lib/index.js` — cordis host: Config schema, settings namespace `dsh-image-gen`, web routes, `registerAllTools`.
 - `lib/register-tools.js` — orchestrator calling group registrars.
 - `lib/tools/{generation,processing,editing,inspect,frontend}.js` — `defineTool` blocks; each tool inside its own labeled `ctx.effect`.
-- `lib/providers.js` — FAL / OpenAI-compatible / Replicate / Gemini / Seedream / local backends.
+- `lib/providers.js` — thin aggregator + public re-exports; backends live in `lib/providers/backends/` (fal, custom, subscription, local, seedream, gemini, replicate); shared helpers in `lib/providers/shared-helpers.js`.
 - `lib/client.js` — settings card (`settings.plugin.item`) + toolviews; styles marked `data-dsh-plugin`.
 - Safety modules: `quality-gate.js`, `loop-guard.js`, `cost-meter.js`, `generation-cache.js`, `security.js`, `negative-sanitizer.js`.
 - Design contract: `docs/design/DESIGN.md` (must match shipped UI).
