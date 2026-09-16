@@ -30,6 +30,7 @@ const EXPECTED_TOOLS = [
   'optimize_vector_svg',
   'generate_pwa_icon_suite',
   'sketch_to_image',
+  'generate_spritesheet',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
