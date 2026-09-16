@@ -9,6 +9,8 @@ import {
   buildSeamlessPrompt,
   buildPatternCss,
   normalizeDensity,
+  scoreEdgeWrap,
+  tilePixels,
 } from '../lib/pattern-helpers.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -41,4 +43,33 @@ test('pattern tool is registered', () => {
   assert.match(src, /name: 'generate_seamless_pattern'/)
   const reg = readFileSync(path.join(here, '..', 'lib', 'register-tools.js'), 'utf8')
   assert.match(reg, /registerPatternTools/)
+})
+
+test('scoreEdgeWrap: identical edges score 1, opposite edges lower', () => {
+  const w = 4, h = 4, ch = 4
+  const solid = new Uint8Array(w * h * ch).fill(200)
+  assert.equal(scoreEdgeWrap(solid, w, h, ch), 1)
+  const split = new Uint8Array(w * h * ch)
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const o = (y * w + x) * ch
+      const v = x < w / 2 ? 0 : 255
+      split[o] = split[o + 1] = split[o + 2] = v
+      split[o + 3] = 255
+    }
+  }
+  assert.ok(scoreEdgeWrap(split, w, h, ch) < 1)
+})
+
+test('tilePixels: 2x2 and 3x3 keep tile dimensions', () => {
+  const w = 2, h = 2, ch = 4
+  const px = new Uint8Array(w * h * ch).fill(10)
+  const t2 = tilePixels(px, w, h, ch, 2, 2)
+  assert.equal(t2.width, 4)
+  assert.equal(t2.height, 4)
+  assert.equal(t2.pixels.length, 4 * 4 * ch)
+  const t3 = tilePixels(px, w, h, ch, 3, 3)
+  assert.equal(t3.width, 6)
+  assert.equal(t3.height, 6)
+  assert.equal(scoreEdgeWrap(t2.pixels, t2.width, t2.height, ch), 1)
 })
