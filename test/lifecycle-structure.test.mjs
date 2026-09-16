@@ -29,6 +29,7 @@ const EXPECTED_TOOLS = [
   'check_image_contrast',
   'optimize_vector_svg',
   'generate_pwa_icon_suite',
+  'sketch_to_image',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
