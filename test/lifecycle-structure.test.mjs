@@ -31,6 +31,7 @@ const EXPECTED_TOOLS = [
   'generate_pwa_icon_suite',
   'sketch_to_image',
   'generate_spritesheet',
+  'generate_seamless_pattern',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
