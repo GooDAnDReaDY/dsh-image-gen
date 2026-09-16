@@ -36,6 +36,7 @@
       'card.copyPrompt': '复制提示词',
       'card.origPrompt': '原始提示词',
       'card.remix': '重混变体',
+      'card.responsiveTabs': '响应式视口',
       'remix.drawer_title': '变体与风格重混工作台',
       'remix.creativity_label': '创意度 / 去噪强度',
       'remix.prompt_placeholder': '描述风格调整、新背景或变体细节...',

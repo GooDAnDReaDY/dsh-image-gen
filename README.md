@@ -117,6 +117,7 @@
 * **`vectorize_image`**: Convert raster graphics to clean scalable SVG vectors with palette quantization.
 * **`blend_images`**: Multi-reference composition mixing.
 * **`generate_image_pack`**: Simultaneous multi-aspect ratio rendering with graceful partial recovery.
+* **`generate_responsive_mockups` (#173)**: One shared product prompt rendered as Mobile (9:16), Tablet (3:4) and Desktop (16:9) UI mockups in parallel. Keeps style/palette coherent across viewports, saves `mockup-mobile.png` / `mockup-tablet.png` / `mockup-desktop.png`, and shows a tabbed viewport preview in chat.
 * **`compare_images`**: Pixel-level visual difference ratio comparison.
 * **`inspect_image_quality`**: Automated visual audit, Laplacian sharpness scoring, and defect detection.
 * **`extract_design_tokens`**: Extract CSS Variables, Tailwind color palettes, and W3C Design Tokens from concept art (#172).

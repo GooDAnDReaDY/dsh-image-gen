@@ -32,6 +32,7 @@ const EXPECTED_TOOLS = [
   'sketch_to_image',
   'generate_spritesheet',
   'generate_seamless_pattern',
+  'generate_responsive_mockups',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -65,6 +66,7 @@ test('lifecycle: orchestrator wires all five tool groups', () => {
     'registerEditingTools',
     'registerInspectTools',
     'registerFrontendTools',
+    'registerResponsiveTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }

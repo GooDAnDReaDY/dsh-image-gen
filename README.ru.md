@@ -157,6 +157,7 @@ graph LR
 | **`vectorize_image`** | Векторизация растра в чистый SVG с квантованием палитры | `image`, `color_mode`, `paletteSize` |
 | **`blend_images`** | Смешивание нескольких изображений в единую композицию | `images`, `weights`, `prompt` |
 | **`generate_image_pack`** | Пакетный рендеринг форматов 1:1, 16:9, 9:16 с сохранением частичных результатов | `prompt`, `aspect_ratios` |
+| **`generate_responsive_mockups`** | Пакетная адаптивная генерация UI-mockup под Mobile 9:16, Tablet 3:4 и Desktop 16:9 с единой палитрой/стилем; табы в toolview (#173) | `prompt`, `devices`, `style_preset`, `palette_colors`, `seed` |
 | **`compare_images`** | Сравнение двух картинок (доля различий пикселей) | `image_a`, `image_b` |
 | **`inspect_image_quality`** | Аудит качества, расчет резкости и проверка дефектов | `image`, `expected_elements` |
 
