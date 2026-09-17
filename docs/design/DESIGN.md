@@ -114,3 +114,14 @@
 * **`check_image_contrast` (#175)**: Computes WCAG 2.1 AA/AAA contrast ratios and provides CSS scrim overlays.
 * **`optimize_vector_svg` (#176)**: Strips SVG metadata, normalizes viewBox, and exports clean React TSX components.
 * **`generate_pwa_icon_suite` (#190)**: Provides complete PWA icon specs (16px to 512px maskable) and web app manifest.json.
+
+## Architecture Modular Decomposition & Line Standards (v0.10.26, #239, #235, #238)
+- **Module Sizing Compliance**: All server modules strictly conform to <= 600 lines threshold:
+  - `lib/tools/generation-pack.js`: Extracted multi-aspect ratio pack generator (`generate_image_pack`).
+  - `lib/history.js`: Generation cache and history persistence file system management.
+  - `lib/attachment-helper.js`: Workspace file system and sidecar JSON persistence.
+  - `lib/tools/generation.js`: Reduced to 547 lines.
+  - `lib/index.js`: Reduced to 557 lines.
+- **Client Modularity (`src/client/*`)**: Single-bundle `lib/client.js` is generated from 15 modular fragments (each <= 337 lines) via `scripts/build-client.mjs`.
+- **Repository Boundary**: Internal developer instructions (`AGENTS.md`, `index.md`) strictly excluded from Git index and public repositories.
+- **Theme Parity & Color Tokens**: Zero standalone `rgba(...)` or hex literals; full semantic coverage via `--dsw-alias-*` and `color-mix(...)`.

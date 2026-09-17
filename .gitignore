@@ -25,3 +25,7 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+  
+# Internal project files 
+AGENTS.md 
+index.md 
