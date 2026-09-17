@@ -41,6 +41,12 @@
 
 ---
 
+## 🚀 Updates v0.10.26: Architecture Decomposition & Repository Sanitization (#235, #238, #239)
+* **Architecture & Modular Decomposition (#239)**: All server modules in `lib/` now strictly meet the <= 600 line threshold: extracted `lib/tools/generation-pack.js` (74 lines, reduces `lib/tools/generation.js` to 547 lines), `lib/history.js` (93 lines), and `lib/attachment-helper.js` (82 lines, reduces `lib/index.js` to 557 lines). Client codebase modularized across 15 sub-modules in `src/client/*` (all <= 337 lines).
+* **Repository Sanitization (#235)**: Internal agent workflow files (`AGENTS.md`, `index.md`) fully untracked from Git and excluded via `.gitignore` and `.gitattributes`.
+* **Theme Parity Completed (#238)**: Full verification and closure of zero-standalone-color rule across all Web UI surfaces with native `--dsw-alias-*` variables and `color-mix(...)` state tints.
+* **Package Integrity**: Added canonical `README.ru.md` and `README.zh.md` to npm package `files` allowlist.
+
 ## 🚀 Updates v0.10.25: Theme Color Parity, Responsive Mockups, Patterns & Spritesheets (#173, #177, #178, #238)
 * **100% Theme Color Parity (#238)**: Completely replaced all hardcoded `rgba(...)` and hex color literals in the Web UI (`src/client/10-css.js`, `src/client/80-gallery.js`) with native DSH theme variables (`--dsw-alias-*`) and dynamic `color-mix(...)`. Badges, alerts, and modal overlays automatically adapt to light and dark themes with zero hardcoded values.
 * **Responsive Multi-Device Mockup Generator (`generate_responsive_mockups`, #173)**: Single product prompt generates coherent Mobile (9:16), Tablet (3:4), and Desktop (16:9) viewports in parallel via `asyncPool` concurrency limit (3). Interactive toolview with tabbed preview navigation.
