@@ -125,3 +125,8 @@
 - **Client Modularity (`src/client/*`)**: Single-bundle `lib/client.js` is generated from 15 modular fragments (each <= 337 lines) via `scripts/build-client.mjs`.
 - **Repository Boundary**: Internal developer instructions (`AGENTS.md`, `index.md`) strictly excluded from Git index and public repositories.
 - **Theme Parity & Color Tokens**: Zero standalone `rgba(...)` or hex literals; full semantic coverage via `--dsw-alias-*` and `color-mix(...)`.
+
+## Documentation Boundary & Publication Policy (#235)
+- **Internal Design Contract**: `docs/design/DESIGN.md` serves as the project's internal design contract and architectural reference for agents and developers within Gitea (`gitea-project-workflow`, `project-design-contract`).
+- **Public Tree Exclusion**: In accordance with the repository publication standard, internal documentation (`docs/`, `AGENTS.md`, `index.md`) is excluded from the public GitHub distribution tree (`public-main`) and npm package tarballs (`package.json` `files` allowlist).
+- **Public User Documentation**: All user-facing documentation is provided exclusively via the canonical trilingual README files (`README.md`, `README.ru.md`, `README.zh.md`).
