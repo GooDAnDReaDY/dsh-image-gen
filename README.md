@@ -41,6 +41,13 @@
 
 ---
 
+## 🚀 Updates v0.10.25: Theme Color Parity, Responsive Mockups, Patterns & Spritesheets (#173, #177, #178, #238)
+* **100% Theme Color Parity (#238)**: Completely replaced all hardcoded `rgba(...)` and hex color literals in the Web UI (`src/client/10-css.js`, `src/client/80-gallery.js`) with native DSH theme variables (`--dsw-alias-*`) and dynamic `color-mix(...)`. Badges, alerts, and modal overlays automatically adapt to light and dark themes with zero hardcoded values.
+* **Responsive Multi-Device Mockup Generator (`generate_responsive_mockups`, #173)**: Single product prompt generates coherent Mobile (9:16), Tablet (3:4), and Desktop (16:9) viewports in parallel via `asyncPool` concurrency limit (3). Interactive toolview with tabbed preview navigation.
+* **Seamless Pattern Generator (`generate_seamless_pattern`, #178)**: Automated tileable background texture generation with periodic boundary condition checks and CSS tiling preview.
+* **2D Spritesheet Generator (`generate_spritesheet`, #177)**: Produces horizontal animation strips with CSS keyframe generator and multi-frame SVG previews for 2D game dev and web UI animations.
+* **Client Modular Source Build (#244)**: Decomposed monolithic `lib/client.js` into 15 structured fragments under `src/client/*` with automated build runner `scripts/build-client.mjs`. Preflight check `FAIL=0`, 179/179 automated tests passing.
+
 ## 🚀 Updates v0.10.24: Quality Block — Publication Boundary, Settings Status, Theme Colors & Module Split (#235–#242)
 * **Publication Boundary**: Added `.gitattributes` with `export-ignore` for `AGENTS.md`, `index.md`, `docs/`, and `.gitea/` so GitHub source archives and `git archive` no longer ship internal workflow files.
 * **Settings Status Fallback**: Corrected provider/config status handling in the Settings Card so partial/unknown states no longer show a false “unavailable”.
@@ -117,6 +124,7 @@
 * **`vectorize_image`**: Convert raster graphics to clean scalable SVG vectors with palette quantization.
 * **`blend_images`**: Multi-reference composition mixing.
 * **`generate_image_pack`**: Simultaneous multi-aspect ratio rendering with graceful partial recovery.
+* **`generate_responsive_mockups` (#173)**: One shared product prompt rendered as Mobile (9:16), Tablet (3:4) and Desktop (16:9) UI mockups in parallel. Keeps style/palette coherent across viewports, saves `mockup-mobile.png` / `mockup-tablet.png` / `mockup-desktop.png`, and shows a tabbed viewport preview in chat.
 * **`compare_images`**: Pixel-level visual difference ratio comparison.
 * **`inspect_image_quality`**: Automated visual audit, Laplacian sharpness scoring, and defect detection.
 * **`extract_design_tokens`**: Extract CSS Variables, Tailwind color palettes, and W3C Design Tokens from concept art (#172).

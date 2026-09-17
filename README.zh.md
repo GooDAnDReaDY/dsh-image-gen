@@ -47,6 +47,13 @@
 
 ---
 
+## 🚀 更新 v0.10.25: DSH 主题颜色适配、响应式多端原型、无缝纹理与精灵图导出 (#173, #177, #178, #238)
+* **100% 主题变量原生适配 (#238)**: 彻底移除客户端代码中的所有写死 `rgba(...)` 和 Hex 颜色（`src/client/10-css.js`、`src/client/80-gallery.js`），徽章、提示栏和画廊遮罩全部通过 `color-mix(...)` 配合 `--dsw-alias-*` 主题变量动态生成，完美兼容深色与浅色主题。
+* **多端响应式原型生成器 (`generate_responsive_mockups`, #173)**: 输入单个产品提示词，并发生成风格统一的移动端 (9:16)、平板端 (3:4) 与桌面端 (16:9) UI 原型，支持聊天卡片中的分栏切换预览。
+* **无缝平铺纹理生成器 (`generate_seamless_pattern`, #178)**: 自动生成四方连续平铺背景图，内置接缝平滑度校验与 CSS 平铺预览参数。
+* **2D 逐帧精灵图生成器 (`generate_spritesheet`, #177)**: 自动化横向动画序列帧渲染，内置 CSS `@keyframes` 动画代码与 SVG 多帧预览条。
+* **客户端源码模块化重构 (#244)**: 将原本庞大的单文件拆分为 `src/client/*` 目录下 15 个独立职责模块，配套 `scripts/build-client.mjs` 构建机制。Preflight 检查 `FAIL=0`，179/179 项自动化测试全绿。
+
 ## 🚀 更新 v0.10.24: 质量加固 — 发布边界、设置状态、主题颜色与模块拆分 (#235–#242)
 * **发布边界**: 新增 `.gitattributes`，对 `AGENTS.md`、`index.md`、`docs/`、`.gitea/` 设置 `export-ignore`，GitHub source 归档与 `git archive` 不再包含内部工作流文件。
 * **设置状态回退**: 修正设置卡片中的提供方/配置状态处理，部分或未知状态不再误显示为 “unavailable”。
@@ -71,6 +78,7 @@
 * **智能比例无损画布裁切器 (`smart_crop_image`)**: 快速裁切适配各大社交与设计标准比例 (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`)，支持自动对焦、三分法构图 (`rule_of_thirds`) 与黑边留白 (`letterbox`)。
 * **品牌资源套件导出器 (`export_asset_pack`)**: 一键生成生产级网站与 PWA 资源套件：SVG Favicon、PWA 推荐图标套件 (`icon-192.svg`, `icon-512.svg`)、`manifest.webmanifest`、1200×630 社交分享预览卡片 (`og-card.svg`) 与索引 `catalog.json`。
 * **覆盖 12 大视觉工具的交互 Toolview**: 在对话中直接提供重混、放大、裁切与栅格拼图的可视化操作。
+* **响应式多端 Mockup 套件 (`generate_responsive_mockups`, #173)**: 同一产品提示词并行生成 Mobile 9:16、Tablet 3:4、Desktop 16:9 三端 UI mockup，统一风格与品牌色，保存为 `mockup-mobile.png` / `mockup-tablet.png` / `mockup-desktop.png`，对话内以三标签页预览。
 * **严谨的中英双语界面**: 完整的 `zh` 和 `en` 词典覆盖。
 
 ## 🚀 更新 v0.10.19: 侧边栏内置图库、连接诊断与风格引擎 (#224)
