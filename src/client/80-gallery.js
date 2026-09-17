@@ -120,9 +120,9 @@
                     left: 0,
                     right: 0,
                     padding: '4px 6px',
-                    background: 'linear-gradient(transparent, var(--dsw-alias-overlay-scrim,rgba(0,0,0,0.8)))',
+                    background: 'linear-gradient(transparent, var(--dsw-alias-overlay-scrim, color-mix(in srgb, var(--dsw-alias-bg-layer-0, black) 80%, transparent)))',
                     fontSize: '10px',
-                    color: 'var(--dsw-alias-label-on-overlay,#fff)',
+                    color: 'var(--dsw-alias-label-on-overlay, var(--dsw-alias-label-primary, white))',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -140,7 +140,7 @@
               style: {
                 position: 'fixed',
                 inset: 0,
-                background: 'var(--dsw-alias-overlay-backdrop,rgba(0,0,0,0.7))',
+                background: 'var(--dsw-alias-overlay-backdrop, color-mix(in srgb, var(--dsw-alias-bg-layer-0, black) 70%, transparent))',
                 zIndex: 10000,
                 display: 'flex',
                 alignItems: 'center',
@@ -183,7 +183,7 @@
               ),
               react.createElement('img', {
                 src: selected.thumbnailUrl || (selected.attachmentId ? '/dsh-image-gen/image?id=' + encodeURIComponent(selected.attachmentId) : ''),
-                style: { width: '100%', borderRadius: '8px', maxHeight: '340px', objectFit: 'contain', background: 'var(--dsw-alias-bg-layer-1,#0a0a0c)' },
+                style: { width: '100%', borderRadius: '8px', maxHeight: '340px', objectFit: 'contain', background: 'var(--dsw-alias-bg-layer-1, var(--dsw-alias-bg-layer-2, transparent))' },
               }),
               react.createElement(
                 'div',
@@ -296,7 +296,7 @@
                 background: 'var(--dsw-alias-bg-layer-3)',
                 border: '1px solid var(--dsw-alias-border-l2)',
                 borderRadius: '12px',
-                boxShadow: 'var(--dsw-alias-shadow-overlay,0 8px 32px rgba(0,0,0,0.4))',
+                boxShadow: 'var(--dsw-alias-shadow-overlay, 0 8px 32px color-mix(in srgb, var(--dsw-alias-bg-layer-0, black) 40%, transparent))',
                 zIndex: 9999,
                 padding: '16px',
                 overflowY: 'auto',
