@@ -74,7 +74,10 @@ test('lifecycle: orchestrator wires all five tool groups', () => {
 
 test('docs: project meta files exist', () => {
   const root = path.join(here, '..')
-  for (const name of ['AGENTS.md', 'index.md', 'docs/design/DESIGN.md']) {
+  // AGENTS.md and index.md are internal-only: commit 338219c untracked them and added
+  // them to .gitignore, so they are not required in the tree. The design contract and
+  // the published README trio are.
+  for (const name of ['docs/design/DESIGN.md', 'README.md', 'README.ru.md', 'README.zh.md']) {
     assert.ok(readFileSync(path.join(root, name), 'utf8').length > 100, name)
   }
   const design = readFileSync(path.join(root, 'docs/design/DESIGN.md'), 'utf8')
