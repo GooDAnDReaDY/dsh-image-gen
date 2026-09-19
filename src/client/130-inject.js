@@ -160,7 +160,25 @@
         )
       )
 
-      // Settings card item
+      // List seat (plugins.item): the seat the Plugins page renders as the plugin's own
+      // page with its configuration. The label is a static string on purpose — it is
+      // resolved while the page renders, and a locale lookup there would take the whole
+      // client batch down with it.
+      registerSlotWhenReady('plugins.item', () =>
+        ctx.slots.register(
+          {
+            name: 'plugins.item',
+            id: 'dsh-image-gen',
+            order: 60,
+            label: () => 'Image Studio',
+            locale: NS,
+            inject: () => cardOnce().inject(),
+          },
+          (props) => react.createElement(ErrorBoundary, null, react.createElement(FalSettingsCard, props))
+        )
+      )
+
+      // Settings card item (legacy seat, kept as a fallback)
       registerSlotWhenReady('settings.plugin.item', () =>
         ctx.slots.register(
           {

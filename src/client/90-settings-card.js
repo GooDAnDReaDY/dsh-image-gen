@@ -50,9 +50,21 @@
       const budgetText = (state.dailyBudgetUsd && state.dailyBudgetUsd.text) || '0'
       const loopLimit = (state.loopGuardLimit && state.loopGuardLimit.text) || '3'
 
+      // Plugins page seats: 'summary' is the one-line row description, 'page' is the
+      // opened detail form (the page draws title/icon/crumb and padding itself, so the
+      // form must render bare and open).
+      const page = !!(props && props.view === 'page')
+      if (props && props.view === 'summary') {
+        return react.createElement(
+          'div',
+          { style: { fontSize: '13px', color: 'var(--dsw-alias-label-secondary)' } },
+          t('settings.description')
+        )
+      }
+
       return react.createElement(
-        'li',
-        { className: 'ig-section-card', style: { listStyle: 'none', marginBottom: '12px' } },
+        page ? 'div' : 'li',
+        { className: page ? 'ig-seat-page' : 'ig-section-card', style: page ? undefined : { listStyle: 'none', marginBottom: '12px' } },
         // Header
         react.createElement(
           'button',
@@ -62,13 +74,13 @@
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              display: 'flex',
+              display: page ? 'none' : 'flex',
               alignItems: 'center',
               width: '100%',
               padding: 0,
               textAlign: 'left',
             },
-            'aria-expanded': open,
+            'aria-expanded': page ? true : open,
             onClick: () => setOpen(!open),
           },
           react.createElement(
@@ -94,7 +106,7 @@
             ChevronIconNode
           )
         ),
-        open
+        (page || open)
           ? react.createElement(
               'div',
               { className: 'ig-page' },
