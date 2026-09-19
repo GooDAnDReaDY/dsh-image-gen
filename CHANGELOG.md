@@ -2,6 +2,17 @@
 
 Notable changes to `@goodandready/dsh-image-gen`.
 
+## 0.10.28
+
+### Fixed
+- **Settings reachable again on the plugin's own page**: the current DSH core
+  (0.1.6-alpha.2) renders a plugin's configuration page only for entries registered
+  in the plugin-list seat `plugins.item`. The card is now registered there
+  (`id: 'dsh-image-gen'`, order 60, static label) and became view-aware: `summary`
+  renders the one-line description and `page` renders the form bare and open instead
+  of inside our card frame. The legacy `settings.plugin.item` seat stays as a
+  fallback. Sources edited in `src/client`, `lib/client.js` rebuilt.
+
 ## 0.10.27
 
 ### Fixed
