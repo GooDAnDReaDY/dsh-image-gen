@@ -130,3 +130,7 @@
 - **Internal Design Contract**: `docs/design/DESIGN.md` serves as the project's internal design contract and architectural reference for agents and developers within Gitea (`gitea-project-workflow`, `project-design-contract`).
 - **Public Tree Exclusion**: In accordance with the repository publication standard, internal documentation (`docs/`, `AGENTS.md`, `index.md`) is excluded from the public GitHub distribution tree (`public-main`) and npm package tarballs (`package.json` `files` allowlist).
 - **Public User Documentation**: All user-facing documentation is provided exclusively via the canonical trilingual README files (`README.md`, `README.ru.md`, `README.zh.md`).
+
+## Pattern Seam Verification & Testing Helpers (#178, #271)
+- **`scoreEdgeWrap(pixels, width, height, channels)`**: Pure QA helper that calculates normalized edge continuity (0..1) across opposing horizontal and vertical pixel rows.
+- **`tilePixels(pixels, width, height, channels, cols, rows)`**: Pure matrix tiling helper that assembles repeated pixel buffers (2x2 / 3x3) for visual and programmatic tile boundary evaluation in unit/integration tests.
