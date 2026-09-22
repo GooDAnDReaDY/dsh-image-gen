@@ -134,3 +134,19 @@
 ## Pattern Seam Verification & Testing Helpers (#178, #271)
 - **`scoreEdgeWrap(pixels, width, height, channels)`**: Pure QA helper that calculates normalized edge continuity (0..1) across opposing horizontal and vertical pixel rows.
 - **`tilePixels(pixels, width, height, channels, cols, rows)`**: Pure matrix tiling helper that assembles repeated pixel buffers (2x2 / 3x3) for visual and programmatic tile boundary evaluation in unit/integration tests.
+## Политика маршрутов и защита от DNS Rebinding / Cross-Site Leaks (#280, #276, #277, Refs: GitHub #1)
+
+Все HTTP маршруты плагина, регистрируемые в `ctx.webServer`, строго разграничены по уровню доступа и защищены централизованными валидаторами `isTrustedLocalRequest` и `isTrustedUpdateRequest` (`lib/security.js`, `lib/updater.js`):
+
+| Маршрут | Метод | Назначение | Политика доступа и защита |
+|---|---|---|---|
+| `/dsh-image-gen/image` | `GET`, `HEAD` | Доставка сгенерированных изображений по SHA-256 | `isTrustedLocalRequest`: Loopback / LAN host, отклонение `Sec-Fetch-Site: cross-site`, валидация sha256 и метаданных. |
+| `/dsh-fal-image-gen/image` | `GET`, `HEAD` | Legacy-алиас для обратной совместимости истории чатов | Тот же обработчик `imageHandler`, что и для `/dsh-image-gen/image`. |
+| `/dsh-image-gen/diagnostics/test` | `GET` | Диагностическая проверка связи с провайдером | `isTrustedLocalRequest`: только доверенные локальные/LAN запросы. Предотвращает несанкционированную инициацию внешних запросов со сторонних сайтов. |
+| `/dsh-image-gen/history` | `GET` | Выгрузка списка недавних генераций для вкладки галереи | `isTrustedLocalRequest`: блокировка cross-site запросов. В выдаче JSON локальные абсолютные пути файлов (`path`) строго опускаются (`_discardPath`), предотвращая раскрытие структуры каталогов сервера. |
+| `/api/dsh-image-gen/update` | `POST` | One-click обновление плагина хостом DSH | `isTrustedUpdateRequest`: строгая проверка `x-dsh-plugin-update: 1`, loopback/LAN remoteAddress, совпадение `Host` и `Origin`, отклонение `Sec-Fetch-Site != same-origin`. |
+
+### Валидация адресов (Строгая защита от обхода префиксов)
+- Функции `isLoopbackAddress` и `isPrivateLanAddress` используют якорные регулярные выражения (`^...$`) с проверкой числовых диапазонов октетов (0..255).
+- Исключены любые уязвимости совпадения по префиксу (`startsWith('127.')`, `startsWith('10.')`, `startsWith('192.168.')`, `/^172\.(1[6-9]|2[0-9]|3[0-1])\./`), которые ранее пропускали домены вроде `10.evil.com`, `127.0.0.1.evil.com`, `192.168.evil.com`, `10.0.0.1.nip.io`.
+- Поддерживаются IPv6 loopback (`::1`), IPv6-mapped IPv4 (`::ffff:...`), RFC 6761 `.localhost`, RFC 1918 частные сети (10/8, 172.16/12, 192.168/16), link-local (169.254/16, fe80::/10) и IPv6 ULA (fc00::/7).
