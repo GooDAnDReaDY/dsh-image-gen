@@ -163,6 +163,9 @@ graph LR
 | Инструмент | Назначение | Ключевые параметры |
 |---|---|---|
 | **`generate_image`** | Генерация изображения по тексту | `prompt`, `image_size`, `seed`, `style`, `negative_prompt`, `count` |
+| **`set_style_anchor`** | Фиксация визуального стиля и персонажа сессии (объект, костюм, палитра, свет) (#283) | `mode` (`character`/`style`), `image`, `description`, `strength`, `clear` |
+| **`generate_ui_asset`** | Генерация интерфейсных ассетов с контролем свободного пространства и авто-прозрачностью (#284) | `prompt`, `asset_type`, `layout_composition`, `transparent`, `output_format` |
+| **`generate_style_matrix`** | Сетка 2x2 для одновременного бенчмаркинга концепта в 4 стилях со слепым сравнением (#286) | `prompt`, `styles`, `blind_mode`, `output_format` |
 | **`edit_image`** | Направленное редактирование / inpainting с авто-поиском оригинала (#142, #144, #145) | `prompt`, `image` (по умолч. `latest`), `mask`, `strength` |
 | **`vary_image`** | Генерация вариаций существующей картинки (#143, #144) | `image` (по умолч. `latest`), `prompt`, `variation_strength` (0.1–0.9), `count` |
 | **`remove_background`** | Удаление фона с сохранением прозрачного PNG | `image`, `model`, `output_name` |
