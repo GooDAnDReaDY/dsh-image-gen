@@ -2,6 +2,11 @@
 
 Notable changes to `@goodandready/dsh-image-gen`.
 
+## 0.10.30
+
+### Fixed
+- Settings no longer wait on the removed settingsScope service. The client uses configForms (#278).
+
 ## 0.10.29
 
 ### Fixed
