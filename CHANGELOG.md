@@ -2,6 +2,13 @@
 
 Notable changes to `@goodandready/dsh-image-gen`.
 
+## 0.10.31
+
+### Security
+- **Strict IP and domain validation against DNS rebinding (GitHub #1, Gitea #280)**: Replaced loose prefix matching in `isLoopback` and `isPrivateLan` (`lib/updater.js`, `lib/security.js`) with anchored regular expressions and strict 0..255 octet range checks. Explicitly blocks attacker domains such as `10.evil.com`, `127.0.0.1.evil.com`, `192.168.evil.com`, `10.0.0.1.nip.io`.
+- **Request guards on read routes (#276, #277)**: Added `isTrustedLocalRequest` guard to `/dsh-image-gen/image`, `/dsh-fal-image-gen/image`, `/dsh-image-gen/diagnostics/test`, and `/dsh-image-gen/history`, rejecting cross-site fetches (`sec-fetch-site: cross-site`), spoofed hostnames, and external origin/referer requests with HTTP 403 Forbidden.
+- **Server filesystem path masking in history API (#276)**: Stripped local absolute filesystem path (`path`) from the `/dsh-image-gen/history` JSON response to prevent directory structure disclosure.
+
 ## 0.10.30
 
 ### Fixed
