@@ -111,8 +111,7 @@ test('lib/client.js CardForm store provides referentially stable getSnapshot (#2
   }
   const mockCtx = {
     locale: { define: () => {} },
-    settingsScope: {
-      bind: () => mockScope,
+    configForms: { get: () => mockScope,
     },
     slots: {
       inject: (name, cb) => cb(),
