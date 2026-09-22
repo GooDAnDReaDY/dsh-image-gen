@@ -905,13 +905,13 @@ test('audit (#201): lib/client.js booleanField spec and dictionary coverage', ()
   }
 })
 
-test('audit: lib/client.js не содержит мертвого React-стейта', () => {
+test('audit: lib/client.js содержит живой InpaintCanvas и не содержит мертвого React-стейта (#285)', () => {
   const clientCode = fs.readFileSync('lib/client.js', 'utf8')
-  assert.ok(!clientCode.includes('setInpaintOpen'))
-  assert.ok(!clientCode.includes('setCompareSlider'))
-  assert.ok(!clientCode.includes('setShowCompare'))
-  assert.ok(!clientCode.includes('setDrawing'))
-  assert.ok(!clientCode.includes('canvasRef'))
+  assert.ok(clientCode.includes('InpaintCanvasOverlay'), 'InpaintCanvasOverlay must be present')
+  assert.ok(clientCode.includes('setInpaintOpen'), 'inpaint state must be hooked up')
+  assert.ok(!clientCode.includes('setCompareSlider'), 'unused compare slider state should not exist')
+  assert.ok(!clientCode.includes('setShowCompare'), 'unused show compare state should not exist')
+  assert.ok(!clientCode.includes('setDrawing'), 'unused setDrawing state should not exist')
 })
 
 test('audit (#208): lib/client.js регистрирует карточку только в settings.plugin.item без settings.section', () => {

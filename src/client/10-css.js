@@ -60,6 +60,12 @@
 .ig-alert-err{padding:10px 14px;border-radius:8px;background:var(--dsw-alias-state-error-bg, color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent));color:var(--dsw-alias-state-error-primary);font-size:13px}
 .ig-banner-warning{padding:12px 16px;border-radius:8px;background:var(--dsw-alias-state-warning-bg, color-mix(in srgb, var(--dsw-alias-state-warning-primary) 12%, transparent));border:1px solid var(--dsw-alias-state-warning-primary);color:var(--dsw-alias-state-warning-primary);font-size:13px;display:flex;align-items:center;gap:10px;font-weight:500}
 
+.ig-inpaint-box{position:relative;margin-top:10px;padding:12px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);display:flex;flex-direction:column;gap:8px}
+.ig-matrix-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;margin-top:8px}
+.ig-matrix-cell{border:1px solid var(--dsw-alias-border-l2);border-radius:8px;overflow:hidden;background:var(--dsw-alias-bg-layer-2);display:flex;flex-direction:column}
+.ig-matrix-img{width:100%;aspect-ratio:1/1;object-fit:cover;cursor:pointer}
+.ig-matrix-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:11px}
+
 /* Backward-compatibility alias styles for toolview */
 .fal_head{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--dsw-alias-label-primary)}
 .ig-prompt{font-size:13px;padding:8px 12px;background:var(--dsw-alias-bg-layer-2);border-radius:6px;border:1px solid var(--dsw-alias-border-l2);margin-bottom:8px;word-break:break-word}
@@ -68,4 +74,3 @@
 `
       document.head.appendChild(style)
     }
-

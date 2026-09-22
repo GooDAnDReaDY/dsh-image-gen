@@ -150,3 +150,29 @@
 - Функции `isLoopbackAddress` и `isPrivateLanAddress` используют якорные регулярные выражения (`^...$`) с проверкой числовых диапазонов октетов (0..255).
 - Исключены любые уязвимости совпадения по префиксу (`startsWith('127.')`, `startsWith('10.')`, `startsWith('192.168.')`, `/^172\.(1[6-9]|2[0-9]|3[0-1])\./`), которые ранее пропускали домены вроде `10.evil.com`, `127.0.0.1.evil.com`, `192.168.evil.com`, `10.0.0.1.nip.io`.
 - Поддерживаются IPv6 loopback (`::1`), IPv6-mapped IPv4 (`::ffff:...`), RFC 6761 `.localhost`, RFC 1918 частные сети (10/8, 172.16/12, 192.168/16), link-local (169.254/16, fe80::/10) и IPv6 ULA (fc00::/7).
+## Major Features & Tool Expansions (v0.11.0, #282-#286)
+
+### 1. Smart Provider Fallback Chain (#282)
+- **Automatic Multi-Provider Cascade (`lib/fallback-router.js`)**: When a primary provider encounters a rate limit (HTTP 429), gateway or internal server outage (5xx), request timeout, quota/credit depletion, or network connectivity failures, execution seamlessly falls back across `fallbackProviders` without failing the conversation turn.
+- **Fail-Safe Policy Separation**: Prompt-level violations (content policy, safety filters, NSFW) fail fast closed without cascading, preventing policy evasion.
+- **Dual-Output Diagnostics**: Results carry transparent metadata (`_fallback: { triggered, primaryProvider, providerUsed, attempts }`), allowing users and models to observe which provider fulfilled the generation.
+
+### 2. Character & Style Reference Anchor (#283)
+- **`set_style_anchor` Tool (`lib/tools/anchor.js`, `lib/anchor-helpers.js`)**: Associates a visual anchor (URL, workspace path, or `sha256:...` attachment ID) with a session or workspace scope.
+- **Session Continuity**: Subsequent calls to `generate_image` automatically reference the active anchor, enforcing character facial/physical identity or artistic style consistency across iterations.
+- **Anchor Control**: Supports `mode: 'character'` or `'style'`, custom reference `strength` (0.1..1.0), and explicit session clearing (`clear: true`).
+
+### 3. Specialized UI Asset Generator with Negative Space (#284)
+- **`generate_ui_asset` Tool (`lib/tools/ui-asset.js`, `lib/ui-asset-helpers.js`)**: Tailored pipeline for vector icons, digital illustrations, badges, stickers, and marketing hero banners.
+- **Layout Negative Space**: Compositions (`isolated`, `left_empty`, `right_empty`, `top_empty`, `center_empty`) strictly carve out clean copy space for typography, search bars, and UI headers.
+- **Automatic Alpha Transparency**: By default (`transparent: true`), strips backgrounds into clean alpha-channel transparent PNGs ready for immediate web placement.
+
+### 4. In-Chat Inpainting Canvas Overlay (#285)
+- **Interactive Masking Workbench (`src/client/105-inpaint-canvas.js`)**: In-chat visual canvas directly positioned over rendered image cards.
+- **Brush & Controls**: Adjustable brush size (6px to 64px), smooth pointer/touch drawing, multi-level Undo history, and canvas clearing.
+- **Direct Dispatch**: Automatically renders a black-and-white binary PNG mask data URL and assembles `edit_image` instructions with targeted prompt guidance.
+
+### 5. Style Matrix Explorer & Blind Compare (#286)
+- **`generate_style_matrix` Tool (`lib/tools/style-matrix.js`, `lib/style-matrix-helpers.js`, `src/client/106-style-matrix-view.js`)**: Concurrently generates a 2×2 grid benchmarking 4 distinct artistic styles (e.g. editorial photograph, flat vector, 3D clay, cyberpunk) for a single concept.
+- **Blind A/B Compare**: Optional `blind_mode` masks style labels as "Option A..D" to enable unbiased visual evaluation before revealing preset names.
+- **Interactive Selection**: Interactive "⭐ Use Style" action allows users to adopt the chosen style preset for all subsequent session generations in one click.

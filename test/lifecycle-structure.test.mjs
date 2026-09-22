@@ -33,6 +33,9 @@ const EXPECTED_TOOLS = [
   'generate_spritesheet',
   'generate_seamless_pattern',
   'generate_responsive_mockups',
+  'set_style_anchor',
+  'generate_ui_asset',
+  'generate_style_matrix',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -58,7 +61,7 @@ test('lifecycle: every tool is registered inside a labeled ctx.effect', () => {
   assert.deepEqual([...found].sort(), [...EXPECTED_TOOLS].sort())
 })
 
-test('lifecycle: orchestrator wires all five tool groups', () => {
+test('lifecycle: orchestrator wires all tool groups', () => {
   const src = readFileSync(path.join(lib, 'register-tools.js'), 'utf8')
   for (const fn of [
     'registerGenerationTools',
@@ -67,6 +70,9 @@ test('lifecycle: orchestrator wires all five tool groups', () => {
     'registerInspectTools',
     'registerFrontendTools',
     'registerResponsiveTools',
+    'registerAnchorTools',
+    'registerUiAssetTools',
+    'registerStyleMatrixTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }
@@ -74,9 +80,6 @@ test('lifecycle: orchestrator wires all five tool groups', () => {
 
 test('docs: project meta files exist', () => {
   const root = path.join(here, '..')
-  // AGENTS.md and index.md are internal-only: commit 338219c untracked them and added
-  // them to .gitignore, so they are not required in the tree. The design contract and
-  // the published README trio are.
   for (const name of ['docs/design/DESIGN.md', 'README.md', 'README.ru.md', 'README.zh.md']) {
     assert.ok(readFileSync(path.join(root, name), 'utf8').length > 100, name)
   }

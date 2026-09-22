@@ -55,14 +55,8 @@
             const attachment = item.attachment || null
             const url = attachmentImageUrl(attachment) || item.url || ''
             const rawDevice = String(item.device || '').toLowerCase()
-            const device = ['mobile', 'tablet', 'desktop'].includes(rawDevice)
-              ? rawDevice
-              : `device-${index + 1}`
-            const label = item.label
-              || (device === 'mobile' ? 'Mobile'
-                : device === 'tablet' ? 'Tablet'
-                  : device === 'desktop' ? 'Desktop'
-                    : `#${index + 1}`)
+            const device = ['mobile', 'tablet', 'desktop'].includes(rawDevice) ? rawDevice : `device-${index + 1}`
+            const label = item.label || (device === 'mobile' ? 'Mobile' : device === 'tablet' ? 'Tablet' : device === 'desktop' ? 'Desktop' : `#${index + 1}`)
             return {
               device,
               label,
@@ -89,10 +83,12 @@
       const responsiveImages = !failed && !running ? readResponsiveImages(block) : []
       const t = props.t || ((k) => k)
       const [remixOpen, setRemixOpen] = react.useState(false)
+      const [inpaintOpen, setInpaintOpen] = react.useState(false)
       const [remixStrength, setRemixStrength] = react.useState(0.45)
       const [remixPrompt, setRemixPrompt] = react.useState('')
       const [copiedRemix, setCopiedRemix] = react.useState(false)
       const [responsiveTab, setResponsiveTab] = react.useState(0)
+      const [copied, setCopied] = react.useState(false)
 
       react.useEffect(() => {
         ensureCss()
@@ -106,9 +102,7 @@
           args = JSON.parse(raw)
           prompt = args.prompt || ''
         }
-      } catch (_) { /* malformed tool args; use empty prompt */ }
-
-      const [copied, setCopied] = react.useState(false)
+      } catch (_) { /* malformed tool args */ }
 
       const sendActionPrompt = async (text) => {
         try {
@@ -117,7 +111,7 @@
           const binding = current && sessions.binding(current)
           const session = binding && binding.session
           if (session && session.prompt) await session.prompt([{ type: 'text', text }], 'queue')
-        } catch (_) { /* session prompt delivery failed; non-fatal */ }
+        } catch (_) { /* session prompt delivery failed */ }
       }
 
       const onCopyPrompt = () => {
@@ -161,12 +155,7 @@
         body.push(
           react.createElement(
             'div',
-            {
-              className: 'ig-tabs',
-              role: 'tablist',
-              'aria-label': t('card.responsiveTabs') || 'Responsive viewports',
-              key: 'rtabs',
-            },
+            { className: 'ig-tabs', role: 'tablist', 'aria-label': t('card.responsiveTabs') || 'Responsive viewports', key: 'rtabs' },
             responsiveImages.map((img, idx) =>
               react.createElement(
                 'button',
@@ -182,36 +171,18 @@
               )
             )
           ),
-          active && active.url
-            ? react.createElement('img', {
-              key: 'ri',
-              src: active.url,
-              alt: prompt || (active.label + ' responsive mockup'),
-              loading: 'lazy',
-              style: {
-                maxWidth: '100%',
-                borderRadius: '8px',
-                border: '1px solid var(--dsw-alias-border-l2)',
-              },
-            })
-            : null,
-          active
-            ? react.createElement(
-              'div',
-              {
-                key: 'rmeta',
-                style: {
-                  marginTop: '6px',
-                  fontSize: '11px',
-                  color: 'var(--dsw-alias-label-secondary)',
-                },
-              },
-              [
-                active.width && active.height ? `${active.width}×${active.height}` : null,
-                active.path ? String(active.path) : null,
-              ].filter(Boolean).join(' · ')
-            )
-            : null
+          active && active.url ? react.createElement('img', {
+            key: 'ri',
+            src: active.url,
+            alt: prompt || (active.label + ' responsive mockup'),
+            loading: 'lazy',
+            style: { maxWidth: '100%', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l2)' },
+          }) : null,
+          active ? react.createElement(
+            'div',
+            { key: 'rmeta', style: { marginTop: '6px', fontSize: '11px', color: 'var(--dsw-alias-label-secondary)' } },
+            [active.width && active.height ? `${active.width}×${active.height}` : null, active.path ? String(active.path) : null].filter(Boolean).join(' · ')
+          ) : null
         )
       } else if (!parsed.attachment && parsed.url) {
         body.push(react.createElement('img', {
@@ -222,10 +193,9 @@
           style: { maxWidth: '100%', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l2)' },
         }))
       } else if (parsed.attachment) {
-        const a = parsed.attachment
         body.push(react.createElement('img', {
           key: 'i',
-          src: attachmentImageUrl(a),
+          src: attachmentImageUrl(parsed.attachment),
           alt: prompt || 'generated image',
           loading: 'lazy',
           style: { maxWidth: '100%', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l2)' },
@@ -235,6 +205,7 @@
       const actions = []
       if (!running && !failed && (parsed.url || parsed.attachment || responsiveImages.length)) {
         actions.push(
+          react.createElement('button', { key: 'inpaint', type: 'button', className: 'ig-btn', onClick: () => setInpaintOpen(!inpaintOpen) }, '🖌️ ' + (t('card.inpaint') || 'Inpaint')),
           react.createElement('button', { key: 'remix', type: 'button', className: 'ig-btn', onClick: () => setRemixOpen(!remixOpen) }, '⚡ ' + (t('card.remix') || 'Remix')),
           react.createElement('button', { key: 'reroll', type: 'button', className: 'ig-btn', onClick: onReroll }, '🎲 ' + t('card.reroll')),
           react.createElement('button', { key: 'upscale', type: 'button', className: 'ig-btn', onClick: onUpscale }, '🔍 ' + t('card.upscale')),
@@ -324,13 +295,21 @@
         )
       ) : null
 
+      const inpaintDrawer = inpaintOpen ? react.createElement(InpaintCanvasOverlay, {
+        react,
+        t,
+        parsed,
+        onClose: () => setInpaintOpen(false),
+      }) : null
+
       return react.createElement(
         'div',
         { className: 'ig-section-card', style: { margin: '8px 0' } },
         head,
         body,
         actions.length > 0 ? react.createElement('div', { className: 'ig-row', style: { marginTop: '8px' } }, actions) : null,
-        remixDrawer
+        remixDrawer,
+        inpaintDrawer
       )
     }
 
