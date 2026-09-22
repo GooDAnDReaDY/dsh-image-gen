@@ -1,4 +1,4 @@
-    const inject = ['slots', 'settingsScope', 'locale', 'sessions']
+    const inject = ['slots', 'configForms', 'locale', 'sessions']
 
     function apply(ctx) {
       if (ctx.locale && typeof ctx.locale.define === 'function') {
@@ -9,7 +9,7 @@
       let card
       const cardOnce = () => {
         if (card === undefined) {
-          const scope = ((ctx.get && ctx.get('lanSettings')) || ctx.settingsScope).bind({ namespace: SETTINGS_NS })
+          const scope = ((ctx.get && ctx.get('lanSettings')) || ctx.configForms).get(SETTINGS_NS)
           card = new FalSettingsCardController(scope)
         }
         return card
