@@ -60,6 +60,7 @@
 
       // Provider: Codex / Grok
       { field: 'subscriptionQuality', spec: selectField('subscriptionQuality', ['', 'low', 'medium', 'high']), kind: 'select', options: ['', 'low', 'medium', 'high'], labelKey: 'f.subscriptionQuality', hintKey: 'f.subscriptionQualityHint', when: ['codex', 'grok'], tab: 'provider' },
+      { field: 'fallbackProviders', spec: textField('fallbackProviders'), kind: 'text', labelKey: 'f.fallbackProviders', hintKey: 'f.fallbackProvidersHint', placeholderKey: 'p.fallbackProviders', tab: 'provider' },
 
       // Enhancer & Style
       { field: 'autoEnhancePrompt', spec: booleanField('autoEnhancePrompt'), kind: 'select', options: ['true', 'false'], labelKey: 'f.autoEnhancePrompt', hintKey: 'f.autoEnhancePromptHint', tab: 'enhancer' },

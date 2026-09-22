@@ -55,6 +55,7 @@
         'assemble_image_grid',
         'smart_crop_image',
         'export_asset_pack',
+        'generate_ui_asset',
       ]
 
       for (const toolName of toolviewTools) {
@@ -70,6 +71,18 @@
           )
         )
       }
+
+      registerSlotWhenReady('tool.call.toolview', () =>
+        ctx.slots.register(
+          {
+            name: 'tool.call.toolview',
+            key: 'generate_style_matrix',
+            locale: NS,
+            inject: () => ({ sessions: ctx.sessions }),
+          },
+          (props) => react.createElement(ErrorBoundary, null, react.createElement(StyleMatrixCard, props))
+        )
+      )
 
 
       // Native Sidebar Right Pane Tab & BetterSidebar
