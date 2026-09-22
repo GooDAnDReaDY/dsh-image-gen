@@ -114,3 +114,11 @@ dsh plugin --profile web add @goodandready/dsh-image-gen
 ## 📄 许可证
 
 MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
+
+## 🛠️ 新增核心功能 (v0.10.32)
+
+* **`set_style_anchor` (#283)**: 会话级角色与风格参考锚点，在连续对话中锁定主体、配色、光照与渲染媒介。
+* **`generate_ui_asset` (#284)**: 布局感知与留白控制 UI 资产生成器，支持精准留白（`isolated`、`centered`、`left_empty`、`right_empty`、`top_empty`、`bottom_empty`）与自动透明通道。
+* **`generate_style_matrix` (#286)**: 2x2 风格矩阵探索与双盲对比，并发生成 4 种美学预设切片并支持一键应用。
+* **`对话内局部重绘画布` (#285)**: 在消息卡片上直接唤起交互式笔刷画布，支持选区涂抹与即时 Inpainting 局部重绘。
+* **`智能服务商自动故障转移链` (#282)**: 主服务商 429、5xx、超时或额度耗尽时自动无缝切换备选渠道。

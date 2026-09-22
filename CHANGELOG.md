@@ -2,6 +2,15 @@
 
 Notable changes to `@goodandready/dsh-image-gen`.
 
+## 0.10.32
+
+### Added
+- **Smart Provider Fallback Chain (#282)**: Automatic intelligent failover cascade (`fallbackRouter`). When primary provider encounters HTTP 429 rate limit, 5xx server failure, network timeout, or quota exhaustion, image generation automatically continues with the next eligible provider without aborting the turn or losing user prompts.
+- **Character & Style Reference Anchor (#283)**: Session visual identity anchors via `set_style_anchor`. Locks visual characteristics (subject, outfit, palette, lighting, render medium) across subsequent generation calls, maintaining character and stylistic consistency throughout conversations.
+- **Specialized UI Asset Generator (#284)**: Layout-aware asset generation via `generate_ui_asset`. Produces clean icons, badges, hero graphics, and stickers with strictly bounded negative space compositions (`isolated`, `centered`, `left_empty`, `right_empty`, `top_empty`, `bottom_empty`) and automatic alpha channel transparency support.
+- **In-Chat Inpainting Canvas (#285)**: Direct canvas editing directly on message cards (`src/client/105-inpaint-canvas.js`). Users can brush mask regions and define inpainting boxes within the chat interface, enabling seamless local edits and prompt regenerations without modal disruptions.
+- **Style Matrix Explorer & Blind Compare (#286)**: 2x2 visual benchmarking matrix via `generate_style_matrix`. Generates identical concepts across 4 diverse aesthetic presets simultaneously, complete with blind comparison mode and one-click style preset adoption.
+
 ## 0.10.31
 
 ### Security

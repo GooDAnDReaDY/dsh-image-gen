@@ -123,6 +123,11 @@
 ## 🛠️ Complete Tools Reference
 
 * **`generate_image`**: Generate images with pluggable providers, seeds, aspect ratios, and style presets.
+* **`set_style_anchor` (#283)**: Lock session visual identity (subject, outfit, medium, color palette, lighting) for consistent multi-turn generation.
+* **`generate_ui_asset` (#284)**: Layout-aware UI asset generator for icons, stickers, badges, spot graphics, and heroes with negative space constraints (`isolated`, `centered`, `left_empty`, `right_empty`, `top_empty`, `bottom_empty`) and auto-transparency.
+* **`generate_style_matrix` (#286)**: 2x2 visual benchmarking matrix exploring 4 aesthetic presets simultaneously with blind compare mode and 1-click style preset adoption.
+* **`In-Chat Inpainting Canvas` (#285)**: Interactive brush overlay and mask drawer mounted directly over image message cards in chat.
+* **`Smart Provider Fallback Chain` (#282)**: Intelligent cascading failover across providers on 429, 5xx, timeouts, or depleted balance.
 * **`edit_image`**: Targeted inpainting and modification with automatic session reference resolution (#142, #144, #145).
 * **`vary_image`**: Controlled variation generation preserving composition (#143, #144).
 * **`remove_background`**: Extract subject with transparent PNG output (FAL BiRefNet / Rembg).
