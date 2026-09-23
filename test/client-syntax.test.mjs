@@ -163,3 +163,172 @@ test('lib/client.js CardForm store provides referentially stable getSnapshot (#2
   registeredItem.injected.edit('provider', 'seedart')
   assert.equal(notified, 2, 'Unsubscribed listener must not be called')
 })
+
+test('lib/client.js inject supports both DSH 0.1.5-rc.3 (settingsScope) and 0.1.6+ (configForms) (#291, GitHub #3)', () => {
+  const clientPath = path.join(rootDir, 'lib', 'client.js')
+  const content = readFileSync(clientPath, 'utf8')
+
+  let loadedModule = null
+  const context = vm.createContext({
+    window: {
+      __ModuleLoader__: {
+        load: (entry) => {
+          loadedModule = entry
+        },
+      },
+    },
+    document: {
+      head: { appendChild: () => {} },
+      createElement: () => ({ setAttribute: () => {}, appendChild: () => {} }),
+    },
+    console,
+  })
+
+  vm.runInContext(content, context)
+  assert.ok(loadedModule, 'Module should register with __ModuleLoader__')
+
+  const mockRequire = (id) => {
+    if (id === 'react') {
+      return {
+        createElement: () => ({}),
+        useState: (init) => [init, () => {}],
+        useEffect: () => {},
+      }
+    }
+    if (id === 'react/jsx-runtime') {
+      return { jsx: () => ({}), jsxs: () => ({}) }
+    }
+    throw new Error(`Cannot find module '${id}'`)
+  }
+
+  const moduleExports = loadedModule.factory(mockRequire)
+  assert.ok(moduleExports && typeof moduleExports.apply === 'function', 'Factory must return module with apply()')
+
+  // 1. Verify exports.inject has slots, locale, sessions and neither configForms nor settingsScope
+  assert.ok(Array.isArray(moduleExports.inject), 'exports.inject must be an array')
+  assert.ok(moduleExports.inject.includes('slots'), 'must inject slots')
+  assert.ok(moduleExports.inject.includes('locale'), 'must inject locale')
+  assert.ok(moduleExports.inject.includes('sessions'), 'must inject sessions')
+  assert.ok(!moduleExports.inject.includes('configForms'), 'must NOT declare configForms in inject (causes hard block on 0.1.5-rc.3)')
+  assert.ok(!moduleExports.inject.includes('settingsScope'), 'must NOT declare settingsScope in inject (causes hard block on 0.1.6+)')
+
+  // 2. Test compatibility with DSH 0.1.5-rc.3 host (settingsScope only)
+  {
+    let registeredItem = null
+    let mockValues = { provider: 'fal', defaultModel: 'flux-schnell' }
+    const mockScope = {
+      getSnapshot: () => ({ status: 'ready', writable: true, value: mockValues }),
+      set: (k, v) => { mockValues[k] = v },
+      delete: (k) => { delete mockValues[k] },
+      subscribe: (cb) => () => {},
+    }
+    const mockCtx015 = {
+      locale: { define: () => {} },
+      settingsScope: {
+        bind: ({ namespace }) => {
+          assert.equal(namespace, 'dsh-image-gen')
+          return mockScope
+        },
+      },
+      slots: {
+        inject: (name, cb) => cb(),
+        register: (desc, comp) => {
+          if (desc.name === 'settings.plugin.item') {
+            registeredItem = { desc, comp, injected: desc.inject ? desc.inject() : null }
+          }
+        },
+      },
+    }
+
+    moduleExports.apply(mockCtx015)
+    assert.ok(registeredItem, '0.1.5: Should have registered settings.plugin.item slot')
+    assert.ok(registeredItem.injected, '0.1.5: Slot should have injected card controller')
+    const store = registeredItem.injected.hooks.falSettingsCard
+    assert.ok(store, '0.1.5: Should have falSettingsCard store')
+    const snap = store.getSnapshot()
+    assert.equal(snap.provider.text, 'fal')
+  }
+
+  // 3. Test compatibility with DSH 0.1.6+ host (configForms only)
+  {
+    let registeredItem = null
+    let mockValues = { provider: 'custom', defaultModel: 'my-custom-model' }
+    const mockScope = {
+      getSnapshot: () => ({ status: 'ready', writable: true, value: mockValues }),
+      set: (k, v) => { mockValues[k] = v },
+      delete: (k) => { delete mockValues[k] },
+      subscribe: (cb) => () => {},
+    }
+    const mockCtx016 = {
+      locale: { define: () => {} },
+      configForms: {
+        get: (namespace) => {
+          assert.equal(namespace, 'dsh-image-gen')
+          return mockScope
+        },
+      },
+      slots: {
+        inject: (name, cb) => cb(),
+        register: (desc, comp) => {
+          if (desc.name === 'settings.plugin.item') {
+            registeredItem = { desc, comp, injected: desc.inject ? desc.inject() : null }
+          }
+        },
+      },
+    }
+
+    moduleExports.apply(mockCtx016)
+    assert.ok(registeredItem, '0.1.6+: Should have registered settings.plugin.item slot')
+    assert.ok(registeredItem.injected, '0.1.6+: Slot should have injected card controller')
+    const store = registeredItem.injected.hooks.falSettingsCard
+    assert.ok(store, '0.1.6+: Should have falSettingsCard store')
+    const snap = store.getSnapshot()
+    assert.equal(snap.provider.text, 'custom')
+  }
+
+  // 4. Test async resolution via ctx.inject
+  {
+    let registeredItem = null
+    let injectCallbacks = {}
+    let mockValues = { provider: 'seedart' }
+    const mockScope = {
+      getSnapshot: () => ({ status: 'ready', writable: true, value: mockValues }),
+      set: (k, v) => { mockValues[k] = v },
+      delete: (k) => { delete mockValues[k] },
+      subscribe: (cb) => () => {},
+    }
+    const mockCtxAsync = {
+      locale: { define: () => {} },
+      inject: (deps, cb) => {
+        injectCallbacks[deps[0]] = cb
+      },
+      slots: {
+        inject: (name, cb) => cb(),
+        register: (desc, comp) => {
+          if (desc.name === 'settings.plugin.item') {
+            registeredItem = { desc, comp, injected: desc.inject ? desc.inject() : null }
+          }
+        },
+      },
+    }
+
+    moduleExports.apply(mockCtxAsync)
+    assert.ok(registeredItem, 'Async: Should register slot')
+    const store = registeredItem.injected.hooks.falSettingsCard
+
+    // Initially scope has no host service yet
+    const snapInitial = store.getSnapshot()
+    assert.ok(snapInitial, 'Should have initial fallback snapshot')
+
+    // Simulate configForms becoming available later via Cordis inject
+    if (injectCallbacks['configForms']) {
+      injectCallbacks['configForms']({
+        configForms: {
+          get: (ns) => mockScope,
+        },
+      })
+    }
+    const snapAfter = store.getSnapshot()
+    assert.equal(snapAfter.provider.text, 'seedart')
+  }
+})
