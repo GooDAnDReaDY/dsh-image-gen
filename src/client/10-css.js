@@ -48,6 +48,7 @@
 .ig-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-4, var(--dsw-alias-bg-layer-2));border-color:var(--dsw-alias-label-dimmed, var(--dsw-alias-border-l2))}
 .ig-btn-primary{background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-layer-3);border-color:transparent}
 .ig-btn-primary:hover:not(:disabled){opacity:0.9}
+.ig-btn-active{background:var(--dsw-alias-brand-primary, #3b82f6);color:#ffffff;border-color:transparent}
 .ig-btn-danger{color:var(--dsw-alias-state-error-primary);border-color:var(--dsw-alias-state-error-primary)}
 .ig-btn-danger:hover:not(:disabled){background:var(--dsw-alias-state-error-bg, color-mix(in srgb, var(--dsw-alias-state-error-primary) 12%, transparent));border-color:var(--dsw-alias-state-error-primary)}
 .ig-btn-disabled{opacity:0.5;cursor:not-allowed}

@@ -109,3 +109,44 @@ test('identity: export const name matches package.json and client loader id', ()
 
   assert.ok(cordis.includes(`name: '${pkg.name}'`), 'cordis.patch.yml name must match package.json')
 })
+
+test('lifecycle: every registered tool defines output schema and callable output.render (#275)', async () => {
+  const { registerAllTools } = await import('../lib/register-tools.js')
+  const tools = []
+  const ctx = {
+    effect(fn) { fn() },
+    tools: {
+      register(def) { tools.push(def) }
+    }
+  }
+  registerAllTools(ctx, {
+    config: { timeoutMs: 60000 },
+    live: () => ({ deliverAs: 'attachment' }),
+    saveAndAttachResult: () => {},
+    resolveSource: () => {},
+    slugify: () => {},
+    resolveApiKey: () => {},
+  })
+
+  assert.equal(tools.length, EXPECTED_TOOLS.length)
+  for (const t of tools) {
+    assert.ok(t.output, `Tool ${t.name} missing output definition`)
+    assert.equal(typeof t.output.render, 'function', `Tool ${t.name} missing callable output.render`)
+    const rendered = t.output.render(null, { summary: 'OK', attachment: { id: 'test' } })
+    assert.ok(Array.isArray(rendered), `Tool ${t.name} output.render did not return an array`)
+    assert.ok(rendered.length >= 1, `Tool ${t.name} output.render returned empty array`)
+  }
+})
+
+test('client: inpaint canvas declares brush, eraser, and invert mode controls (#149)', () => {
+  const canvasSrc = readFileSync(path.join(here, '..', 'src', 'client', '105-inpaint-canvas.js'), 'utf8')
+  assert.match(canvasSrc, /setToolMode\('brush'\)/)
+  assert.match(canvasSrc, /setToolMode\('eraser'\)/)
+  assert.match(canvasSrc, /handleInvert/)
+  assert.match(canvasSrc, /inpaint\.eraser/)
+  assert.match(canvasSrc, /inpaint\.invert/)
+
+  const clientSrc = readFileSync(path.join(lib, 'client.js'), 'utf8')
+  assert.match(clientSrc, /setToolMode\('eraser'\)/)
+  assert.match(clientSrc, /handleInvert/)
+})
