@@ -4,6 +4,7 @@
       const canvasRef = react.useRef(null)
       const isDrawingRef = react.useRef(false)
       const [brushSize, setBrushSize] = react.useState(24)
+      const [toolMode, setToolMode] = react.useState('brush')
       const [inpaintPrompt, setInpaintPrompt] = react.useState('')
       const [copied, setCopied] = react.useState(false)
       const [hasStrokes, setHasStrokes] = react.useState(false)
@@ -53,8 +54,9 @@
         ctx.lineWidth = brushSize
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
-        ctx.strokeStyle = '#ffffff'
-        ctx.fillStyle = '#ffffff'
+        const color = toolMode === 'eraser' ? '#000000' : '#ffffff'
+        ctx.strokeStyle = color
+        ctx.fillStyle = color
 
         ctx.beginPath()
         ctx.arc(pos.x, pos.y, brushSize / 2, 0, Math.PI * 2)
@@ -76,7 +78,8 @@
         ctx.lineWidth = brushSize
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
-        ctx.strokeStyle = '#ffffff'
+        const color = toolMode === 'eraser' ? '#000000' : '#ffffff'
+        ctx.strokeStyle = color
         ctx.lineTo(pos.x, pos.y)
         ctx.stroke()
         setHasStrokes(true)
@@ -110,6 +113,27 @@
         if (undoStackRef.current.length <= 1) {
           setHasStrokes(false)
         }
+      }
+
+      function handleInvert() {
+        const canvas = canvasRef.current
+        if (!canvas) return
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const d = imgData.data
+        for (let i = 0; i < d.length; i += 4) {
+          d[i] = 255 - d[i]
+          d[i + 1] = 255 - d[i + 1]
+          d[i + 2] = 255 - d[i + 2]
+          d[i + 3] = 255
+        }
+        ctx.putImageData(imgData, 0, 0)
+        if (undoStackRef.current.length >= 15) {
+          undoStackRef.current.shift()
+        }
+        undoStackRef.current.push(ctx.getImageData(0, 0, canvas.width, canvas.height))
+        setHasStrokes(true)
       }
 
       function handleClear() {
@@ -163,8 +187,38 @@
             max: '64',
             value: brushSize,
             onChange: (e) => setBrushSize(parseInt(e.target.value, 10)),
-            style: { width: '120px', cursor: 'pointer' },
+            style: { width: '100px', cursor: 'pointer' },
           }),
+          react.createElement(
+            'button',
+            {
+              type: 'button',
+              className: 'ig-btn' + (toolMode === 'brush' ? ' ig-btn-active' : ''),
+              style: { padding: '3px 8px', fontSize: '11px' },
+              onClick: () => setToolMode('brush'),
+            },
+            '🖌️ ' + (t('inpaint.brush') || 'Brush')
+          ),
+          react.createElement(
+            'button',
+            {
+              type: 'button',
+              className: 'ig-btn' + (toolMode === 'eraser' ? ' ig-btn-active' : ''),
+              style: { padding: '3px 8px', fontSize: '11px' },
+              onClick: () => setToolMode('eraser'),
+            },
+            '🧹 ' + (t('inpaint.eraser') || 'Eraser')
+          ),
+          react.createElement(
+            'button',
+            {
+              type: 'button',
+              className: 'ig-btn',
+              style: { padding: '3px 8px', fontSize: '11px' },
+              onClick: handleInvert,
+            },
+            '🔄 ' + (t('inpaint.invert') || 'Invert')
+          ),
           react.createElement(
             'button',
             {
