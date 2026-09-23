@@ -2,6 +2,11 @@
 
 Notable changes to `@goodandready/dsh-image-gen`.
 
+## 0.10.35
+
+### Fixed
+- **Dual Client Settings Compatibility for DSH 0.1.5-rc.3 and 0.1.6+ (#291, GitHub #3)**: Removed hard blocking dependency requirement on `configForms` or `settingsScope` in `exports.inject` (`src/client/130-inject.js`). Implemented dynamic universal scope adapter `createDynamicSettingsScope(ctx)` that seamlessly binds whichever settings service is provided by the DSH host (`lanSettings`, `configForms` on 0.1.6+ / 0.1.7+, or `settingsScope` on 0.1.5-rc.3), including asynchronous Cordis activation. Completely resolves "Failed to load plugins / web boot: 1 entry did not activate" crash on DSH `0.1.5-rc.3` (npm `latest`).
+
 ## 0.10.34
 
 ### Fixed
