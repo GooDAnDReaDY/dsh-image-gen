@@ -2,6 +2,14 @@
 
 Notable changes to `@goodandready/dsh-image-gen`.
 
+## 0.10.34
+
+### Fixed
+- **Tool Output Render Standardization (#275)**: Implemented callable `output.render(args, value)` across all registered tools via unified `renderToolOutput` helper in `lib/attachment-helper.js`. Adheres strictly to the DSH core 0.1.6-alpha.2 tool output specification, eliminating runtime crashes (`TypeError: userRender is not a function`) during tool result card rendering for `assemble_image_grid`, `export_asset_pack`, `remix_image`, and 18 other secondary tools. Added recursive regression test locking this contract across all 26 tools.
+
+### Added
+- **Interactive Mask Eraser & Inversion for Inpainting Canvas (#149)**: Expanded in-chat inpainting canvas controls (`src/client/105-inpaint-canvas.js`) with dedicated Eraser mode (`🧹 Eraser`) and one-click Mask Inversion (`🔄 Invert Mask`) with undo preservation, active button states, and English/Chinese localizations.
+
 ## 0.10.33
 
 ### Fixed
