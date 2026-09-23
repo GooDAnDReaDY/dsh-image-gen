@@ -2,6 +2,11 @@
 
 Notable changes to `@goodandready/dsh-image-gen`.
 
+## 0.10.33
+
+### Fixed
+- **Style Matrix Tool Schema Compliance (#288, GitHub #2)**: Declared explicit `additionalProperties: true` on the nested `cells.items.properties.attachment` object schema in `lib/tools/style-matrix.js`. Resolves fatal DSH plugin tree loader failure (`schema.properties.cells.items.properties.attachment.additionalProperties must be explicitly true or false`) when mounting the plugin under strict schema validation environments.
+
 ## 0.10.32
 
 ### Added
