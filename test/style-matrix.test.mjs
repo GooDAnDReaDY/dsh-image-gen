@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -61,4 +61,28 @@ test('style-matrix: tool file declares generate_style_matrix and parameters', ()
   assert.match(src, /styles:\s*\{/)
   assert.match(src, /blind_mode:\s*\{/)
   assert.match(src, /executeWithFallback/)
+})
+
+test('style-matrix: cells attachment schema explicitly declares additionalProperties: true', () => {
+  const src = readFileSync(path.join(lib, 'tools', 'style-matrix.js'), 'utf8')
+  assert.match(src, /attachment:\s*\{\s*type:\s*'object',\s*additionalProperties:\s*true\s*\}/)
+})
+
+test('schema audit: all type: object declarations in lib/tools declare additionalProperties', () => {
+  const toolsDir = path.join(lib, 'tools')
+  const files = readdirSync(toolsDir).filter(f => f.endsWith('.js'))
+  for (const file of files) {
+    const content = readFileSync(path.join(toolsDir, file), 'utf8')
+    const lines = content.split('\n')
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      if (line.includes("type: 'object'") || line.includes('type: "object"')) {
+        const snippet = lines.slice(Math.max(0, i - 1), Math.min(lines.length, i + 6)).join('\n')
+        assert.ok(
+          snippet.includes('additionalProperties'),
+          `Missing additionalProperties near line ${i + 1} in lib/tools/${file}: ${line.trim()}`
+        )
+      }
+    }
+  }
 })
