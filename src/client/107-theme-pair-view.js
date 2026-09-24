@@ -1,5 +1,5 @@
-    // -------------------------------------------------------------- Theme Pair Toolview (#189)
-    function ThemePairToolView(props) {
+    // -------------------------------------------------------------- Theme Pair Toolview (#189, #296)
+    function ThemePairView(props) {
       const block = props.block
       const t = props.t || ((k) => k)
       const [copiedHtml, setCopiedHtml] = react.useState(false)
@@ -101,3 +101,4 @@
         ) : null
       )
     }
+    var ThemePairToolView = ThemePairView

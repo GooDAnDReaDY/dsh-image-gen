@@ -1,43 +1,16 @@
-    // Dual compatibility with DSH 0.1.5-rc.3 (settingsScope) and 0.1.6+ (configForms) (#291)
+    // Dual compatibility with DSH 0.1.5-rc.3 (settingsScope) and 0.1.6+ (configForms) (#291, #295)
     const inject = ['slots', 'locale', 'sessions']
 
     function resolveActiveScope(ctx) {
       if (!ctx) return null
-      if (ctx.get && typeof ctx.get === 'function') {
-        try {
-          const lan = ctx.get('lanSettings')
-          if (lan && typeof lan.get === 'function') {
-            const s = lan.get(SETTINGS_NS)
-            if (s) return s
-          }
-        } catch (_) { /* scope unavailable */ }
-        try {
-          const cf = ctx.get('configForms')
-          if (cf && typeof cf.get === 'function') {
-            const s = cf.get(SETTINGS_NS)
-            if (s) return s
-          }
-        } catch (_) { /* scope unavailable */ }
-        try {
-          const ss = ctx.get('settingsScope')
-          if (ss && typeof ss.bind === 'function') {
-            const s = ss.bind({ namespace: SETTINGS_NS })
-            if (s) return s
-          }
-        } catch (_) { /* scope unavailable */ }
-      }
-      if (ctx.configForms && typeof ctx.configForms.get === 'function') {
-        try {
-          const s = ctx.configForms.get(SETTINGS_NS)
-          if (s) return s
-        } catch (_) { /* scope unavailable */ }
-      }
-      if (ctx.settingsScope && typeof ctx.settingsScope.bind === 'function') {
-        try {
-          const s = ctx.settingsScope.bind({ namespace: SETTINGS_NS })
-          if (s) return s
-        } catch (_) { /* scope unavailable */ }
-      }
+      try {
+        const lan = (ctx.get && ctx.get('lanSettings')) || ctx.lanSettings
+        if (lan?.get) return lan.get(SETTINGS_NS)
+        const cf = (ctx.get && ctx.get('configForms')) || ctx.configForms
+        if (cf?.get) return cf.get(SETTINGS_NS)
+        const ss = (ctx.get && ctx.get('settingsScope')) || ctx.settingsScope
+        if (ss?.bind) return ss.bind({ namespace: SETTINGS_NS })
+      } catch (_) { /* scope unavailable */ }
       return null
     }
 
@@ -45,70 +18,93 @@
       const listeners = new Set()
       let activeTarget = resolveActiveScope(ctx)
       let activeUnsub = null
+      let httpSnapshot = { status: 'loading', writable: true, value: {} }
+
+      const notify = () => { for (const fn of listeners) fn() }
+
+      const syncHttpConfig = () => {
+        if (typeof fetch !== 'function') return
+        fetch('/dsh-image-gen/config', { cache: 'no-store' })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data && data.ok && data.config) {
+              httpSnapshot = { status: 'ready', writable: true, value: data.config }
+              notify()
+            }
+          })
+          .catch(() => {})
+      }
+      syncHttpConfig()
 
       const bindTarget = (target) => {
         if (!target || target === activeTarget) return
         if (typeof activeUnsub === 'function') {
-          try { activeUnsub() } catch (_) { /* scope unavailable */ }
+          try { activeUnsub() } catch { /* ignore */ }
           activeUnsub = null
         }
         activeTarget = target
         if (typeof activeTarget.subscribe === 'function') {
           try {
-            activeUnsub = activeTarget.subscribe(() => {
-              for (const fn of listeners) fn()
-            })
-          } catch (_) { /* scope unavailable */ }
+            activeUnsub = activeTarget.subscribe(notify)
+          } catch { /* ignore */ }
         }
-        for (const fn of listeners) fn()
+        notify()
       }
 
-      if (activeTarget && typeof activeTarget.subscribe === 'function') {
-        try {
-          activeUnsub = activeTarget.subscribe(() => {
-            for (const fn of listeners) fn()
-          })
-        } catch (_) { /* scope unavailable */ }
+      if (activeTarget?.subscribe) {
+        try { activeUnsub = activeTarget.subscribe(notify) } catch { /* ignore */ }
       }
 
       if (typeof ctx?.inject === 'function') {
         try {
           ctx.inject(['configForms'], (sctx) => {
-            try {
-              const s = sctx?.configForms?.get?.(SETTINGS_NS)
-              if (s) bindTarget(s)
-            } catch (_) { /* scope unavailable */ }
+            const s = sctx?.configForms?.get?.(SETTINGS_NS)
+            if (s) bindTarget(s)
           })
-        } catch (_) { /* scope unavailable */ }
-        try {
           ctx.inject(['settingsScope'], (sctx) => {
-            try {
-              const s = sctx?.settingsScope?.bind?.({ namespace: SETTINGS_NS })
-              if (s) bindTarget(s)
-            } catch (_) { /* scope unavailable */ }
+            const s = sctx?.settingsScope?.bind?.({ namespace: SETTINGS_NS })
+            if (s) bindTarget(s)
           })
-        } catch (_) { /* scope unavailable */ }
+        } catch { /* ignore */ }
       }
 
       return {
         getSnapshot() {
           const target = activeTarget || resolveActiveScope(ctx)
-          if (target && typeof target.getSnapshot === 'function') {
-            return target.getSnapshot()
-          }
-          return { status: 'unavailable', writable: false, value: {} }
+          const snap = target?.getSnapshot ? target.getSnapshot() : null
+          if (snap?.status === 'ready' && snap.writable) return snap
+          if (httpSnapshot.status === 'ready') return httpSnapshot
+          return snap || httpSnapshot
         },
         async set(key, val) {
           const target = activeTarget || resolveActiveScope(ctx)
-          if (target && typeof target.set === 'function') {
-            return target.set(key, val)
-          }
+          const snap = target?.getSnapshot ? target.getSnapshot() : null
+          if (snap?.status === 'ready' && snap.writable && target.set) return target.set(key, val)
+          httpSnapshot = { ...httpSnapshot, value: { ...httpSnapshot.value, [key]: val } }
+          notify()
+          try {
+            await fetch('/dsh-image-gen/config', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ [key]: val }),
+            })
+          } catch { /* ignore */ }
         },
         async delete(key) {
           const target = activeTarget || resolveActiveScope(ctx)
-          if (target && typeof target.delete === 'function') {
-            return target.delete(key)
-          }
+          const snap = target?.getSnapshot ? target.getSnapshot() : null
+          if (snap?.status === 'ready' && snap.writable && target.delete) return target.delete(key)
+          const nextVal = { ...httpSnapshot.value }
+          delete nextVal[key]
+          httpSnapshot = { ...httpSnapshot, value: nextVal }
+          notify()
+          try {
+            await fetch('/dsh-image-gen/config', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ [key]: undefined }),
+            })
+          } catch { /* ignore */ }
         },
         subscribe(fn) {
           listeners.add(fn)
@@ -137,27 +133,17 @@
         if (typeof ctx.slots.inject === 'function') {
           try {
             ctx.slots.inject(slotName, () => {
-              try {
-                return registerFn()
-              } catch (err) {
-                console.warn('[dsh-image-gen] Error registering slot ' + slotName + ':', err)
-              }
+              try { return registerFn() } catch (err) { console.warn('[dsh-image-gen] Slot err ' + slotName + ':', err) }
             })
             return
-          } catch (err) {
-            console.warn('[dsh-image-gen] Failed to inject slot ' + slotName + ':', err)
-          }
+          } catch (err) { console.warn('[dsh-image-gen] Failed inject ' + slotName + ':', err) }
         }
         if (typeof ctx.slots.register === 'function') {
-          try {
-            registerFn()
-          } catch (err) {
-            console.warn('[dsh-image-gen] Failed direct registration for ' + slotName + ':', err)
-          }
+          try { registerFn() } catch (err) { console.warn('[dsh-image-gen] Direct reg err ' + slotName + ':', err) }
         }
       }
 
-      // Register toolviews for all 8 visual tools
+      // Register toolviews for all visual tools
       const toolviewTools = [
         'generate_image',
         'edit_image',
@@ -213,7 +199,6 @@
         )
       )
 
-
       // Native Sidebar Right Pane Tab & BetterSidebar
       if (typeof ctx.inject === 'function') {
         try {
@@ -267,7 +252,7 @@
               console.warn('[dsh-image-gen] native sidebar registration failed', e)
             }
           })
-        } catch (e) { /* native sidebar unavailable */ }
+        } catch (_) { /* native sidebar unavailable */ }
 
         try {
           ctx.inject(['betterSidebar'], (sctx) => {
@@ -285,7 +270,7 @@
               console.warn('[dsh-image-gen] betterSidebar registerTab failed', e)
             }
           })
-        } catch (e) { /* betterSidebar unavailable */ }
+        } catch (_) { /* betterSidebar unavailable */ }
       }
 
       // Conversation header utilities chip (quick-access gallery button in chat header)
@@ -302,22 +287,7 @@
         )
       )
 
-      // List seat (plugins.item)
-      registerSlotWhenReady('plugins.item', () =>
-        ctx.slots.register(
-          {
-            name: 'plugins.item',
-            id: 'dsh-image-gen',
-            order: 60,
-            label: () => 'Image Studio',
-            locale: NS,
-            inject: () => cardOnce().inject(),
-          },
-          (props) => react.createElement(ErrorBoundary, null, react.createElement(FalSettingsCard, props))
-        )
-      )
-
-      // Settings card item (legacy seat, kept as a fallback)
+      // Settings card item — sole slot registration for settings card (#208, #300)
       registerSlotWhenReady('settings.plugin.item', () =>
         ctx.slots.register(
           {
@@ -330,4 +300,3 @@
         )
       )
     }
-

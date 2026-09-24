@@ -45,7 +45,7 @@
       }, [q, provider, aspect, sort])
 
       const handleDelete = (id) => {
-        if (!confirm('Are you sure you want to delete this asset?')) return
+        if (!window.confirm('Are you sure you want to delete this asset?')) return
         fetch('/dsh-image-gen/vault?id=' + encodeURIComponent(id), { method: 'DELETE' })
           .then((r) => r.json())
           .then((res) => {

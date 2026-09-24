@@ -69,6 +69,7 @@
       'settings.reset': '重置',
       'settings.invalidNumber': '请输入有效数值',
       'settings.unavailable': '设置命名空间当前不可用。',
+      'settings.loading': '正在加载插件设置…',
 
       'f.enabled': '启用图像生成',
       'f.enabledHint': '关闭后将禁用所有图像生成及处理工具。',

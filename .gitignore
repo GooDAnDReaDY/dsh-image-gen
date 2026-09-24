@@ -29,3 +29,7 @@ Thumbs.db
 # Internal project files 
 AGENTS.md 
 index.md 
+
+# worktrees & tarballs
+.worktrees/
+*.tgz
