@@ -226,5 +226,21 @@
       'f.cacheTtlDays': 'Cache Retention (Legacy)',
       'f.cacheTtlDaysHint': 'Legacy name for retention period in days.',
       'p.cacheTtlDays': '0',
+
+      'studio.title': 'Image Studio',
+      'studio.canvas': 'Studio Canvas',
+      'studio.vault': 'Asset Vault',
+      'studio.parameters': 'Generation Parameters',
+      'studio.generate': 'Generate in Chat',
+      'studio.recent': 'Recent Generations',
+      'vault.title': 'Asset Browser & Vault',
+      'vault.search': 'Search prompt or tags...',
+      'vault.loadMore': 'Load more assets',
+      'vault.empty': 'No assets found in vault.',
+      'vault.inspector': 'Asset Inspector',
+      'vault.reroll': 'Re-roll with seed',
+      'vault.insert': 'Insert in Chat',
+      'vault.download': 'Download',
+      'vault.delete': 'Delete',
     }
 

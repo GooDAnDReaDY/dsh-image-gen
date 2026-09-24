@@ -214,6 +214,22 @@
       'f.cacheTtlDays': '缓存生命周期 (Legacy)',
       'f.cacheTtlDaysHint': '已废弃的缓存保留时长参数。',
       'p.cacheTtlDays': '0',
+
+      'studio.title': '图像创作工作台',
+      'studio.canvas': '创作画布',
+      'studio.vault': '素材资产库',
+      'studio.parameters': '生成参数配置',
+      'studio.generate': '在对话中生成',
+      'studio.recent': '最近生成历史',
+      'vault.title': '图像素材库与浏览器',
+      'vault.search': '搜索提示词或标签...',
+      'vault.loadMore': '加载更多素材',
+      'vault.empty': '素材库中暂无图像。',
+      'vault.inspector': '素材检查器',
+      'vault.reroll': '使用此种子重新生成',
+      'vault.insert': '插入到当前对话',
+      'vault.download': '下载图像',
+      'vault.delete': '删除',
     }
 
     // -------------------------------------------------------------- Registration & Apply

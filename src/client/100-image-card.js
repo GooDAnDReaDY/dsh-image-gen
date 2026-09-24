@@ -90,10 +90,6 @@
       const [responsiveTab, setResponsiveTab] = react.useState(0)
       const [copied, setCopied] = react.useState(false)
 
-      react.useEffect(() => {
-        ensureCss()
-      }, [])
-
       let args = {}
       let prompt = ''
       try {
@@ -103,6 +99,24 @@
           prompt = args.prompt || ''
         }
       } catch (_) { /* malformed tool args */ }
+
+      const initialUrl = parsed.attachment ? attachmentImageUrl(parsed.attachment) : parsed.url
+      const [revisions, setRevisions] = react.useState(() => initialUrl ? [{ url: initialUrl, attachment: parsed.attachment, seed: args.seed, timestamp: Date.now() }] : [])
+      const [activeRev, setActiveRev] = react.useState(0)
+
+      react.useEffect(() => {
+        ensureCss()
+      }, [])
+
+      react.useEffect(() => {
+        if (!initialUrl) return
+        setRevisions((prev) => {
+          if (prev.some((r) => r.url === initialUrl)) return prev
+          const next = [...prev, { url: initialUrl, attachment: parsed.attachment, seed: args.seed, timestamp: Date.now() }]
+          setActiveRev(next.length - 1)
+          return next
+        })
+      }, [initialUrl, args.seed])
 
       const sendActionPrompt = async (text) => {
         try {
@@ -184,21 +198,28 @@
             [active.width && active.height ? `${active.width}×${active.height}` : null, active.path ? String(active.path) : null].filter(Boolean).join(' · ')
           ) : null
         )
-      } else if (!parsed.attachment && parsed.url) {
-        body.push(react.createElement('img', {
-          key: 'i',
-          src: parsed.url,
+      } else {
+        // Revision bar (#148)
+        if (revisions.length > 1) {
+          body.push(react.createElement(ImageRevisionBar, {
+            key: 'revs',
+            revisions,
+            activeIndex: activeRev,
+            onSelect: (idx) => setActiveRev(idx),
+            t,
+          }))
+        }
+        // Progressive preview (#147)
+        const currentRev = revisions[activeRev] || {}
+        const displaySrc = currentRev.url || initialUrl
+        const draftSrc = block && (block.draftUrl || block.previewUrl || '')
+        body.push(react.createElement(ProgressiveImagePreview, {
+          key: 'prog-img',
+          src: displaySrc,
+          draftSrc,
+          isRunning: running,
           alt: prompt || 'generated image',
-          loading: 'lazy',
-          style: { maxWidth: '100%', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l2)' },
-        }))
-      } else if (parsed.attachment) {
-        body.push(react.createElement('img', {
-          key: 'i',
-          src: attachmentImageUrl(parsed.attachment),
-          alt: prompt || 'generated image',
-          loading: 'lazy',
-          style: { maxWidth: '100%', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l2)' },
+          t,
         }))
       }
 
@@ -312,5 +333,3 @@
         inpaintDrawer
       )
     }
-
-    // -------------------------------------------------------------- Dictionaries
