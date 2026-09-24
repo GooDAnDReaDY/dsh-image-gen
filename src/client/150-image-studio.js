@@ -5,7 +5,7 @@
       const [isFullscreen, setIsFullscreen] = react.useState(false)
       const [layoutGrid, setLayoutGrid] = react.useState('1x1') // '1x1' | '2x2' | '1x4'
       const [prompt, setPrompt] = react.useState(() => {
-        try { return localStorage.getItem('dsh_studio_prompt') || '' } catch (_) { return '' }
+        try { return window.localStorage.getItem('dsh_studio_prompt') || '' } catch (_) { return '' }
       })
       const [stylePreset, setStylePreset] = react.useState('none')
       const [aspectRatio, setAspectRatio] = react.useState('1:1')
@@ -44,7 +44,7 @@
 
       const updatePrompt = (val) => {
         setPrompt(val)
-        try { localStorage.setItem('dsh_studio_prompt', val) } catch (_) { /* storage unavailable */ }
+        try { window.localStorage.setItem('dsh_studio_prompt', val) } catch (_) { /* storage unavailable */ }
       }
 
       const handleSelectFromVault = (asset) => {

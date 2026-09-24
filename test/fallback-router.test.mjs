@@ -25,7 +25,9 @@ test('fallback-router: isRetryableProviderError detects transient and quota erro
   assert.equal(isRetryableProviderError(new Error('Request timed out')), true)
   assert.equal(isRetryableProviderError(new Error('insufficient_quota')), true)
   assert.equal(isRetryableProviderError(new Error('balance is insufficient')), true)
-  assert.equal(isRetryableProviderError(new Error('Invalid API key (HTTP 401)')), true)
+  assert.equal(isRetryableProviderError(new Error('Invalid API key (HTTP 401)')), false)
+  assert.equal(isRetryableProviderError(new Error('HTTP 403 Forbidden')), false)
+  assert.equal(isRetryableProviderError(new Error('HTTP 400 Bad Request')), false)
   assert.equal(isRetryableProviderError(new Error('fetch failed: ECONNREFUSED')), true)
 
   assert.equal(isRetryableProviderError(new Error('Prompt violates content policy')), false)
@@ -116,4 +118,48 @@ test('fallback-router: executeWithFallback throws aggregate error when all provi
       return true
     }
   )
+})
+
+test('fallback-router: executeWithFallback does not cascade on 401/auth non-retryable errors (#298)', async () => {
+  let repAttempts = 0
+  const generators = {
+    fal: async () => {
+      throw new Error('HTTP 401 Unauthorized: Invalid API key')
+    },
+    replicate: async () => {
+      repAttempts++
+      return { path: '/tmp/rep.png' }
+    },
+  }
+
+  await assert.rejects(
+    async () => executeWithFallback(generators, ['fal', 'replicate'], 555, 'auth test'),
+    (err) => {
+      assert.ok(err.message.includes('Non-retryable provider error on fal (not cascading)'))
+      assert.ok(err.message.includes('401'))
+      return true
+    }
+  )
+  assert.equal(repAttempts, 0, 'replicate fallback must NOT be called on 401')
+})
+
+test('fallback-router: executeWithFallback cascades on 503 Service Unavailable (#298)', async () => {
+  let falAttempts = 0
+  let repAttempts = 0
+  const generators = {
+    fal: async () => {
+      falAttempts++
+      throw new Error('HTTP 503 Service Unavailable')
+    },
+    replicate: async (seed, prompt) => {
+      repAttempts++
+      return { path: '/tmp/rep503.png', seed, prompt, provider: 'replicate' }
+    },
+  }
+
+  const res = await executeWithFallback(generators, ['fal', 'replicate'], 777, 'cascade test')
+  assert.equal(falAttempts, 1)
+  assert.equal(repAttempts, 1)
+  assert.equal(res.provider, 'replicate')
+  assert.equal(res._fallback.triggered, true)
 })

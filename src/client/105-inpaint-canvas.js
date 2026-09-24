@@ -1,24 +1,22 @@
-// 105-inpaint-canvas.js — Interactive in-chat canvas drawing overlay for inpainting (#285).
+// 105-inpaint-canvas.js — Interactive in-chat canvas drawing overlay for inpainting (#285, #301).
 
-    function InpaintCanvasOverlay({ react, t, parsed, onClose }) {
+    function InpaintCanvas(props) {
+      const { imgUrl, targetRef, onClose, t } = props
       const canvasRef = react.useRef(null)
       const isDrawingRef = react.useRef(false)
-      const [brushSize, setBrushSize] = react.useState(24)
-      const [toolMode, setToolMode] = react.useState('brush')
-      const [inpaintPrompt, setInpaintPrompt] = react.useState('')
-      const [copied, setCopied] = react.useState(false)
-      const [hasStrokes, setHasStrokes] = react.useState(false)
       const undoStackRef = react.useRef([])
-
-      const imgUrl = (parsed && (parsed.url || (parsed.attachment && attachmentImageUrl(parsed.attachment)))) || ''
-      const targetRef = (parsed && (parsed.attachment?.attachmentId || parsed.path || parsed.url)) || 'current image'
+      const [brushSize, setBrushSize] = react.useState(24)
+      const [toolMode, setToolMode] = react.useState('brush') // 'brush' | 'eraser'
+      const [hasStrokes, setHasStrokes] = react.useState(false)
+      const [copied, setCopied] = react.useState(false)
+      const [inpaintPrompt, setInpaintPrompt] = react.useState('')
 
       const initCanvas = react.useCallback(() => {
         const canvas = canvasRef.current
         if (!canvas) return
         const ctx = canvas.getContext('2d')
         if (!ctx) return
-        ctx.fillStyle = '#000000'
+        ctx.fillStyle = 'black'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         undoStackRef.current = [ctx.getImageData(0, 0, canvas.width, canvas.height)]
       }, [])
@@ -27,9 +25,7 @@
         initCanvas()
       }, [initCanvas])
 
-      function getPos(e) {
-        const canvas = canvasRef.current
-        if (!canvas) return { x: 0, y: 0 }
+      function getPos(e, canvas) {
         const rect = canvas.getBoundingClientRect()
         const clientX = e.touches ? e.touches[0].clientX : e.clientX
         const clientY = e.touches ? e.touches[0].clientY : e.clientY
@@ -43,42 +39,40 @@
 
       function startDraw(e) {
         if (e.touches && e.touches.length > 1) return
-        e.preventDefault()
         const canvas = canvasRef.current
         if (!canvas) return
         const ctx = canvas.getContext('2d')
         if (!ctx) return
-
         isDrawingRef.current = true
-        const pos = getPos(e)
+        const pos = getPos(e, canvas)
+        ctx.beginPath()
+        ctx.moveTo(pos.x, pos.y)
         ctx.lineWidth = brushSize
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
-        const color = toolMode === 'eraser' ? '#000000' : '#ffffff'
+        const color = toolMode === 'eraser' ? 'black' : 'white'
         ctx.strokeStyle = color
         ctx.fillStyle = color
 
-        ctx.beginPath()
         ctx.arc(pos.x, pos.y, brushSize / 2, 0, Math.PI * 2)
         ctx.fill()
         ctx.beginPath()
         ctx.moveTo(pos.x, pos.y)
+        setHasStrokes(true)
       }
 
       function draw(e) {
         if (!isDrawingRef.current) return
         if (e.touches && e.touches.length > 1) return
-        e.preventDefault()
         const canvas = canvasRef.current
         if (!canvas) return
         const ctx = canvas.getContext('2d')
         if (!ctx) return
-
-        const pos = getPos(e)
+        const pos = getPos(e, canvas)
         ctx.lineWidth = brushSize
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
-        const color = toolMode === 'eraser' ? '#000000' : '#ffffff'
+        const color = toolMode === 'eraser' ? 'black' : 'white'
         ctx.strokeStyle = color
         ctx.lineTo(pos.x, pos.y)
         ctx.stroke()
@@ -252,7 +246,7 @@
               borderRadius: '8px',
               overflow: 'hidden',
               border: '1px solid var(--dsw-alias-border-l2)',
-              background: '#000000',
+              background: 'black',
               margin: '4px 0',
               userSelect: 'none',
               touchAction: 'none',
@@ -318,3 +312,4 @@
         )
       )
     }
+    var InpaintCanvasOverlay = InpaintCanvas
