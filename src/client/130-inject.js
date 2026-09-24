@@ -201,6 +201,18 @@
         )
       )
 
+      registerSlotWhenReady('tool.call.toolview', () =>
+        ctx.slots.register(
+          {
+            name: 'tool.call.toolview',
+            key: 'generate_theme_pair',
+            locale: NS,
+            inject: () => ({ sessions: ctx.sessions }),
+          },
+          (props) => react.createElement(ErrorBoundary, null, react.createElement(ThemePairView, props))
+        )
+      )
+
 
       // Native Sidebar Right Pane Tab & BetterSidebar
       if (typeof ctx.inject === 'function') {
@@ -210,16 +222,16 @@
             if (!tabs || typeof tabs.register !== 'function') return
             try {
               const def = {
-                id: '@goodandready/dsh-image-gen:gallery',
-                kind: 'image-gallery',
+                id: '@goodandready/dsh-image-gen:studio',
+                kind: 'image-studio',
                 priority: 'extension',
-                title: () => 'Gallery',
+                title: () => 'Image Studio',
                 guide: [
                   {
                     order: 45,
-                    title: () => 'Image Studio Gallery',
-                    description: () => 'Browse and inspect recent image generations',
-                    icon: () => react.createElement('span', null, '🖼️'),
+                    title: () => 'Image Studio & Vault',
+                    description: () => 'Interactive visual studio & asset browser',
+                    icon: () => react.createElement('span', null, '🎨'),
                   },
                 ],
               }
@@ -239,7 +251,7 @@
                         locale: NS,
                         inject: () => ({ ctx }),
                       },
-                      (props) => react.createElement(ErrorBoundary, null, react.createElement(GalleryView, { ...props, ctx }))
+                      (props) => react.createElement(ErrorBoundary, null, react.createElement(ImageStudioView, { ...props, ctx }))
                     )
                   } catch (e) {
                     console.warn('[dsh-image-gen] native sidebar pane tab register failed', e)
@@ -267,7 +279,7 @@
                 title: () => 'Gallery',
                 icon: () => react.createElement('span', null, '🖼️'),
                 order: 45,
-                component: ({ scope }) => react.createElement(ErrorBoundary, null, react.createElement(GalleryView, { ctx, scope })),
+                component: ({ scope }) => react.createElement(ErrorBoundary, null, react.createElement(ImageStudioView, { ctx, scope })),
               })
             } catch (e) {
               console.warn('[dsh-image-gen] betterSidebar registerTab failed', e)
@@ -290,10 +302,7 @@
         )
       )
 
-      // List seat (plugins.item): the seat the Plugins page renders as the plugin's own
-      // page with its configuration. The label is a static string on purpose — it is
-      // resolved while the page renders, and a locale lookup there would take the whole
-      // client batch down with it.
+      // List seat (plugins.item)
       registerSlotWhenReady('plugins.item', () =>
         ctx.slots.register(
           {

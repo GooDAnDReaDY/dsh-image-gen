@@ -36,6 +36,7 @@ const EXPECTED_TOOLS = [
   'set_style_anchor',
   'generate_ui_asset',
   'generate_style_matrix',
+  'generate_theme_pair',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -73,6 +74,7 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerAnchorTools',
     'registerUiAssetTools',
     'registerStyleMatrixTools',
+    'registerThemePairTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }
@@ -85,6 +87,17 @@ test('docs: project meta files exist', () => {
   }
   const design = readFileSync(path.join(root, 'docs/design/DESIGN.md'), 'utf8')
   assert.ok(!/встроенную галерею истории генераций \(`HistoryGallery`\)/.test(design), 'HistoryGallery must not be advertised as shipped UI')
+})
+
+test('skills: official image-generation agent skill exists with valid YAML frontmatter (#164)', () => {
+  const skillFile = path.join(here, '..', 'skills', 'image-generation', 'SKILL.md')
+  const content = readFileSync(skillFile, 'utf8')
+  assert.ok(content.startsWith('---\n'), 'SKILL.md must start with YAML frontmatter')
+  assert.match(content, /name:\s*image-generation/)
+  assert.match(content, /description:\s*.+/)
+  assert.match(content, /# Image Generation & Visual Assets Skill/)
+  assert.match(content, /generate_theme_pair/)
+  assert.match(content, /Aspect Ratio Selection Reference/)
 })
 
 test('lifecycle: index.js imports registerAllTools from register-tools.js', () => {
