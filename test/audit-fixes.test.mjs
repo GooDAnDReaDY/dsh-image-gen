@@ -111,3 +111,38 @@ test('audit (#273): /dsh-image-gen/image route uses Buffer.isBuffer check before
     /res\.end\(Buffer\.isBuffer\(stored\.data\)\s*\?\s*stored\.data\s*:\s*Buffer\.from\(stored\.data\)\)/
   );
 });
+
+test("audit (#295): ensureConfig handles plain, empty and volatile config inputs", async () => {
+  const { ensureConfig, plainConfig } = await import("../lib/index.js");
+
+  // 1. Plain empty config
+  const c1 = ensureConfig({});
+  const p1 = plainConfig(c1);
+  assert.equal(p1.enabled, true);
+  assert.equal(p1.timeoutMs, 180000);
+  assert.equal(p1.provider, "fal");
+
+  // 2. Synthesized empty field objects from cordis loader
+  const c2 = ensureConfig({ enabled: {}, timeoutMs: {} });
+  const p2 = plainConfig(c2);
+  assert.equal(p2.enabled, true);
+  assert.equal(p2.timeoutMs, 180000);
+
+  // 3. Volatile ref getters from cordis reactive context
+  const fakeVolatile = {
+    enabled: { get: () => true },
+    timeoutMs: { get: () => 120000 },
+    provider: { get: () => "custom" },
+  };
+  const c3 = ensureConfig(fakeVolatile);
+  const p3 = plainConfig(c3);
+  assert.equal(p3.enabled, true);
+  assert.equal(p3.timeoutMs, 120000);
+  assert.equal(p3.provider, "custom");
+
+  // 4. Custom plain options
+  const c4 = ensureConfig({ provider: "custom", timeoutMs: 60000 });
+  const p4 = plainConfig(c4);
+  assert.equal(p4.provider, "custom");
+  assert.equal(p4.timeoutMs, 60000);
+});
