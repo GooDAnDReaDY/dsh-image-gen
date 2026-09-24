@@ -2,6 +2,17 @@
 
 Notable changes to `@goodandready/dsh-image-gen`.
 
+## 0.11.0
+
+### Added
+- **Fullscreen Image Studio & Navbar Slot (#158)**: Dedicated creative studio layout accessible via DSH sidebar/navigation panel and chat header utility chip. Features a 2-column workstation with parameter controls (prompt draft persistence, style presets, aspect ratios, model/provider selector, seed randomizer), live canvas with multi-image grid preview (`1x1`, `2x2`, `1x4`), quick Markdown/HTML snippet export, and bottom recent strip.
+- **Centralized Asset Browser & Vault (#159)**: High-performance indexed local asset vault with backend API (`/dsh-image-gen/vault`). Supports deep text search in prompts, multi-criteria filtering by provider/model, aspect ratios, sorting by timestamp, infinite pagination, one-click re-roll with seed, insert into active chat, and atomic file/sidecar deletion.
+- **Agent Skill Definition (#164)**: Bundled official agent skill `skills/image-generation/SKILL.md` declaring full frontmatter, tool decision matrix, structural prompt engineering formulas, aspect ratio guidelines, theme pair rules, and vision validation best practices.
+- **Synchronized Dark & Light Theme Pair Generation (#189)**: New tool `generate_theme_pair` generating synchronized artwork paired for light and dark UI themes with automatic contrast tuning, sidecar JSON, and responsive `<picture>` / CSS code snippets. Interactive client preview `ThemePairView` with theme tabs and copyable HTML.
+- **Arbitrary ComfyUI Workflow JSON Graphs (#157)**: Native support for custom ComfyUI Workflow API JSON in the `local` provider backend with recursive placeholder interpolation (`{{prompt}}`, `{{seed}}`, `{{width}}`, `{{height}}`, `{{steps}}`, `{{cfg}}`), schema validation, and automatic fallback graph construction.
+- **Progressive Draft Preview Rendering (#147)**: Real-time draft preview manifestation in message cards with smooth cross-fade transitions and `prefers-reduced-motion` compliance.
+- **Image Revision Chains & In-Card History (#148)**: Multi-version revision tracker in image cards (`◀ vX / Y ▶`) with seed badges and re-roll history navigation.
+
 ## 0.10.35
 
 ### Fixed
