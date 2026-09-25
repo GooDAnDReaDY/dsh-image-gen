@@ -168,6 +168,43 @@ test('GH#4: generation.js can import enhancePrompt without ReferenceError', asyn
   assert.strictEqual(typeof mod.registerGenerationTools, 'function')
 })
 
+test('GH#4: generate_image executes enhancePrompt without ReferenceError', async () => {
+  const { registerGenerationTools } = await import('../lib/tools/generation.js')
+  const registeredTools = []
+  const mockCtx = {
+    effect: (fn) => fn(),
+    tools: {
+      register: (tool) => { registeredTools.push(tool) },
+    },
+    get: () => null,
+  }
+  const mockDeps = {
+    config: { enabled: true, provider: 'fal', enhancePrompt: false, defaultFormat: 'png' },
+    live: { provider: 'fal' },
+    resolveSource: async () => undefined,
+    slugify: () => 'test',
+    resolveApiKey: () => 'test-key',
+  }
+  registerGenerationTools(mockCtx, mockDeps)
+  const registeredTool = registeredTools.find((t) => t.name === 'generate_image')
+  assert.ok(registeredTool, 'generate_image tool must be registered')
+
+  const exec = {
+    signal: new AbortController().signal,
+    sessionCwd: '/tmp',
+    sessionId: 'test-session',
+  }
+  try {
+    await registeredTool.execute({ prompt: 'a small red dot' }, exec)
+  } catch (err) {
+    assert.strictEqual(
+      err.message.includes('enhancePrompt is not defined'),
+      false,
+      `Must not fail with ReferenceError: ${err.message}`
+    )
+  }
+})
+
 test('GH#4: enhancePrompt returns original prompt when disabled', async () => {
   const { enhancePrompt } = await import('../lib/prompt-enhancer.js')
   const result = await enhancePrompt({}, { enhancePrompt: false }, 'test prompt', null, 'fal')
