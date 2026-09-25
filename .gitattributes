@@ -1,5 +1,0 @@
-# Exclude internal agent/workflow files from GitHub source archives
-AGENTS.md export-ignore
-index.md export-ignore
-docs/ export-ignore
-.gitea/ export-ignore
