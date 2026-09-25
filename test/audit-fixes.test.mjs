@@ -146,3 +146,109 @@ test("audit (#295): ensureConfig handles plain, empty and volatile config inputs
   assert.equal(p4.provider, "custom");
   assert.equal(p4.timeoutMs, 60000);
 });
+
+// ── GH Issue #4: enhancePrompt must be importable from prompt-enhancer.js ──
+test('GH#4: enhancePrompt is exported from prompt-enhancer.js', async () => {
+  const mod = await import('../lib/prompt-enhancer.js')
+  assert.strictEqual(typeof mod.enhancePrompt, 'function', 'enhancePrompt must be a function')
+  assert.strictEqual(typeof mod.buildEnhancePromptSystemMessage, 'function', 'buildEnhancePromptSystemMessage must be a function')
+  assert.strictEqual(typeof mod.collectText, 'function', 'collectText must be a function')
+})
+
+test('GH#4: enhancePrompt is re-exported from index.js for backwards compat', async () => {
+  const mod = await import('../lib/index.js')
+  assert.strictEqual(typeof mod.enhancePrompt, 'function')
+  assert.strictEqual(typeof mod.buildEnhancePromptSystemMessage, 'function')
+  assert.strictEqual(typeof mod.collectText, 'function')
+})
+
+test('GH#4: generation.js can import enhancePrompt without ReferenceError', async () => {
+  // This import itself validates that the identifier resolves at module load time
+  const mod = await import('../lib/tools/generation.js')
+  assert.strictEqual(typeof mod.registerGenerationTools, 'function')
+})
+
+test('GH#4: enhancePrompt returns original prompt when disabled', async () => {
+  const { enhancePrompt } = await import('../lib/prompt-enhancer.js')
+  const result = await enhancePrompt({}, { enhancePrompt: false }, 'test prompt', null, 'fal')
+  assert.deepStrictEqual(result, { prompt: 'test prompt', enhanced: false })
+})
+
+test('GH#4: enhancePrompt returns original prompt when prompt is long enough', async () => {
+  const { enhancePrompt } = await import('../lib/prompt-enhancer.js')
+  const longPrompt = 'a'.repeat(250)
+  const result = await enhancePrompt({}, { enhancePrompt: true, enhanceBelowChars: 200 }, longPrompt, null, 'fal')
+  assert.deepStrictEqual(result, { prompt: longPrompt, enhanced: false })
+})
+
+// ── GH Issue #5: SVG attachments must NOT enter multimodal LLM context ──
+test('GH#5: renderToolOutput omits image block for SVG attachments', async () => {
+  const { renderToolOutput } = await import('../lib/attachment-helper.js')
+  const value = {
+    summary: 'test grid',
+    attachment: { attachmentId: '', mediaType: 'image/svg+xml', bytes: 1000, width: 0, height: 0, name: 'grid.svg' },
+  }
+  const blocks = renderToolOutput(value)
+  assert.strictEqual(blocks.length, 1, 'SVG attachment must NOT produce image block')
+  assert.strictEqual(blocks[0].type, 'text')
+})
+
+test('GH#5: renderToolOutput emits image block for PNG attachments', async () => {
+  const { renderToolOutput } = await import('../lib/attachment-helper.js')
+  const value = {
+    summary: 'test image',
+    attachment: { attachmentId: 'abc123', mediaType: 'image/png', bytes: 5000, width: 512, height: 512, name: 'img.png' },
+  }
+  const blocks = renderToolOutput(value)
+  assert.strictEqual(blocks.length, 2, 'PNG attachment must produce image block')
+  assert.strictEqual(blocks[1].type, 'image')
+})
+
+test('GH#5: renderToolOutput omits image block when attachmentId is empty', async () => {
+  const { renderToolOutput } = await import('../lib/attachment-helper.js')
+  const value = {
+    summary: 'fallback',
+    attachment: { attachmentId: '', mediaType: 'image/png', bytes: 100, width: 0, height: 0, name: 'x.png' },
+  }
+  const blocks = renderToolOutput(value)
+  assert.strictEqual(blocks.length, 1, 'Empty attachmentId must NOT produce image block')
+})
+
+test('GH#5: saveAttachmentSafe returns stub for SVG without calling saveImage', async () => {
+  const { saveAttachmentSafe } = await import('../lib/providers.js')
+  let saveCalled = false
+  const ctx = {
+    attachments: {
+      saveImage: async () => { saveCalled = true; return { attachmentId: 'x' } },
+    },
+  }
+  const result = await saveAttachmentSafe(ctx, {
+    bytes: Buffer.from('<svg></svg>'),
+    mediaType: 'image/svg+xml',
+    name: 'test.svg',
+  })
+  assert.strictEqual(saveCalled, false, 'saveImage must NOT be called for SVG')
+  assert.strictEqual(result.attachment.attachmentId, '', 'SVG attachment must have empty id')
+  assert.strictEqual(result.localUrl, '')
+})
+
+test('GH#5: saveAttachmentSafe calls saveImage for PNG', async () => {
+  const { saveAttachmentSafe } = await import('../lib/providers.js')
+  let saveCalled = false
+  const ctx = {
+    attachments: {
+      saveImage: async ({ mediaType }) => {
+        saveCalled = true
+        return { attachmentId: 'png-123', mediaType, bytes: 100, width: 64, height: 64, name: 'test.png' }
+      },
+    },
+  }
+  const result = await saveAttachmentSafe(ctx, {
+    bytes: Buffer.alloc(100),
+    mediaType: 'image/png',
+    name: 'test.png',
+  })
+  assert.strictEqual(saveCalled, true, 'saveImage must be called for PNG')
+  assert.strictEqual(result.attachment.attachmentId, 'png-123')
+  assert.ok(result.localUrl.includes('png-123'))
+})
