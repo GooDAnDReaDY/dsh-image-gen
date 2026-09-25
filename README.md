@@ -167,6 +167,9 @@
 * **Cache & History Consistency**: Ensured content-addressed disk cache hits synchronize seamlessly with generation history and sidecar metadata.
 * **Test Suite Expansion**: Added `test/batch4-hardening.test.mjs`, expanding test coverage to **128 automated unit tests (100% pass)**.
 
+### 🚀 What's New in v0.11.9
+* **ComfyUI Local Backend Payload Fix (#322, GitHub #7)**: Eliminated redundant nesting in `lib/providers/backends/local.js` that wrapped workflows as `{ prompt: { prompt: workflowGraph } }`, resolving `missing_node_type: Node 'ID #prompt' has no class_type` HTTP 400 errors during local ComfyUI generations. Added node shape validation before submission.
+
 ### 🚀 What's New in v0.11.8
 * **Bounded Config Payloads (#313)**: `PUT /dsh-image-gen/config` now uses bounded request streaming (`readBoundedRequestBody`) with a 64 KB cap, returning HTTP 413 `Payload Too Large` on oversized bodies to prevent memory exhaustion DoS.
 * **Build Parity Gate (#316)**: `scripts/build-client.mjs` supports `--check` mode, enforcing client distribution parity in `npm test`.
