@@ -125,7 +125,7 @@
           try {
             ctx.locale.register(NS, 'en', en)
             ctx.locale.register(NS, 'zh', zh)
-          } catch (_) {}
+          } catch (_) { /* ignore fallback locale register error */ }
         }
       } else if (ctx.locale && typeof ctx.locale.define === 'function') {
         ctx.locale.define('en', NS, en)

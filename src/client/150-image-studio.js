@@ -45,7 +45,7 @@
 
       const updatePrompt = (val) => {
         setPrompt(val)
-        try { window.localStorage.setItem('dsh_studio_prompt', val) } catch (_) {}
+        try { window.localStorage.setItem('dsh_studio_prompt', val) } catch (_) { /* ignore storage quota or private mode error */ }
       }
 
       const handleSelectFromVault = (item) => {
