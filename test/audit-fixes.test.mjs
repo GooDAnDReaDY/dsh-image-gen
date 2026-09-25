@@ -252,3 +252,74 @@ test('GH#5: saveAttachmentSafe calls saveImage for PNG', async () => {
   assert.strictEqual(result.attachment.attachmentId, 'png-123')
   assert.ok(result.localUrl.includes('png-123'))
 })
+
+// ── Issue #303: Locale registration via current ctx.locale.register API ──
+test('audit (#303): client registers locales using modern ctx.locale.register(NS, { en, zh })', async () => {
+  const fs = await import('node:fs')
+  const vm = await import('node:vm')
+  const clientCode = fs.readFileSync('lib/client.js', 'utf8')
+
+  let loadedModule = null
+  const sandbox = {
+    window: {
+      __ModuleLoader__: {
+        load: (entry) => { loadedModule = entry },
+      },
+    },
+    document: {
+      head: { appendChild: () => {} },
+      createElement: () => ({ setAttribute: () => {}, appendChild: () => {} }),
+    },
+    console,
+  }
+  vm.createContext(sandbox)
+  vm.runInContext(clientCode, sandbox)
+
+  assert.ok(loadedModule, 'Module should register with __ModuleLoader__')
+  const mockRequire = (id) => {
+    if (id === 'react') {
+      return {
+        createElement: () => ({}),
+        useState: (init) => [init, () => {}],
+        useEffect: () => {},
+      }
+    }
+    if (id === 'react/jsx-runtime') {
+      return { jsx: () => ({}), jsxs: () => ({}) }
+    }
+    throw new Error(`Cannot find module '${id}'`)
+  }
+
+  const moduleExports = loadedModule.factory(mockRequire)
+  assert.strictEqual(typeof moduleExports?.apply, 'function', 'client plugin must have apply function')
+
+  let registeredNs = null
+  let registeredDicts = null
+  let effectCalled = false
+
+  const mockCtx = {
+    locale: {
+      register: (ns, dicts) => {
+        registeredNs = ns
+        registeredDicts = dicts
+        return () => {}
+      },
+    },
+    effect: (fn, label) => {
+      effectCalled = true
+      return fn()
+    },
+    slots: {
+      inject: (name, cb) => cb(),
+      register: () => () => {},
+    },
+  }
+
+  moduleExports.apply(mockCtx)
+
+  assert.strictEqual(registeredNs, 'dsh-image-gen', 'Must register under dsh-image-gen namespace')
+  assert.ok(registeredDicts && typeof registeredDicts === 'object', 'Dicts must be provided')
+  assert.ok(registeredDicts.en && typeof registeredDicts.en === 'object', 'English dictionary must be registered')
+  assert.ok(registeredDicts.zh && typeof registeredDicts.zh === 'object', 'Chinese dictionary must be registered')
+  assert.strictEqual(effectCalled, true, 'Registration must be registered inside labeled ctx.effect')
+})

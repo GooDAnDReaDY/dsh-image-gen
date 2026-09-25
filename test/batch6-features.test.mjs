@@ -117,8 +117,7 @@ test('locale: client.js declares complete Chinese (zh) and English (en) dictiona
   const clientCode = fs.readFileSync('lib/client.js', 'utf8')
   assert.ok(clientCode.includes('const zh = {'), 'Must declare zh dictionary')
   assert.ok(clientCode.includes('const en = {'), 'Must declare en dictionary')
-  assert.ok(clientCode.includes("ctx.locale.define('zh', NS, zh)"), 'Must register zh in ctx.locale')
-  assert.ok(clientCode.includes("ctx.locale.define('en', NS, en)"), 'Must register en in ctx.locale')
+  assert.ok(clientCode.includes("ctx.locale.register(NS, { en, zh })"), 'Must register dictionaries via ctx.locale.register')
 
   // Check new feature keys in zh
   const zhMatch = clientCode.match(/const zh = \{([\s\S]*?)\n    \}/)

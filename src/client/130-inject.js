@@ -114,7 +114,20 @@
     }
 
     function apply(ctx) {
-      if (ctx.locale && typeof ctx.locale.define === 'function') {
+      if (ctx.locale && typeof ctx.locale.register === 'function') {
+        try {
+          if (typeof ctx.effect === 'function') {
+            ctx.effect(() => ctx.locale.register(NS, { en, zh }), 'dsh-image-gen: locale')
+          } else {
+            ctx.locale.register(NS, { en, zh })
+          }
+        } catch (_) {
+          try {
+            ctx.locale.register(NS, 'en', en)
+            ctx.locale.register(NS, 'zh', zh)
+          } catch (_) {}
+        }
+      } else if (ctx.locale && typeof ctx.locale.define === 'function') {
         ctx.locale.define('en', NS, en)
         ctx.locale.define('zh', NS, zh)
       }
