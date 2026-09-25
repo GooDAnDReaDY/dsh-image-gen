@@ -6,7 +6,7 @@ import { trackAndAssertLoopGuard, resetLoopGuard } from '../lib/loop-guard.js'
 import { calculateGenerationCost, assertBudgetAvailable } from '../lib/cost-meter.js'
 
 test('ui-stability: Config schema has all required keys synchronized with client fields', () => {
-  const indexCode = fs.readFileSync('lib/index.js', 'utf8')
+  const schemaCode = fs.existsSync('lib/config-schema.js') ? fs.readFileSync('lib/config-schema.js', 'utf8') : fs.readFileSync('lib/index.js', 'utf8')
   const clientCode = fs.readFileSync('lib/client.js', 'utf8')
 
   const expectedKeys = [
@@ -25,7 +25,7 @@ test('ui-stability: Config schema has all required keys synchronized with client
   ]
 
   for (const k of expectedKeys) {
-    assert.ok(indexCode.includes(`${k}: z`), `index.js Config missing key: ${k}`)
+    assert.ok(schemaCode.includes(`${k}: z`), `Config schema missing key: ${k}`)
     assert.ok(clientCode.includes(`field: '${k}'`), `client.js FIELDS missing key: ${k}`)
   }
 })

@@ -3,14 +3,16 @@
  * Build DSH client entry (lib/client.js) from ordered src/client fragments.
  * DSH ModuleLoader loads a single file; this concatenates source modules
  * into that one factory. Run: npm run build:client
+ * Pass --check to verify that lib/client.js is up-to-date without writing.
  */
-import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const srcDir = join(root, 'src', 'client')
 const outFile = join(root, 'lib', 'client.js')
+const isCheck = process.argv.includes('--check')
 
 const files = readdirSync(srcDir)
   .filter((name) => name.endsWith('.js'))
@@ -35,7 +37,23 @@ for (const name of files) {
   body += readFileSync(join(srcDir, name), 'utf8')
 }
 
+const expectedContent = banner + body
+
+if (isCheck) {
+  if (!existsSync(outFile)) {
+    console.error('build-client: lib/client.js does not exist. Run npm run build:client')
+    process.exit(1)
+  }
+  const currentContent = readFileSync(outFile, 'utf8')
+  if (currentContent !== expectedContent) {
+    console.error('build-client: lib/client.js is out of date with src/client/*. Run npm run build:client')
+    process.exit(1)
+  }
+  console.log(`build-client: lib/client.js is in sync with ${files.length} fragments in src/client/*`)
+  process.exit(0)
+}
+
 mkdirSync(dirname(outFile), { recursive: true })
-writeFileSync(outFile, banner + body, 'utf8')
+writeFileSync(outFile, expectedContent, 'utf8')
 console.log(`build-client: wrote lib/client.js from ${files.length} fragments (${body.length} bytes)`)
 console.log(files.map((f) => `  - src/client/${f}`).join('\n'))

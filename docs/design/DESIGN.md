@@ -115,6 +115,12 @@
 * **`optimize_vector_svg` (#176)**: Strips SVG metadata, normalizes viewBox, and exports clean React TSX components.
 * **`generate_pwa_icon_suite` (#190)**: Provides complete PWA icon specs (16px to 512px maskable) and web app manifest.json.
 
+### Security & Endpoint Protection Invariants (v0.11.8)
+- **Bounded Request Payloads:** All mutating endpoints (`PUT /dsh-image-gen/config`, `DELETE /dsh-image-gen/vault`) enforce maximum request body limits via `readBoundedRequestBody`. Requests exceeding 64 KB are terminated with HTTP 413 `Payload Too Large` and incoming socket streams are destroyed to protect host process heap memory against DoS.
+- **Thin Core Facade:** `lib/index.js` acts strictly as an injection and lifecycle facade (<400 lines). Zod schema definitions reside in `lib/config-schema.js`, source path validation and resolution in `lib/resolve-source.js`.
+- **Client Build Parity Gate:** `scripts/build-client.mjs --check` validates that compiled `lib/client.js` matches modular sources under `src/client/*` during `npm test`, preventing uncommitted or manual desynchronization.
+- **Style Preset Contract:** `applyStylePreset(prompt, styleKeyOrText)` is a standard deterministic prompt decorator returning `prompt, {promptSuffix}` when a matching preset is found, integrated into `/image` command execution.
+
 ## Architecture Modular Decomposition & Line Standards (v0.10.26, #239, #235, #238)
 - **Module Sizing Compliance**: All server modules strictly conform to <= 600 lines threshold:
   - `lib/tools/generation-pack.js`: Extracted multi-aspect ratio pack generator (`generate_image_pack`).
