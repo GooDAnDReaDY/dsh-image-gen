@@ -1,6 +1,7 @@
-    // -------------------------------------------------------------- Asset Vault View (#159)
+    // -------------------------------------------------------------- Asset Vault View (#159, #304)
     function AssetVaultView(props) {
       const { ctx, onSelectAsset } = props
+      const t = resolveTranslator(props, ctx)
       const [items, setItems] = react.useState([])
       const [loading, setLoading] = react.useState(false)
       const [q, setQ] = react.useState('')
@@ -45,7 +46,7 @@
       }, [q, provider, aspect, sort])
 
       const handleDelete = (id) => {
-        if (!window.confirm('Are you sure you want to delete this asset?')) return
+        if (!window.confirm(t('vault.confirmDelete') || 'Are you sure you want to delete this asset?')) return
         fetch('/dsh-image-gen/vault?id=' + encodeURIComponent(id), { method: 'DELETE' })
           .then((r) => r.json())
           .then((res) => {
@@ -54,17 +55,17 @@
               if (selected && (selected.id === id || selected.attachmentId === id)) {
                 setSelected(null)
               }
-              showFeedback('Asset deleted')
+              showFeedback(t('vault.deleted') || 'Asset deleted')
             }
           })
-          .catch(() => showFeedback('Failed to delete asset'))
+          .catch(() => showFeedback(t('vault.deleteFailed') || 'Failed to delete asset'))
       }
 
       const handleInsert = (item) => {
         const link = '![' + (item.prompt || 'Generated Image') + '](' + (item.url || item.thumbnailUrl) + ')'
         if (typeof navigator !== 'undefined' && navigator.clipboard) {
           navigator.clipboard.writeText(link)
-          showFeedback('Markdown snippet copied to clipboard!')
+          showFeedback(t('vault.copiedMarkdown') || 'Markdown snippet copied to clipboard!')
         }
       }
 
@@ -76,7 +77,7 @@
         const cmd = '/image ' + (item.prompt || '') + (item.seed !== undefined ? ' --seed ' + item.seed : '')
         if (typeof navigator !== 'undefined' && navigator.clipboard) {
           navigator.clipboard.writeText(cmd)
-          showFeedback('Prompt & seed copied to clipboard!')
+          showFeedback(t('vault.copiedPrompt') || 'Prompt & seed copied to clipboard!')
         }
       }
 
@@ -90,7 +91,7 @@
             type: 'text',
             className: 'ig-input',
             style: { flex: '1 1 200px', padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)' },
-            placeholder: 'Search prompt or tags...',
+            placeholder: t('vault.search') || 'Search prompt or tags...',
             value: q,
             onChange: (e) => setQ(e.target.value),
           }),
@@ -102,7 +103,7 @@
               onChange: (e) => setProvider(e.target.value),
               style: { padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)' },
             },
-            react.createElement('option', { value: 'all' }, 'All Providers'),
+            react.createElement('option', { value: 'all' }, t('vault.allProviders') || 'All Providers'),
             react.createElement('option', { value: 'fal' }, 'FAL.ai'),
             react.createElement('option', { value: 'openai' }, 'OpenAI'),
             react.createElement('option', { value: 'local' }, 'Local (ComfyUI)')
@@ -115,7 +116,7 @@
               onChange: (e) => setAspect(e.target.value),
               style: { padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)' },
             },
-            react.createElement('option', { value: 'all' }, 'All Ratios'),
+            react.createElement('option', { value: 'all' }, t('vault.allRatios') || 'All Ratios'),
             react.createElement('option', { value: '1:1' }, '1:1 Square'),
             react.createElement('option', { value: '16:9' }, '16:9 Landscape'),
             react.createElement('option', { value: '9:16' }, '9:16 Portrait'),
@@ -130,12 +131,12 @@
               onClick: () => setSort(sort === 'newest' ? 'oldest' : 'newest'),
               style: { border: '1px solid var(--dsw-alias-border-l2)', padding: '6px 10px', borderRadius: '6px', background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)', cursor: 'pointer' },
             },
-            sort === 'newest' ? '↓ Newest' : '↑ Oldest'
+            sort === 'newest' ? ('↓ ' + (t('vault.newest') || 'Newest')) : ('↑ ' + (t('vault.oldest') || 'Oldest'))
           )
         ),
         feedback && react.createElement('div', { style: { padding: '6px 12px', borderRadius: '6px', background: 'color-mix(in srgb, var(--dsw-alias-state-brand-primary) 15%, transparent)', color: 'var(--dsw-alias-state-brand-primary)', fontSize: '12px' } }, feedback),
         items.length === 0 && !loading
-          ? react.createElement('div', { style: { padding: '32px', textAlign: 'center', color: 'var(--dsw-alias-label-secondary)', fontSize: '13px' } }, 'No assets found in vault.')
+          ? react.createElement('div', { style: { padding: '32px', textAlign: 'center', color: 'var(--dsw-alias-label-secondary)', fontSize: '13px' } }, t('vault.empty') || 'No assets found in vault.')
           : react.createElement(
               'div',
               { className: 'ig-vault-grid' },
@@ -152,19 +153,19 @@
                   react.createElement(
                     'div',
                     { className: 'ig-vault-body' },
-                    react.createElement('div', { className: 'ig-vault-prompt', title: item.prompt }, item.prompt || 'Untitled'),
+                    react.createElement('div', { className: 'ig-vault-prompt', title: item.prompt }, item.prompt || (t('vault.noPrompt') || 'Untitled')),
                     react.createElement(
                       'div',
                       { className: 'ig-vault-meta' },
                       react.createElement('span', null, item.provider || 'local'),
-                      item.seed !== undefined && react.createElement('span', null, 'Seed ' + item.seed)
+                      item.seed !== undefined && react.createElement('span', null, (t('vault.seed') || 'Seed') + ' ' + item.seed)
                     ),
                     react.createElement(
                       'div',
                       { style: { display: 'flex', gap: '4px', marginTop: '6px' } },
-                      react.createElement('button', { type: 'button', className: 'ig-rev-btn', style: { flex: 1 }, onClick: () => handleReroll(item), title: 'Re-roll with seed' }, '🎲 Re-roll'),
-                      react.createElement('button', { type: 'button', className: 'ig-rev-btn', style: { flex: 1 }, onClick: () => handleInsert(item), title: 'Insert into chat' }, '💬 Insert'),
-                      react.createElement('button', { type: 'button', className: 'ig-rev-btn', onClick: () => handleDelete(item.id || item.attachmentId), title: 'Delete' }, '🗑️')
+                      react.createElement('button', { type: 'button', className: 'ig-rev-btn', style: { flex: 1 }, onClick: () => handleReroll(item), title: t('vault.reroll') || 'Re-roll with seed' }, '🎲 ' + (t('vault.reroll') || 'Re-roll')),
+                      react.createElement('button', { type: 'button', className: 'ig-rev-btn', style: { flex: 1 }, onClick: () => handleInsert(item), title: t('vault.insert') || 'Insert into chat' }, '💬 ' + (t('vault.insert') || 'Insert')),
+                      react.createElement('button', { type: 'button', className: 'ig-rev-btn', onClick: () => handleDelete(item.id || item.attachmentId), title: t('vault.delete') || 'Delete' }, '🗑️')
                     )
                   )
                 )
@@ -183,7 +184,7 @@
                 disabled: loading,
                 style: { padding: '8px 20px', borderRadius: '6px', border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)', cursor: 'pointer' },
               },
-              loading ? 'Loading...' : 'Load more assets'
+              loading ? (t('vault.loading') || 'Loading...') : (t('vault.loadMore') || 'Load more assets')
             )
           ),
         selected &&
@@ -202,7 +203,7 @@
               react.createElement(
                 'div',
                 { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-                react.createElement('span', { style: { fontWeight: '700', fontSize: '14px', color: 'var(--dsw-alias-label-primary)' } }, 'Asset Inspector'),
+                react.createElement('span', { style: { fontWeight: '700', fontSize: '14px', color: 'var(--dsw-alias-label-primary)' } }, t('vault.inspector') || 'Asset Inspector'),
                 react.createElement('button', { type: 'button', onClick: () => setSelected(null), style: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', color: 'var(--dsw-alias-label-secondary)' } }, '✕')
               ),
               react.createElement('img', {
@@ -212,23 +213,23 @@
               react.createElement(
                 'div',
                 { style: { display: 'flex', flexWrap: 'wrap', gap: '6px', fontSize: '11px' } },
-                selected.seed !== undefined && react.createElement('span', { className: 'ig-badge' }, 'Seed: ' + selected.seed),
-                selected.provider && react.createElement('span', { className: 'ig-badge' }, 'Provider: ' + selected.provider),
+                selected.seed !== undefined && react.createElement('span', { className: 'ig-badge' }, (t('vault.seed') || 'Seed') + ': ' + selected.seed),
+                selected.provider && react.createElement('span', { className: 'ig-badge' }, (t('vault.provider') || 'Provider') + ': ' + selected.provider),
                 selected.width && react.createElement('span', { className: 'ig-badge' }, selected.width + '×' + selected.height),
                 selected.cost ? react.createElement('span', { className: 'ig-badge' }, '$' + Number(selected.cost).toFixed(4)) : null
               ),
-              react.createElement('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-primary)', background: 'var(--dsw-alias-bg-layer-2)', padding: '10px', borderRadius: '6px', lineHeight: '1.4' } }, selected.prompt || 'No prompt'),
+              react.createElement('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-primary)', background: 'var(--dsw-alias-bg-layer-2)', padding: '10px', borderRadius: '6px', lineHeight: '1.4' } }, selected.prompt || (t('vault.noPrompt') || 'No prompt')),
               react.createElement(
                 'div',
                 { style: { display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' } },
-                react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleReroll(selected) }, '🎲 Re-roll'),
-                react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleInsert(selected) }, '💬 Insert in Chat'),
+                react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleReroll(selected) }, '🎲 ' + (t('vault.reroll') || 'Re-roll')),
+                react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleInsert(selected) }, '💬 ' + (t('vault.insert') || 'Insert in Chat')),
                 react.createElement(
                   'a',
                   { href: selected.url || selected.thumbnailUrl, download: 'vault-asset-' + (selected.id || 'image') + '.png', className: 'ig-tab-btn', style: { textDecoration: 'none', display: 'inline-flex', alignItems: 'center' } },
-                  '⬇ Download'
+                  '⬇ ' + (t('vault.download') || 'Download')
                 ),
-                react.createElement('button', { type: 'button', className: 'ig-tab-btn', style: { color: 'var(--dsw-alias-state-error-primary)' }, onClick: () => handleDelete(selected.id || selected.attachmentId) }, '🗑️ Delete')
+                react.createElement('button', { type: 'button', className: 'ig-tab-btn', style: { color: 'var(--dsw-alias-state-error-primary)' }, onClick: () => handleDelete(selected.id || selected.attachmentId) }, '🗑️ ' + (t('vault.delete') || 'Delete'))
               )
             )
           )

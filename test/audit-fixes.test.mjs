@@ -323,3 +323,73 @@ test('audit (#303): client registers locales using modern ctx.locale.register(NS
   assert.ok(registeredDicts.zh && typeof registeredDicts.zh === 'object', 'Chinese dictionary must be registered')
   assert.strictEqual(effectCalled, true, 'Registration must be registered inside labeled ctx.effect')
 })
+
+// ── Issue #304: Asset Vault & Image Studio localization ──
+test('audit (#304): client UI resolves all Vault and Studio strings through locale dictionaries', async () => {
+  const fs = await import('node:fs')
+  const vm = await import('node:vm')
+  const clientCode = fs.readFileSync('lib/client.js', 'utf8')
+
+  let loadedModule = null
+  const sandbox = {
+    window: {
+      __ModuleLoader__: { load: (entry) => { loadedModule = entry } },
+      localStorage: { getItem: () => null, setItem: () => {} },
+    },
+    document: {
+      head: { appendChild: () => {} },
+      createElement: () => ({ setAttribute: () => {}, appendChild: () => {} }),
+    },
+    console,
+  }
+  vm.createContext(sandbox)
+  vm.runInContext(clientCode, sandbox)
+
+  let capturedComponents = {}
+  const mockRequire = (id) => {
+    if (id === 'react') {
+      return {
+        createElement: (type, props, ...children) => {
+          if (typeof type === 'function') {
+            capturedComponents[type.name] = type
+          }
+          return { type, props, children }
+        },
+        useState: (init) => [init, () => {}],
+        useEffect: () => {},
+        Fragment: 'Fragment',
+      }
+    }
+    if (id === 'react/jsx-runtime') {
+      return { jsx: () => ({}), jsxs: () => ({}) }
+    }
+    throw new Error(`Cannot find module '${id}'`)
+  }
+
+  const moduleExports = loadedModule.factory(mockRequire)
+  let registeredSlots = []
+  const mockCtx = {
+    locale: { register: () => () => {} },
+    inject: (deps, cb) => {
+      cb({ sidebarRightTabs: { register: () => {} }, slots: mockCtx.slots })
+    },
+    slots: {
+      inject: (name, cb) => cb(),
+      register: (desc, comp) => {
+        registeredSlots.push({ desc, comp })
+      },
+    },
+  }
+  moduleExports.apply(mockCtx)
+
+  // Find ImageStudioView slot
+  const studioSlot = registeredSlots.find((s) => s.desc?.name === 'sidebar.right.pane.tab')
+  assert.ok(studioSlot, 'Studio tab slot must be registered')
+
+  // Check English and Chinese dictionary definitions in client bundle
+  assert.ok(clientCode.includes("'studio.title': 'Image Studio'"))
+  assert.ok(clientCode.includes("'studio.title': '图像创作工作台'"))
+  assert.ok(clientCode.includes("'vault.search': 'Search prompt or tags...'"))
+  assert.ok(clientCode.includes("'vault.search': '搜索提示词或标签...'"))
+  assert.ok(clientCode.includes("'vault.empty': '素材库中暂无图像。'"))
+})
