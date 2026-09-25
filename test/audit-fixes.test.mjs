@@ -433,9 +433,11 @@ test('audit (#305): resolveConversationImage rejects oversized data URIs before 
 test('audit (#305): resolveConversationImage validates image signatures and rejects non-image files', async () => {
   const { resolveConversationImage } = await import('../lib/resolve-image.js')
   const fs = await import('node:fs')
-  const testDir = '/tmp/test-dsh-img-sig'
+  const os = await import('node:os')
+  const path = await import('node:path')
+  const testDir = path.join(os.tmpdir(), `test-dsh-img-sig-${Date.now()}`)
   fs.mkdirSync(testDir, { recursive: true })
-  const fakeImgPath = `${testDir}/not_really_an_image.png`
+  const fakeImgPath = path.join(testDir, 'not_really_an_image.png')
   fs.writeFileSync(fakeImgPath, 'This is a text file that pretends to be a png')
 
   const ctx = {}
@@ -599,4 +601,101 @@ test('audit (#266): scripts/publish-github.sh exists, is executable and passes -
   // Verify non-product files are excluded from published tree
   assert.ok(!output.split('WILL BE PUBLISHED')[1].split('WILL BE DROPPED')[0].includes('test/'), 'test files must not be published')
   assert.ok(!output.split('WILL BE PUBLISHED')[1].split('WILL BE DROPPED')[0].includes('scripts/'), 'scripts must not be published')
+})
+
+// ── Issue #152: Slash command /image <prompt> [flags] ──
+test('audit (#152): parseImageCommandArgs correctly parses prompt and flags', async () => {
+  const { parseImageCommandArgs } = await import('../lib/commands.js')
+
+  // Empty string
+  const empty = parseImageCommandArgs('')
+  assert.strictEqual(empty.prompt, '')
+  assert.ok(empty.error)
+
+  // Standard prompt with --flag=value
+  const r1 = parseImageCommandArgs('cyberpunk cat in neon rain --aspect=16:9 --provider=fal --style=anime --seed=42')
+  assert.strictEqual(r1.prompt, 'cyberpunk cat in neon rain')
+  assert.strictEqual(r1.flags.aspect, '16:9')
+  assert.strictEqual(r1.flags.provider, 'fal')
+  assert.strictEqual(r1.flags.style, 'anime')
+  assert.strictEqual(r1.flags.seed, '42')
+
+  // Space-separated flags: --size landscape_4_3
+  const r2 = parseImageCommandArgs('retro arcade game --size landscape_4_3 --quality hd')
+  assert.strictEqual(r2.prompt, 'retro arcade game')
+  assert.strictEqual(r2.flags.size, 'landscape_4_3')
+  assert.strictEqual(r2.flags.quality, 'hd')
+
+  // Quoted arguments
+  const r3 = parseImageCommandArgs('"portrait of a wise owl in library" --style "oil painting" --aspect 1:1')
+  assert.strictEqual(r3.prompt, 'portrait of a wise owl in library')
+  assert.strictEqual(r3.flags.style, 'oil painting')
+  assert.strictEqual(r3.flags.aspect, '1:1')
+})
+
+test('audit (#152): registerImageCommand registers /image on commands service and executes directly', async () => {
+  const { registerImageCommand } = await import('../lib/commands.js')
+
+  let registeredCommand = null
+  let effectDisposer = null
+
+  const dummyImageBytes = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00])
+
+  const mockCtx = {
+    inject: (deps, cb) => {
+      assert.ok(deps.includes('commands'))
+      cb({
+        commands: {
+          register: (def) => {
+            registeredCommand = def
+            return () => { registeredCommand = null }
+          },
+        },
+      })
+    },
+    effect: (fn, label) => {
+      effectDisposer = fn()
+    },
+    attachments: {
+      saveImage: async () => ({ attachmentId: 'cmd-img-123', mediaType: 'image/png' }),
+    },
+  }
+
+  const mockDeps = {
+    live: () => ({ provider: 'custom', defaultSize: 'square', defaultFormat: 'png' }),
+    resolveApiKey: async () => 'test-key',
+    slugify: (str) => 'slug-' + str.replace(/\s+/g, '-'),
+    makeProviders: () => ({
+      custom: async () => ({
+        bytes: dummyImageBytes,
+        mediaType: 'image/png',
+        seed: 42,
+      }),
+    }),
+    saveAndAttachResult: async (ctx, exec, cfg, params) => {
+      return {
+        summary: `### Generated Image: ${params.prompt}\n![image](mock-url)`,
+        attachment: { attachmentId: 'att-slash-cmd', mediaType: 'image/png' },
+      }
+    },
+  }
+
+  registerImageCommand(mockCtx, mockDeps)
+
+  assert.ok(registeredCommand, 'Command /image must be registered')
+  assert.strictEqual(registeredCommand.name, 'image')
+  assert.ok(registeredCommand.description.includes('/image'))
+  assert.strictEqual(typeof registeredCommand.handler, 'function')
+  assert.strictEqual(typeof registeredCommand.execute, 'function')
+
+  // Test usage error on empty prompt
+  const emptyRes = await registeredCommand.handler({ rawInput: '' })
+  assert.strictEqual(emptyRes.kind, 'error')
+  assert.ok(emptyRes.text.includes('Usage: /image'))
+
+  // Test successful execution with mock provider
+  const succRes = await registeredCommand.handler({ rawInput: 'neon sunset --aspect=16:9' })
+  assert.strictEqual(succRes.kind, 'success')
+  assert.ok(succRes.text.includes('Generated Image: neon sunset'))
+  assert.strictEqual(succRes.attachment.attachmentId, 'att-slash-cmd')
 })
