@@ -197,11 +197,7 @@ test('GH#4: generate_image executes enhancePrompt without ReferenceError', async
   try {
     await registeredTool.execute({ prompt: 'a small red dot' }, exec)
   } catch (err) {
-    assert.strictEqual(
-      err.message.includes('enhancePrompt is not defined'),
-      false,
-      `Must not fail with ReferenceError: ${err.message}`
-    )
+    assert.notStrictEqual(err.name, 'ReferenceError', 'Must not fail with ReferenceError: ' + err.message)
   }
 })
 
@@ -735,4 +731,59 @@ test('audit (#152): registerImageCommand registers /image on commands service an
   assert.strictEqual(succRes.kind, 'success')
   assert.ok(succRes.text.includes('Generated Image: neon sunset'))
   assert.strictEqual(succRes.attachment.attachmentId, 'att-slash-cmd')
+})
+
+// ── GH Issue #6: effectivePolishedNegative must not be referenced, zero undeclared variables in lib ──
+test('GH#6: generation.js does not reference undefined effectivePolishedNegative', async () => {
+  const fs = await import('node:fs/promises')
+  const content = await fs.readFile(new URL('../lib/tools/generation.js', import.meta.url), 'utf8')
+  assert.strictEqual(
+    content.includes('effectivePolishedNegative'),
+    false,
+    'effectivePolishedNegative must not be referenced in generation.js'
+  )
+})
+
+test('GH#6: all modules in lib have zero undeclared identifiers (no-undef)', async () => {
+  let ESLintClass
+  try {
+    const es = await import('/usr/lib/node_modules/eslint/lib/api.js')
+    ESLintClass = es.ESLint
+  } catch {
+    const es = await import('eslint')
+    ESLintClass = es.ESLint
+  }
+  const eslint = new ESLintClass({
+    overrideConfigFile: true,
+    overrideConfig: [
+      {
+        files: ['lib/**/*.js'],
+        languageOptions: {
+          ecmaVersion: 2024,
+          sourceType: 'module',
+          globals: {
+            console: 'readonly', fetch: 'readonly', AbortController: 'readonly', AbortSignal: 'readonly',
+            Buffer: 'readonly', setTimeout: 'readonly', clearTimeout: 'readonly', setInterval: 'readonly',
+            clearInterval: 'readonly', URL: 'readonly', URLSearchParams: 'readonly', process: 'readonly',
+            Uint8Array: 'readonly', FormData: 'readonly', Blob: 'readonly', structuredClone: 'readonly',
+            Set: 'readonly', Map: 'readonly', Promise: 'readonly', Error: 'readonly', TypeError: 'readonly',
+            RangeError: 'readonly', Array: 'readonly', Object: 'readonly', String: 'readonly', Number: 'readonly',
+            Boolean: 'readonly', Math: 'readonly', JSON: 'readonly', Date: 'readonly', RegExp: 'readonly',
+            window: 'readonly', document: 'readonly', navigator: 'readonly',
+          },
+        },
+        rules: { 'no-undef': 'error' },
+      },
+    ],
+  })
+  const results = await eslint.lintFiles(['lib/**/*.js'])
+  const errors = []
+  for (const r of results) {
+    for (const m of r.messages) {
+      if (m.ruleId === 'no-undef') {
+        errors.push(r.filePath + ':' + m.line + ' ' + m.message)
+      }
+    }
+  }
+  assert.deepStrictEqual(errors, [], 'Found undeclared variables in lib: ' + errors.join('\n'))
 })
