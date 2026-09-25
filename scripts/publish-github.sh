@@ -135,6 +135,7 @@ if [ "$mode" = "check" ]; then
 fi
 
 source_sha="$(git rev-parse "$gitea_ref")"
+git fetch "$MIRROR_REMOTE" "$MIRROR_BRANCH" --quiet 2>/dev/null || true
 mirror_sha="$(git rev-parse "$MIRROR_REMOTE/$MIRROR_BRANCH")"
 echo "gitea ref  : $gitea_ref = $source_sha"
 echo "mirror head: $MIRROR_REMOTE/$MIRROR_BRANCH = $mirror_sha"

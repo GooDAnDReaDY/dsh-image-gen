@@ -577,3 +577,26 @@ test('audit (#307): repairHistoryPermissions migrates legacy 0755 dir and 0644 f
     try { fs.rmSync(testDshHome, { recursive: true, force: true }) } catch {}
   }
 })
+
+// ── Issue #266: Canonical sanitized GitHub publish script ──
+test('audit (#266): scripts/publish-github.sh exists, is executable and passes --check', async () => {
+  const fs = await import('node:fs')
+  const { execSync } = await import('node:child_process')
+
+  const scriptPath = 'scripts/publish-github.sh'
+  assert.ok(fs.existsSync(scriptPath), 'scripts/publish-github.sh must exist')
+  const stat = fs.statSync(scriptPath)
+  assert.ok((stat.mode & 0o111) !== 0, 'scripts/publish-github.sh must have executable bit set')
+
+  // Run --check on current HEAD
+  const output = execSync('bash scripts/publish-github.sh --check HEAD', { encoding: 'utf8' })
+  assert.ok(output.includes('WILL BE PUBLISHED'), 'Must report published list')
+  assert.ok(output.includes('WILL BE DROPPED'), 'Must report dropped list')
+  assert.ok(output.includes('package.json'), 'package.json must be published')
+  assert.ok(output.includes('README.md'), 'README.md must be published')
+  assert.ok(output.includes('lib/index.js'), 'lib/index.js must be published')
+
+  // Verify non-product files are excluded from published tree
+  assert.ok(!output.split('WILL BE PUBLISHED')[1].split('WILL BE DROPPED')[0].includes('test/'), 'test files must not be published')
+  assert.ok(!output.split('WILL BE PUBLISHED')[1].split('WILL BE DROPPED')[0].includes('scripts/'), 'scripts must not be published')
+})
