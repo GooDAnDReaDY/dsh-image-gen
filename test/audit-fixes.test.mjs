@@ -532,3 +532,48 @@ test('audit (#306): vault DELETE route responds with 413 on oversized body and h
   assert.strictEqual(statusCode, 413, 'Must return HTTP 413 Payload Too Large')
   assert.ok(responseData.includes('Payload Too Large'))
 })
+
+// ── Issue #307: History file and directory permissions (0700/0600) & startup repair ──
+test('audit (#307): repairHistoryPermissions migrates legacy 0755 dir and 0644 file to 0700/0600', async () => {
+  const fs = await import('node:fs')
+  const path = await import('node:path')
+  const os = await import('node:os')
+  const { repairHistoryPermissions, writeHistory, historyFile } = await import('../lib/history.js')
+
+  const testDshHome = path.join(os.tmpdir(), `test-dsh-perm-${Date.now()}`)
+  process.env.DSH_HOME = testDshHome
+
+  try {
+    const file = historyFile()
+    const dir = path.dirname(file)
+
+    // Simulate legacy world-readable install: 0755 dir, 0644 file
+    fs.mkdirSync(dir, { recursive: true, mode: 0o755 })
+    fs.chmodSync(dir, 0o755)
+    fs.writeFileSync(file, JSON.stringify([{ id: 'test-1', prompt: 'secret prompt', path: '/secret/path' }]), { mode: 0o644 })
+    fs.chmodSync(file, 0o644)
+
+    // Verify initial legacy permissions
+    const dirStatBefore = fs.statSync(dir)
+    assert.strictEqual(dirStatBefore.mode & 0o777, 0o755, 'Initial dir mode must be 0755')
+    const fileStatBefore = fs.statSync(file)
+    assert.strictEqual(fileStatBefore.mode & 0o777, 0o644, 'Initial file mode must be 0644')
+
+    // Run repair
+    repairHistoryPermissions()
+
+    // Assert repaired permissions
+    const dirStatAfter = fs.statSync(dir)
+    assert.strictEqual(dirStatAfter.mode & 0o777, 0o700, 'Repaired dir mode must be 0700')
+    const fileStatAfter = fs.statSync(file)
+    assert.strictEqual(fileStatAfter.mode & 0o777, 0o600, 'Repaired file mode must be 0600')
+
+    // Also verify writeHistory maintains 0700/0600
+    await writeHistory([{ id: 'test-2', prompt: 'another secret', path: '/path/2' }])
+    assert.strictEqual(fs.statSync(dir).mode & 0o777, 0o700)
+    assert.strictEqual(fs.statSync(file).mode & 0o777, 0o600)
+  } finally {
+    delete process.env.DSH_HOME
+    try { fs.rmSync(testDshHome, { recursive: true, force: true }) } catch {}
+  }
+})
