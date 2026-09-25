@@ -167,6 +167,12 @@
 * **Cache & History Consistency**: Ensured content-addressed disk cache hits synchronize seamlessly with generation history and sidecar metadata.
 * **Test Suite Expansion**: Added `test/batch4-hardening.test.mjs`, expanding test coverage to **128 automated unit tests (100% pass)**.
 
+### 🚀 What's New in v0.11.8
+* **Bounded Config Payloads (#313)**: `PUT /dsh-image-gen/config` now uses bounded request streaming (`readBoundedRequestBody`) with a 64 KB cap, returning HTTP 413 `Payload Too Large` on oversized bodies to prevent memory exhaustion DoS.
+* **Build Parity Gate (#316)**: `scripts/build-client.mjs` supports `--check` mode, enforcing client distribution parity in `npm test`.
+* **Architecture Decomposition (#317)**: `lib/index.js` simplified into a lightweight facade (<400 lines) with dedicated `lib/config-schema.js` and `lib/resolve-source.js`.
+* **Runtime & Permissions Polish (#318, #319)**: Idempotent startup permissions repair and removal of legacy `loc.get` fallback in favor of standard Cordis translation runtime.
+
 ### 🚀 What's New in v0.10.15
 * **Loop Guard Zero-Limit Bypass (#212)**: Fixed an edge case where setting `loopGuardLimit: 0` (configured to disable protection) enforced a limit of 1 due to `Math.max(1, limit)`. Setting limit to 0 now properly bypasses loop checks.
 * **Security Hardening (Token Masking)**: Added automatic pattern masking for Replicate API tokens (`r8_...`) and Google Gemini API keys (`AIza...`) in `sanitizeErrorAndLogs`.

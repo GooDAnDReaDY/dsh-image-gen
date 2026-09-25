@@ -122,3 +122,9 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 * **`generate_style_matrix` (#286)**: 2x2 风格矩阵探索与双盲对比，并发生成 4 种美学预设切片并支持一键应用。
 * **`对话内局部重绘画布` (#285)**: 在消息卡片上直接唤起交互式笔刷画布，支持选区涂抹与即时 Inpainting 局部重绘。
 * **`智能服务商自动故障转移链` (#282)**: 主服务商 429、5xx、超时或额度耗尽时自动无缝切换备选渠道。
+
+## 🛡️ 安全性
+* **配置请求大小限制 (#313)**：`PUT /dsh-image-gen/config` 限制请求体最大 64 KB，超出返回 HTTP 413，防止内存耗尽 DoS。
+* **客户端构建校验 (#316)**：`scripts/build-client.mjs` 支持 `--check` 模式，确保构建一致性。
+* **架构解耦优化 (#317)**：`lib/index.js` 精简为轻量级门面（<400 行），拆分 `config-schema.js` 与 `resolve-source.js`。
+* **启动与运行时清理 (#318, #319)**：优化历史记录权限修复，移除废弃的 `loc.get` 调用。
