@@ -393,3 +393,69 @@ test('audit (#304): client UI resolves all Vault and Studio strings through loca
   assert.ok(clientCode.includes("'vault.search': '搜索提示词或标签...'"))
   assert.ok(clientCode.includes("'vault.empty': '素材库中暂无图像。'"))
 })
+
+// ── Issue #305: Containment and bounded limits on image inputs and data URIs ──
+test('audit (#305): resolveConversationImage rejects absolute paths outside workspace', async () => {
+  const { resolveConversationImage } = await import('../lib/resolve-image.js')
+  const ctx = {}
+  const exec = { agent: { session: { header: { cwd: '/tmp/test-session-workspace' } } } }
+
+  await assert.rejects(
+    async () => resolveConversationImage(ctx, exec, '/etc/hostname'),
+    /Access denied: path "\/etc\/hostname" is outside allowed workspace directory/
+  )
+})
+
+test('audit (#305): resolveConversationImage rejects path traversal outside workspace', async () => {
+  const { resolveConversationImage } = await import('../lib/resolve-image.js')
+  const ctx = {}
+  const exec = { agent: { session: { header: { cwd: '/tmp/test-session-workspace' } } } }
+
+  await assert.rejects(
+    async () => resolveConversationImage(ctx, exec, '../../../../etc/passwd'),
+    /Access denied: path "\.\.\/\.\.\/\.\.\/\.\.\/etc\/passwd" is outside allowed workspace directory/
+  )
+})
+
+test('audit (#305): resolveConversationImage rejects oversized data URIs before allocation', async () => {
+  const { resolveConversationImage } = await import('../lib/resolve-image.js')
+  const ctx = {}
+  const exec = { agent: { session: { header: { cwd: '/tmp' } } } }
+  // Construct a pseudo data URI with declared length > 50MB (base64 string of 70M chars)
+  const hugeDataUri = 'data:image/png;base64,' + 'A'.repeat(70 * 1024 * 1024)
+
+  await assert.rejects(
+    async () => resolveConversationImage(ctx, exec, hugeDataUri),
+    /Data URI payload too large/
+  )
+})
+
+test('audit (#305): resolveConversationImage validates image signatures and rejects non-image files', async () => {
+  const { resolveConversationImage } = await import('../lib/resolve-image.js')
+  const fs = await import('node:fs')
+  const testDir = '/tmp/test-dsh-img-sig'
+  fs.mkdirSync(testDir, { recursive: true })
+  const fakeImgPath = `${testDir}/not_really_an_image.png`
+  fs.writeFileSync(fakeImgPath, 'This is a text file that pretends to be a png')
+
+  const ctx = {}
+  const exec = { agent: { session: { header: { cwd: testDir } } } }
+
+  await assert.rejects(
+    async () => resolveConversationImage(ctx, exec, fakeImgPath),
+    /does not match any recognized image signature/
+  )
+
+  fs.unlinkSync(fakeImgPath)
+})
+
+test('audit (#305): resolveSource enforces workspace containment and signature check', async () => {
+  const { resolveSource } = await import('../lib/index.js')
+  const ctx = {}
+  const exec = { agent: { session: { header: { cwd: '/tmp/dsh-source-test' } } } }
+
+  await assert.rejects(
+    async () => resolveSource(ctx, exec, '/etc/shadow'),
+    /Access denied: path "\/etc\/shadow" is outside allowed workspace directory/
+  )
+})
