@@ -49,3 +49,13 @@ window.__ModuleLoader__.load({
           strokeLinecap: 'round', strokeLinejoin: 'round',
         }))
 
+
+    function resolveTranslator(props, ctx) {
+      if (typeof props?.t === 'function') return props.t
+      const loc = ctx?.locale || props?.ctx?.locale
+      if (loc) {
+        if (typeof loc.t === 'function') return (k, def) => loc.t(NS + '.' + k) || loc.t(k) || def || k
+        if (typeof loc.get === 'function') return (k, def) => loc.get(NS + '.' + k) || loc.get(k) || def || k
+      }
+      return (k, def) => def || k
+    }
