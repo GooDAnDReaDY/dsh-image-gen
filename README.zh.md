@@ -38,6 +38,7 @@
 ## ⚡ 核心功能与架构提升 (v0.10.0)
 
 **`@goodandready/dsh-image-gen`** 为 DeepSeek Harness 提供工业级高可用的图像生成与视觉处理工具链：
+* **ComfyUI 本地后端工作流形状修复 (#322, GitHub #7)**：修复 `lib/providers/backends/local.js` 中多包一层 `{ prompt: workflow }` 导致 ComfyUI 报 `missing_node_type: Node 'ID #prompt' has no class_type` 的缺陷；增加节点结构自检。
 * **8大后端全面支持**: FAL.ai、Replicate、OpenAI/SiliconFlow、ChatGPT Plus (OAuth)、Grok Imagine (OAuth)、ComfyUI/A1111 本地生成、ByteDance SeaDream 与 Google Imagen 3。
 * **指数退避与 Jitter 队列防爆**: 针对 FAL 与 Replicate 异步队列引入智能 Backoff 轮询，彻底杜绝 429 报错。
 * **确定性哈希缓存 (Deterministic Cache)**: 相同 Prompt 与 Seed 的重复请求直接从本地秒级返回，零 API 消耗。
