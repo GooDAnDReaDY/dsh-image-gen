@@ -459,3 +459,76 @@ test('audit (#305): resolveSource enforces workspace containment and signature c
     /Access denied: path "\/etc\/shadow" is outside allowed workspace directory/
   )
 })
+
+// ── Issue #306: Vault DELETE reads bounded body with early 413 rejection ──
+test('audit (#306): readBoundedRequestBody rejects bodies exceeding byte ceiling with 413', async () => {
+  const { readBoundedRequestBody } = await import('../lib/vault.js')
+  const { Readable } = await import('node:stream')
+
+  // Stream emitting 70 KB in chunks
+  const chunk = Buffer.alloc(10 * 1024, 'A')
+  let count = 0
+  const req = new Readable({
+    read() {
+      if (count++ < 7) {
+        this.push(chunk)
+      } else {
+        this.push(null)
+      }
+    },
+  })
+
+  await assert.rejects(
+    async () => readBoundedRequestBody(req, 64 * 1024),
+    (err) => {
+      assert.strictEqual(err.statusCode, 413)
+      assert.ok(err.message.includes('Payload Too Large'))
+      return true
+    }
+  )
+})
+
+test('audit (#306): vault DELETE route responds with 413 on oversized body and halts deletion', async () => {
+  const { registerVaultRoutes } = await import('../lib/vault.js')
+  const { Readable } = await import('node:stream')
+
+  let registeredRoute = null
+  const mockCtx = {
+    effect: (fn) => fn(),
+    webServer: {
+      register: (opts) => {
+        if (opts.path === '/dsh-image-gen/vault') registeredRoute = opts
+      },
+    },
+  }
+  registerVaultRoutes(mockCtx)
+  assert.ok(registeredRoute, 'Vault route must be registered')
+
+  // Create oversized request with loopback headers to pass isTrustedLocalRequest
+  const chunk = Buffer.alloc(16 * 1024, 'X')
+  let pushed = 0
+  const req = new Readable({
+    read() {
+      if (pushed++ < 5) { // 5 * 16KB = 80KB > 64KB
+        this.push(chunk)
+      } else {
+        this.push(null)
+      }
+    },
+  })
+  req.method = 'DELETE'
+  req.url = '/dsh-image-gen/vault'
+  req.headers = { host: '127.0.0.1' }
+  req.socket = { remoteAddress: '127.0.0.1' }
+
+  let statusCode = 0
+  let responseData = ''
+  const res = {
+    writeHead: (code, headers) => { statusCode = code },
+    end: (body) => { responseData = body },
+  }
+
+  await registeredRoute.handler(req, res)
+  assert.strictEqual(statusCode, 413, 'Must return HTTP 413 Payload Too Large')
+  assert.ok(responseData.includes('Payload Too Large'))
+})
