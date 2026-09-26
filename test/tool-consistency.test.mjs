@@ -33,7 +33,7 @@ test("tool consistency: generatePwaIconSuite produces valid PWA assets and manif
 });
 
 
-test("GH#8: generate_image output schema permits attachment, qualityReport, fallback, and extra properties", async () => {
+test("GH#8 and GH#9: generate_image output schema permits attachment, qualityReport, object _fallback, and golden payloads", async () => {
   const { registerGenerationTools } = await import("../lib/tools/generation.js");
   const registeredTools = [];
   const mockCtx = {
@@ -60,11 +60,23 @@ test("GH#8: generate_image output schema permits attachment, qualityReport, fall
   assert.strictEqual(schema.properties.attachment.additionalProperties, true, "top-level attachment must allow additionalProperties");
   assert.strictEqual(schema.properties.images.items.additionalProperties, true, "images items must allow additionalProperties (GH#8)");
 
+  // GH#9 regression check: _fallback must be an object schema matching runtime shape from fallback-router.js
+  assert.strictEqual(schema.properties._fallback.type, "object", "top-level _fallback must be declared as object (GH#9)");
+  assert.strictEqual(schema.properties._fallback.properties.triggered.type, "boolean");
+  assert.strictEqual(schema.properties._fallback.properties.primaryProvider.type, "string");
+  assert.strictEqual(schema.properties._fallback.properties.providerUsed.type, "string");
+  assert.strictEqual(schema.properties._fallback.properties.attempts.type, "array");
+
   const itemProps = schema.properties.images.items.properties;
   assert.ok(itemProps.attachment, "images.items must declare attachment");
   assert.strictEqual(itemProps.attachment.additionalProperties, true, "images.items.attachment must allow additionalProperties");
   assert.ok(itemProps.qualityReport, "images.items must declare qualityReport");
   assert.ok(itemProps._fallback, "images.items must declare _fallback");
+  assert.strictEqual(itemProps._fallback.type, "object", "images.items._fallback must be declared as object (GH#9)");
+  assert.strictEqual(itemProps._fallback.properties.triggered.type, "boolean");
+  assert.strictEqual(itemProps._fallback.properties.primaryProvider.type, "string");
+  assert.strictEqual(itemProps._fallback.properties.providerUsed.type, "string");
+  assert.strictEqual(itemProps._fallback.properties.attempts.type, "array");
   assert.ok(itemProps.cost, "images.items must declare cost");
   assert.ok(itemProps.fromCache, "images.items must declare fromCache");
   assert.ok(itemProps.originalPrompt, "images.items must declare originalPrompt");
@@ -103,16 +115,30 @@ test("GH#8: generate_image output schema permits attachment, qualityReport, fall
           errors.push(...validateAgainstSchema(item, s.items, path + "[" + idx + "]"));
         });
       }
+    } else if (s.type === "string") {
+      if (typeof val !== "string") errors.push(path + " must be a string, got " + typeof val);
+    } else if (s.type === "boolean") {
+      if (typeof val !== "boolean") errors.push(path + " must be a boolean, got " + typeof val);
+    } else if (s.type === "number" || s.type === "integer") {
+      if (typeof val !== "number") errors.push(path + " must be a number, got " + typeof val);
     }
     return errors;
   }
 
-  const realisticPayload = {
+  // Golden Payload 1: Primary provider success (e.g. local ComfyUI)
+  const primaryPayload = {
     summary: "Generated image",
     channel: "local",
     provider: "local",
     model: "dreamshaper_8.safetensors",
-    _fallback: "local",
+    _fallback: {
+      triggered: false,
+      primaryProvider: "local",
+      providerUsed: "local",
+      attempts: [
+        { provider: "local", durationMs: 4700, success: true },
+      ],
+    },
     path: "/tmp/generated.png",
     url: "http://127.0.0.1:8188/view?filename=generated.png",
     width: 512,
@@ -145,7 +171,14 @@ test("GH#8: generate_image output schema permits attachment, qualityReport, fall
         cost: 0,
         fromCache: false,
         qualityReport: { score: 95, passed: true },
-        _fallback: "local",
+        _fallback: {
+          triggered: false,
+          primaryProvider: "local",
+          providerUsed: "local",
+          attempts: [
+            { provider: "local", durationMs: 4700, success: true },
+          ],
+        },
         provider: "local",
         model: "dreamshaper_8.safetensors",
         attachment: {
@@ -160,6 +193,64 @@ test("GH#8: generate_image output schema permits attachment, qualityReport, fall
     ],
   };
 
-  const validationErrors = validateAgainstSchema(realisticPayload, schema, "value");
-  assert.deepStrictEqual(validationErrors, [], "realistic payload must have 0 schema errors, got: " + validationErrors.join(", "));
+  const primaryErrors = validateAgainstSchema(primaryPayload, schema, "value");
+  assert.deepStrictEqual(primaryErrors, [], "primary golden payload must have 0 schema errors, got: " + primaryErrors.join(", "));
+
+  // Golden Payload 2: Fallback provider cascade success (e.g. fal failed, local succeeded)
+  const fallbackPayload = {
+    summary: "Generated image via fallback",
+    channel: "local",
+    provider: "local",
+    model: "v1-5-pruned-emaonly.safetensors",
+    _fallback: {
+      triggered: true,
+      primaryProvider: "fal",
+      providerUsed: "local",
+      attempts: [
+        { provider: "fal", error: "FAL_API_KEY environment variable is not set", durationMs: 12, success: false },
+        { provider: "local", durationMs: 3400, success: true },
+      ],
+    },
+    path: "/tmp/fallback.png",
+    url: "http://127.0.0.1:7860/file=fallback.png",
+    width: 512,
+    height: 512,
+    seed: 54321,
+    prompt: "cyberpunk skyline",
+    originalPrompt: "cyberpunk skyline",
+    format: "png",
+    cost: 0,
+    fromCache: false,
+    qualityReport: { score: 90, passed: true },
+    images: [
+      {
+        path: "/tmp/fallback.png",
+        url: "http://127.0.0.1:7860/file=fallback.png",
+        width: 512,
+        height: 512,
+        seed: 54321,
+        prompt: "cyberpunk skyline",
+        originalPrompt: "cyberpunk skyline",
+        format: "png",
+        cost: 0,
+        fromCache: false,
+        qualityReport: { score: 90, passed: true },
+        _fallback: {
+          triggered: true,
+          primaryProvider: "fal",
+          providerUsed: "local",
+          attempts: [
+            { provider: "fal", error: "FAL_API_KEY environment variable is not set", durationMs: 12, success: false },
+            { provider: "local", durationMs: 3400, success: true },
+          ],
+        },
+        provider: "local",
+        model: "v1-5-pruned-emaonly.safetensors",
+      },
+    ],
+  };
+
+  const fallbackErrors = validateAgainstSchema(fallbackPayload, schema, "value");
+  assert.deepStrictEqual(fallbackErrors, [], "fallback golden payload must have 0 schema errors, got: " + fallbackErrors.join(", "));
 });
+
