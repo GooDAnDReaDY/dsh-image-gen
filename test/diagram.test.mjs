@@ -89,5 +89,6 @@ test('diagram: tool file declares beautify_diagram with valid schema and render 
     detectedNodes: ['Auth', 'Gateway', 'Cluster'],
   })
   assert.ok(Array.isArray(sampleRender))
+  assert.equal(sampleRender[0]?.text, 'OK')
   assert.ok(sampleRender.length >= 1)
 })

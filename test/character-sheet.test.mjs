@@ -110,5 +110,6 @@ test('character-sheet: tool file declares generate_character_sheet with schema a
     views: ['front', 'side', 'back'],
   })
   assert.ok(Array.isArray(sampleRender))
+  assert.equal(sampleRender[0]?.text, 'OK')
   assert.ok(sampleRender.length >= 1)
 })

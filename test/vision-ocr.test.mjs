@@ -82,5 +82,6 @@ test('vision-ocr: tool file declares replace_image_text with valid schema and re
     bboxes: [[100, 200, 400, 300], [500, 600, 800, 700]],
   })
   assert.ok(Array.isArray(sampleRender))
+  assert.equal(sampleRender[0]?.text, 'OK')
   assert.ok(sampleRender.length >= 1)
 })
