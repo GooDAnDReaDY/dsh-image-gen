@@ -38,6 +38,7 @@ const EXPECTED_TOOLS = [
   'generate_style_matrix',
   'generate_theme_pair',
   'generate_character_sheet',
+  'replace_image_text',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -77,6 +78,7 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerStyleMatrixTools',
     'registerThemePairTools',
     'registerCharacterSheetTools',
+    'registerVisionOcrTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }
