@@ -65,3 +65,36 @@ test('anchor-helpers: applyAnchorPromptHints injects character and style hints w
   assert.ok(styled3.includes('visual style anchor: Pastel Watercolor'))
   assert.ok(styled3.includes('consistent aesthetic palette'))
 })
+
+test('anchor-helpers: buildFaceConsistencyPrompt creates FaceID directives (#183)', async () => {
+  const { buildFaceConsistencyPrompt } = await import('../lib/anchor-helpers.js')
+  const res = buildFaceConsistencyPrompt({
+    prompt: 'detective walking down a rain-slicked alley',
+    faceStrength: 0.85,
+    characterName: 'Agent Miller',
+  })
+
+  assert.ok(res.prompt.includes('detective walking down a rain-slicked alley'))
+  assert.ok(res.prompt.includes('FaceID facial identity match of Agent Miller'))
+  assert.ok(res.prompt.includes('strength: 0.85'))
+  assert.ok(res.prompt.includes('preserving exact facial structure'))
+  assert.ok(res.negativePrompt.includes('altered face'))
+  assert.equal(res.faceStrength, 0.85)
+})
+
+test('anchor-helpers: supports mode: face in session anchor (#183)', () => {
+  clearAllAnchors()
+  const anchor = setSessionAnchor('session-face', {
+    image: 'https://example.com/portrait.jpg',
+    mode: 'face',
+    label: 'Elena Rostova',
+  })
+
+  assert.equal(anchor.mode, 'face')
+  assert.equal(anchor.label, 'Elena Rostova')
+  assert.equal(anchor.strength, 0.75) // default for face
+
+  const hint = applyAnchorPromptHints(anchor, 'sitting in a cafe')
+  assert.ok(hint.includes('visual character anchor: Elena Rostova'))
+  assert.ok(hint.includes('consistent facial features'))
+})

@@ -218,6 +218,9 @@
           src: displaySrc,
           draftSrc,
           isRunning: running,
+          progress: typeof parsed?.progress === 'number' ? parsed.progress : (typeof block?.progress === 'number' ? block.progress : undefined),
+          step: parsed?.step || block?.step,
+          stage: parsed?.stage || block?.stage,
           alt: prompt || 'generated image',
           t,
         }))
@@ -320,6 +323,8 @@
         react,
         t,
         parsed,
+        imgUrl: parsed.imageUrl || parsed.url || parsed.attachment?.url,
+        targetRef: parsed.attachmentId || parsed.attachment?.attachmentId || parsed.imageUrl || parsed.url,
         onClose: () => setInpaintOpen(false),
       }) : null
 

@@ -37,6 +37,9 @@ const EXPECTED_TOOLS = [
   'generate_ui_asset',
   'generate_style_matrix',
   'generate_theme_pair',
+  'generate_character_sheet',
+  'replace_image_text',
+  'beautify_diagram',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -75,6 +78,9 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerUiAssetTools',
     'registerStyleMatrixTools',
     'registerThemePairTools',
+    'registerCharacterSheetTools',
+    'registerVisionOcrTools',
+    'registerDiagramTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }
