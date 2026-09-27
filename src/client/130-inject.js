@@ -172,6 +172,12 @@
         'smart_crop_image',
         'export_asset_pack',
         'generate_ui_asset',
+        'generate_character_sheet',
+        'replace_image_text',
+        'beautify_diagram',
+        'generate_seamless_pattern',
+        'generate_spritesheet',
+        'sketch_to_image',
       ]
 
       for (const toolName of toolviewTools) {

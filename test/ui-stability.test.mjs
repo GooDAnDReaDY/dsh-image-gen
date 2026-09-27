@@ -50,6 +50,12 @@ test('ui-stability: client.js registers toolviews for all 8 visual tools', () =>
     'remove_background',
     'upscale_image',
     'vectorize_image',
+    'generate_character_sheet',
+    'replace_image_text',
+    'beautify_diagram',
+    'generate_seamless_pattern',
+    'generate_spritesheet',
+    'sketch_to_image',
   ]
   for (const tool of tools) {
     assert.ok(clientCode.includes(`'${tool}'`), `toolview must include tool: ${tool}`)
