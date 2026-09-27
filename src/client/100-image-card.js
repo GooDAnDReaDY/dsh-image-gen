@@ -320,6 +320,8 @@
         react,
         t,
         parsed,
+        imgUrl: parsed.imageUrl || parsed.url || parsed.attachment?.url,
+        targetRef: parsed.attachmentId || parsed.attachment?.attachmentId || parsed.imageUrl || parsed.url,
         onClose: () => setInpaintOpen(false),
       }) : null
 
