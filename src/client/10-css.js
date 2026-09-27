@@ -79,6 +79,12 @@
 .ig-progressive-wrap{position:relative;width:100%;overflow:hidden;border-radius:8px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);min-height:160px;display:flex;align-items:center;justify-content:center}
 .ig-draft-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:blur(6px);opacity:0.75;transform:scale(1.02);transition:opacity 0.4s ease}
 .ig-final-img{position:relative;width:100%;height:auto;display:block;opacity:1;transition:opacity 0.35s ease}
+
+.ig-progress-container{display:flex;flex-direction:column;gap:5px;padding:8px 10px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;margin-top:6px}
+.ig-progress-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dsw-alias-label-secondary);font-weight:500}
+.ig-progress-track{height:6px;width:100%;background:var(--dsw-alias-bg-layer-1);border-radius:3px;overflow:hidden;position:relative}
+.ig-progress-fill{height:100%;background:var(--dsw-alias-state-brand);border-radius:3px;transition:width 0.25s ease-in-out}
+
 .ig-draft-overlay{position:absolute;bottom:8px;left:8px;padding:3px 8px;border-radius:4px;background:color-mix(in srgb, var(--dsw-alias-bg-layer-1) 80%, transparent);font-size:11px;font-weight:600;color:var(--dsw-alias-label-primary);display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px)}
 
 @media (prefers-reduced-motion: reduce){

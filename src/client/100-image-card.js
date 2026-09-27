@@ -218,6 +218,9 @@
           src: displaySrc,
           draftSrc,
           isRunning: running,
+          progress: typeof parsed?.progress === 'number' ? parsed.progress : (typeof block?.progress === 'number' ? block.progress : undefined),
+          step: parsed?.step || block?.step,
+          stage: parsed?.stage || block?.stage,
           alt: prompt || 'generated image',
           t,
         }))
