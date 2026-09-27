@@ -167,6 +167,14 @@
 * **Cache & History Consistency**: Ensured content-addressed disk cache hits synchronize seamlessly with generation history and sidecar metadata.
 * **Test Suite Expansion**: Added `test/batch4-hardening.test.mjs`, expanding test coverage to **128 automated unit tests (100% pass)**.
 
+### 🚀 What's New in v0.11.12
+* **Character Sheet Generator (`generate_character_sheet`, #181)**: Synthesizes consistent character turnaround and model sheets (1x3, 2x2, emotions) preserving facial features and attire across anime, 3D, concept, and comic styles.
+* **FaceID & Portrait Consistency (`face_reference`, #183)**: FaceID / IP-Adapter prompt directives and `face` anchor mode in `set_style_anchor` for persistent facial likeness across scenes.
+* **OCR Localization & Text Replacement (`replace_image_text`, #180)**: Automated OCR text detection via `dsh-vision-bridge`, seamless background inpainting, and crisp typography replacement at original coordinates.
+* **3D Isometric Diagram Beautifier (`beautify_diagram`, #185)**: Converts raw Mermaid/Graphviz architecture diagrams into stunning 3D isometric tech illustrations for documentation and hero headers.
+* **Interactive Inpainting Canvas (#328)**: In-chat masking overlay with aspect ratio auto-detection, adjustable brush/eraser, and direct prompt dispatch.
+* **Live Progress Stream (#329)**: Real-time progress bar, stage indicators, and denoising step counters in `FalImageCard`.
+
 ### 🚀 What's New in v0.11.9
 * **ComfyUI Local Backend Payload Fix (#322, GitHub #7)**: Eliminated redundant nesting in `lib/providers/backends/local.js` that wrapped workflows as `{ prompt: { prompt: workflowGraph } }`, resolving `missing_node_type: Node 'ID #prompt' has no class_type` HTTP 400 errors during local ComfyUI generations. Added node shape validation before submission.
 

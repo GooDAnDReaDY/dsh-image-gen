@@ -170,7 +170,7 @@
             textarea.value = instruction
             if (typeof window !== 'undefined' && typeof window.Event === 'function') textarea.dispatchEvent(new window.Event('input', { bubbles: true }))
           }
-        } catch {}
+        } catch (_err) { /* non-fatal: optional textarea dispatch */ }
       }
 
       return react.createElement(

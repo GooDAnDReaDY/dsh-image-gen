@@ -182,3 +182,29 @@
 - **`generate_style_matrix` Tool (`lib/tools/style-matrix.js`, `lib/style-matrix-helpers.js`, `src/client/106-style-matrix-view.js`)**: Concurrently generates a 2×2 grid benchmarking 4 distinct artistic styles (e.g. editorial photograph, flat vector, 3D clay, cyberpunk) for a single concept.
 - **Blind A/B Compare**: Optional `blind_mode` masks style labels as "Option A..D" to enable unbiased visual evaluation before revealing preset names.
 - **Interactive Selection**: Interactive "⭐ Use Style" action allows users to adopt the chosen style preset for all subsequent session generations in one click.
+
+## Major Features & Tool Expansions (v0.11.12, #181, #183, #180, #185, #328, #329)
+
+### 1. Character Sheet Generator (generate_character_sheet, #181)
+- **Multi-Angle Consistency**: Synthesizes structured model sheets (turnarounds, 1x3, 2x2, emotions) preserving facial structure, hairstyle, attire, and color palette.
+- **Style Presets**: Supports concept art, anime, 3D animation, pixel art, realistic, and comic styling.
+- **Turnaround Directives**: Produces sequential full-body projections with clean neutral studio backdrops for downstream 3D modeling and animation.
+
+### 2. Portrait Reference & Identity Preservation (FaceID / IP-Adapter, #183)
+- **`face_reference` & `face_strength` in `generate_image`**: Directives and weights (0.1..1.0) directing diffusion backends to preserve precise facial landmarks and bone structure.
+- **Anchor Mode `face` in `set_style_anchor`**: Session-persistent facial identity anchor maintaining human character likeness across multiple prompts and scenes.
+
+### 3. OCR Localization & Text Replacement (replace_image_text, #180)
+- **Seamless Text Inpainting**: Identifies text regions via `dsh-vision-bridge` OCR, builds binary inpaint masks with padding, and clears background seamlessly via inpainting.
+- **Vector Typography Overlay**: Generates styled SVG text overlay precisely positioned at original coordinates with configurable font colors and families.
+
+### 4. 3D Isometric Diagram Beautifier (beautify_diagram, #185)
+- **Topological Parsing**: Parses raw Mermaid flowchart or Graphviz architecture code, identifying service nodes and data flow connectors.
+- **High-End 3D Aesthetics**: Synthesizes 3D isometric visualizations (isometric_3d, cyber_blueprint, clay_minimal, glossy_dark) for documentation headers and hero banners.
+
+### 5. Interactive Inpainting Canvas (src/client/105-inpaint-canvas.js, #328)
+- **Dynamic Aspect Ratio & Dimensions**: Canvas automatically measures the natural dimensions of the source image and scales the viewport cleanly.
+- **Dual Dispatch**: Copies standard edit_image command and automatically inserts prompt instruction into chat message inputs.
+
+### 6. Live Generation Progress Stream (src/client/102-progressive-preview.js, #329)
+- **Step & Progress Indicator**: Displays real-time progress percentages, step counts (e.g. 12/25), and stage labels (Queued, Denoising, Complete) using DSH design system tokens.
