@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.16
+
+### Fixed
+- **Peer gate on DSH 0.2.0-rc.1** (#58): DSH skips a profile bundle whose `peerDependencies` exclude the running version, so this plugin was absent from the profile with no error in the UI. Every `@deepseek-ai/dsh-*` peer now names both the 0.1.7-rc.2 and 0.2.0-rc.1 lines, because semver does not admit a prerelease of the next minor into a range that does not name it.
+
 ## 0.11.15
 
 ### Fixed
