@@ -1,6 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { isNewerVersion, isTrustedUpdateRequest, registerPluginUpdater } from '../lib/updater.js'
+import { isNewerVersion, isTrustedUpdateRequest, registerPluginUpdater, checkAndCleanProfileLock, isPidAlive } from '../lib/updater.js'
+import { writeFileSync, readFileSync, existsSync, rmSync, mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 test('updater: isNewerVersion correctly compares semver strings', () => {
   assert.equal(isNewerVersion('0.10.22', '0.10.23'), true)
@@ -84,4 +87,37 @@ test('updater: registerPluginUpdater binds route to ctx.webServer', async () => 
   assert.equal(registered[0].path, '/api/dsh-image-gen/update')
   assert.equal(typeof registered[0].handler, 'function')
   assert.equal(typeof cleanup, 'function')
+})
+
+
+test('updater: checkAndCleanProfileLock identifies active PID and removes dead lock (#341)', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'dsh-lock-test-'))
+  const lockFile = join(tmp, 'package.json.lock')
+
+  try {
+    // 1. Living process lock (current process PID)
+    writeFileSync(lockFile, JSON.stringify({ pid: process.pid }))
+    const activeState = checkAndCleanProfileLock(tmp)
+    assert.equal(activeState.locked, true)
+    assert.equal(activeState.pid, process.pid)
+    assert.ok(existsSync(lockFile), 'Lockfile for living PID must remain')
+
+    // 2. Dead process lock (PID 99999999 is dead)
+    writeFileSync(lockFile, JSON.stringify({ pid: 99999999 }))
+    const staleState = checkAndCleanProfileLock(tmp)
+    assert.equal(staleState.locked, false)
+    assert.equal(staleState.staleCleaned, true)
+    assert.equal(existsSync(lockFile), false, 'Stale lockfile must be removed')
+
+    // 3. No lockfile
+    const cleanState = checkAndCleanProfileLock(tmp)
+    assert.equal(cleanState.locked, false)
+  } finally {
+    rmSync(tmp, { recursive: true, force: true })
+  }
+})
+
+test('updater: install command never passes minimumReleaseAge=0 (#341)', () => {
+  const src = readFileSync(new URL('../lib/updater.js', import.meta.url), 'utf8')
+  assert.equal(src.includes('--config.minimumReleaseAge=0'), false, 'Must not pass minimumReleaseAge=0')
 })

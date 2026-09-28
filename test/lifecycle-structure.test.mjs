@@ -139,8 +139,8 @@ test('lifecycle: every registered tool defines output schema and callable output
     }
   }
   registerAllTools(ctx, {
-    config: { timeoutMs: 60000 },
-    live: () => ({ deliverAs: 'attachment' }),
+    config: { timeoutMs: 60000, toolsetProfile: 'all' },
+    live: () => ({ deliverAs: 'attachment', toolsetProfile: 'all' }),
     saveAndAttachResult: () => {},
     resolveSource: () => {},
     slugify: () => {},
