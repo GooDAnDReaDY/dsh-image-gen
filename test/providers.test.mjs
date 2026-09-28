@@ -914,10 +914,14 @@ test('audit: lib/client.js содержит живой InpaintCanvas и не с�
   assert.ok(!clientCode.includes('setDrawing'), 'unused setDrawing state should not exist')
 })
 
-test('audit (#208): lib/client.js регистрирует карточку только в settings.plugin.item без settings.section', () => {
+test('audit (#208): карточка регистрируется на живых сиденьях, а не на снятом settings.plugin.item', () => {
   const clientCode = fs.readFileSync('lib/client.js', 'utf8')
   assert.ok(!clientCode.includes("'settings.section'"), 'settings.section fallback must be removed')
-  assert.ok(clientCode.includes("'settings.plugin.item'"), 'settings.plugin.item slot must be registered')
+  // settings.plugin.item was retired before DSH 0.1.7-rc.2: the card was mounted on
+  // no seat at all, so the plugin had no configuration UI on 0.1.7-rc.2 or 0.2.0.
+  assert.ok(!clientCode.includes("name: 'settings.plugin.item'"), 'the retired seat must not be registered')
+  assert.ok(clientCode.includes("'plugins.item'"), 'plugins.item seat must be registered')
+  assert.ok(clientCode.includes("'plugins.row.config'"), 'plugins.row.config seat must be registered')
   assert.ok(clientCode.includes('registerSlotWhenReady'), 'must use registerSlotWhenReady')
 })
 

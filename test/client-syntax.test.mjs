@@ -49,7 +49,7 @@ test('lib/client.js contains complete gallery, diagnostics, and settings compone
     'FalImageCard',
     'ErrorBoundary',
     'tool.call.toolview',
-    'settings.plugin.item',
+    'plugins.item',
     'sidebar.right.pane.tab',
     'betterSidebar',
     'conversation.session.header.utilities',
@@ -116,7 +116,7 @@ test('lib/client.js CardForm store provides referentially stable getSnapshot (#2
     slots: {
       inject: (name, cb) => cb(),
       register: (desc, comp) => {
-        if (desc.name === 'settings.plugin.item') {
+        if (desc.name === 'plugins.item' || desc.name === 'plugins.row.config') {
           registeredItem = { desc, comp, injected: desc.inject ? desc.inject() : null }
         }
       },
@@ -124,7 +124,7 @@ test('lib/client.js CardForm store provides referentially stable getSnapshot (#2
   }
 
   moduleExports.apply(mockCtx)
-  assert.ok(registeredItem, 'Should have registered settings.plugin.item slot')
+  assert.ok(registeredItem, 'Should have registered a live settings seat (plugins.item / plugins.row.config)')
   assert.ok(registeredItem.injected, 'Slot should have injected card controller')
   const store = registeredItem.injected.hooks.falSettingsCard
   assert.ok(store, 'Should have falSettingsCard store')
@@ -233,7 +233,7 @@ test('lib/client.js inject supports both DSH 0.1.5-rc.3 (settingsScope) and 0.1.
       slots: {
         inject: (name, cb) => cb(),
         register: (desc, comp) => {
-          if (desc.name === 'settings.plugin.item') {
+          if (desc.name === 'plugins.item' || desc.name === 'plugins.row.config') {
             registeredItem = { desc, comp, injected: desc.inject ? desc.inject() : null }
           }
         },
@@ -241,7 +241,7 @@ test('lib/client.js inject supports both DSH 0.1.5-rc.3 (settingsScope) and 0.1.
     }
 
     moduleExports.apply(mockCtx015)
-    assert.ok(registeredItem, '0.1.5: Should have registered settings.plugin.item slot')
+    assert.ok(registeredItem, '0.1.5: Should have registered a live settings seat')
     assert.ok(registeredItem.injected, '0.1.5: Slot should have injected card controller')
     const store = registeredItem.injected.hooks.falSettingsCard
     assert.ok(store, '0.1.5: Should have falSettingsCard store')
@@ -270,7 +270,7 @@ test('lib/client.js inject supports both DSH 0.1.5-rc.3 (settingsScope) and 0.1.
       slots: {
         inject: (name, cb) => cb(),
         register: (desc, comp) => {
-          if (desc.name === 'settings.plugin.item') {
+          if (desc.name === 'plugins.item' || desc.name === 'plugins.row.config') {
             registeredItem = { desc, comp, injected: desc.inject ? desc.inject() : null }
           }
         },
@@ -278,7 +278,7 @@ test('lib/client.js inject supports both DSH 0.1.5-rc.3 (settingsScope) and 0.1.
     }
 
     moduleExports.apply(mockCtx016)
-    assert.ok(registeredItem, '0.1.6+: Should have registered settings.plugin.item slot')
+    assert.ok(registeredItem, '0.1.6+: Should have registered a live settings seat')
     assert.ok(registeredItem.injected, '0.1.6+: Slot should have injected card controller')
     const store = registeredItem.injected.hooks.falSettingsCard
     assert.ok(store, '0.1.6+: Should have falSettingsCard store')
@@ -305,7 +305,7 @@ test('lib/client.js inject supports both DSH 0.1.5-rc.3 (settingsScope) and 0.1.
       slots: {
         inject: (name, cb) => cb(),
         register: (desc, comp) => {
-          if (desc.name === 'settings.plugin.item') {
+          if (desc.name === 'plugins.item' || desc.name === 'plugins.row.config') {
             registeredItem = { desc, comp, injected: desc.inject ? desc.inject() : null }
           }
         },
