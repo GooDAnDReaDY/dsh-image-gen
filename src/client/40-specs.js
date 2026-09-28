@@ -21,6 +21,11 @@
       { field: 'deliverAs', spec: selectField('deliverAs', DELIVERY_MODES), kind: 'select', options: DELIVERY_MODES, labelKey: 'f.deliverAs', hintKey: 'f.deliverAsHint', tab: 'general' },
       { field: 'outputDir', spec: textField('outputDir'), kind: 'text', labelKey: 'f.outputDir', hintKey: 'f.outputDirHint', placeholderKey: 'p.outputDir', tab: 'general' },
       { field: 'historyLimit', spec: numberField('historyLimit'), kind: 'number', labelKey: 'f.historyLimit', hintKey: 'f.historyLimitHint', placeholderKey: 'p.historyLimit', tab: 'general' },
+      { field: 'toolsetProfile', spec: selectField('toolsetProfile', ['minimal', 'all', 'custom']), kind: 'select', options: ['minimal', 'all', 'custom'], labelKey: 'f.toolsetProfile', hintKey: 'f.toolsetProfileHint', tab: 'general' },
+      { field: 'toolsetDesign', spec: booleanField('toolsetDesign'), kind: 'select', options: ['true', 'false'], labelKey: 'f.toolsetDesign', hintKey: 'f.toolsetDesignHint', tab: 'general' },
+      { field: 'toolsetProcessing', spec: booleanField('toolsetProcessing'), kind: 'select', options: ['true', 'false'], labelKey: 'f.toolsetProcessing', hintKey: 'f.toolsetProcessingHint', tab: 'general' },
+      { field: 'toolsetFrontend', spec: booleanField('toolsetFrontend'), kind: 'select', options: ['true', 'false'], labelKey: 'f.toolsetFrontend', hintKey: 'f.toolsetFrontendHint', tab: 'general' },
+      { field: 'toolsetCreative', spec: booleanField('toolsetCreative'), kind: 'select', options: ['true', 'false'], labelKey: 'f.toolsetCreative', hintKey: 'f.toolsetCreativeHint', tab: 'general' },
 
       // Provider: FAL
       { field: 'model', spec: textField('model'), kind: 'text', labelKey: 'f.model', hintKey: 'f.modelHint', placeholderKey: 'p.model', when: ['fal'], tab: 'provider' },
