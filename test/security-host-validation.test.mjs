@@ -245,3 +245,18 @@ test('routes: lib/index.js binds isTrustedLocalRequest guards and sanitizes hist
   assert.equal(sanitized[0].prompt, 'A cute cat')
   assert.equal(sanitized[0].thumbnailUrl, '/dsh-image-gen/image?id=sha256%3A123')
 })
+
+test('security: formatErrorMessage automatically sanitizes sensitive tokens, API keys and URLs (#348)', async () => {
+  const { formatErrorMessage } = await import('../lib/provider-utils.js')
+  
+  const errWithKey = new Error('Request to https://api.openai.com/v1/images/generations?key=AIzaSyD-1234567890abcdefghijklmnop failed with 401 Bearer sk-proj-1234567890abcdef')
+  const formatted = formatErrorMessage(errWithKey, 'custom')
+  
+  assert.ok(!formatted.includes('AIzaSyD-1234567890abcdefghijklmnop'), 'Must mask AIza key in URL')
+  assert.ok(!formatted.includes('sk-proj-1234567890abcdef'), 'Must mask sk- token')
+  assert.ok(formatted.includes('Bearer Bearer sk-p...cdef') || formatted.includes('sk-p...cdef'), 'Must produce masked key')
+  
+  const errReplicate = { message: 'Replicate token r8_1234567890abcdefghijklmnop invalid' }
+  const formattedRep = formatErrorMessage(errReplicate, 'replicate')
+  assert.ok(!formattedRep.includes('r8_1234567890abcdefghijklmnop'), 'Must mask Replicate token')
+})
