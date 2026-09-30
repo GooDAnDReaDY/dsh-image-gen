@@ -3,11 +3,11 @@
 ## Product / Purpose
 - **Назначение:** Мультипровайдерный комбайн генерации и визуальной обработки изображений для DeepSeek Harness. Позволяет агенту генерировать изображения по текстовому описанию, удалять фон, увеличивать разрешение, векторизовать в SVG, смешивать картинки и проводить автономную проверку качества (Vision Loop) в связке с `@goodandready/dsh-vision-bridge`.
 - **Аудитория:** Пользователи и разработчики DeepSeek Harness, создающие визуальный контент, иллюстрации, веб-ассеты и интерфейсы.
-- **Статус:** Production-ready комбайн (v0.10.x).
+- **Статус:** Production-ready комбайн (v0.11.x).
 
 ## User Surfaces
 - **DSH UI / settings / slots:**
-  - Карточка настроек плагина монтируется в слот `settings.plugin.item` (`FalSettingsCard`) в едином дизайн-коде `dsh-clinebot`.
+  - Карточка настроек плагина монтируется в слоты `plugins.item` и `plugins.row.config` (`FalSettingsCard`) с поддержкой обратной совместимости для `settings.plugin.item` в едином дизайн-коде `dsh-clinebot`.
   - Верхний информационный дашборд (`.ig-grid-4`, `.ig-stat-box`): активный провайдер, размер и формат кадра, статус Quality Gate и лимит Loop Guard, дневной бюджет и состояние кэша.
   - 5 структурированных вкладок: ⚙️ Основные, 🔌 Провайдер, ✨ Промпт и стили, 🛡️ Безопасность и бюджет, ⚡ Кэш и хранение.
   - Защитный контур `ErrorBoundary`: изоляция ошибок рендера пользовательского интерфейса с кнопкой повтора (Retry).
@@ -208,3 +208,30 @@
 
 ### 6. Live Generation Progress Stream (src/client/102-progressive-preview.js, #329)
 - **Step & Progress Indicator**: Displays real-time progress percentages, step counts (e.g. 12/25), and stage labels (Queued, Denoising, Complete) using DSH design system tokens.
+
+## Major Features & Tool Expansions (v0.11.16+, #337, #338, #339, #340, #341, #348, #349)
+
+### 1. Toolsets Profiles & Lightweight Agent Context (#337)
+- **`toolsetProfile` Configuration**:
+  - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `upscale_image`) with schema size <= 5k chars, preserving agent context window.
+  - `all`: registers all 30 tools across all suites.
+  - `custom`: enables fine-grained selection per suite (`toolsets.creative`, `toolsets.studio`, etc.) or individual flat boolean toggles.
+- **Suite Architecture (30 tools total)**:
+  - **Core Generation (4 tools)**: `generate_image`, `generate_image_pack`, `vary_image`, `remix_image`.
+  - **Processing & Enhancement (8 tools)**: `edit_image`, `upscale_image`, `remove_background`, `compare_images`, `blend_images`, `vectorize_image`, `smart_crop_image`, `assemble_image_grid`.
+  - **Creative & Web Assets (6 tools)**: `generate_ui_asset`, `generate_theme_pair`, `generate_spritesheet`, `generate_pwa_icons`, `generate_color_palette`, `generate_seamless_pattern`.
+  - **Studio & Continuity (8 tools)**: `set_style_anchor`, `generate_character_sheet`, `generate_style_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`.
+  - **Vision & Analysis (4 tools)**: `inspect_image`, `describe_image_style`, `replace_image_text`, `beautify_diagram`.
+
+### 2. Generation Vault & Media Archive (#339)
+- **Endpoint `/dsh-image-gen/vault`**: Comprehensive media vault for browsing, searching, and filtering past generations with rich sidecar metadata.
+- **Path Isolation**: Directory traversal protection with path normalization, preventing leaks of host files outside configured output directories.
+
+### 3. Settings Card Modernization & Reactive Stability (#338, #343, #347)
+- **Slot Unification**: Fully integrates with modern DSH slots `plugins.item` and `plugins.row.config` alongside legacy `settings.plugin.item`.
+- **Volatile Boxes Unwrapping**: Automatically strips internal reactivity wrappers (`Volatile`) via `plainConfig()`, preventing form freezing and React Error #310.
+
+### 4. Production Robustness & Upgrader Safety (#340, #341, #348, #349)
+- **Profile Lock Recovery (#341)**: Detects dead lockfiles (`pnpm-lock.yaml`, active PIDs) and gracefully purges stale locks on updater timeout.
+- **Security Sanitization (#348)**: Strict regex-based masking of API keys, bearer tokens, and internal provider credentials in all tool exceptions and log messages.
+- **Modular Tool Decomposition (#349)**: Strict adherence to `< 600` lines per file constraint by separating tool registration from execution and caching helpers (`lib/generation-helpers.js`).
