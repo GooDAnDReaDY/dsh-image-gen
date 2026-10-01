@@ -197,7 +197,7 @@ test('updater: isTrustedUpdateRequest rejects DNS-rebinding hostname attacks', (
 })
 
 test('routes: lib/index.js binds isTrustedLocalRequest guards and sanitizes history (#280, #276, #277)', () => {
-  const indexSource = fs.readFileSync('lib/index.js', 'utf8')
+  const indexSource = fs.readFileSync(new URL('../lib/index.js', import.meta.url), 'utf8')
 
   // 1. Guard imported
   assert.ok(indexSource.includes('isTrustedLocalRequest'), 'index.js must import and use isTrustedLocalRequest')
@@ -259,4 +259,52 @@ test('security: formatErrorMessage automatically sanitizes sensitive tokens, API
   const errReplicate = { message: 'Replicate token r8_1234567890abcdefghijklmnop invalid' }
   const formattedRep = formatErrorMessage(errReplicate, 'replicate')
   assert.ok(!formattedRep.includes('r8_1234567890abcdefghijklmnop'), 'Must mask Replicate token')
+})
+
+test('security: resolveConversationImage and resolveSource reject symlinks pointing outside workspace (#354)', async () => {
+  const { resolveConversationImage } = await import('../lib/resolve-image.js')
+  const { resolveSource } = await import('../lib/resolve-source.js')
+  const { mkdir, writeFile, symlink, rm } = await import('node:fs/promises')
+  const fs = await import('node:fs')
+  const path = await import('node:path')
+  const os = await import('node:os')
+
+  const tmpDir = path.join(os.tmpdir(), `dsh-symlink-test-${Date.now()}`)
+  const wsDir = path.join(tmpDir, 'workspace')
+  const outsideDir = path.join(tmpDir, 'outside')
+  await mkdir(wsDir, { recursive: true })
+  await mkdir(outsideDir, { recursive: true })
+
+  const validPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+  
+  const outsideFile = path.join(outsideDir, 'secret.png')
+  await writeFile(outsideFile, validPng)
+
+  const insideFile = path.join(wsDir, 'normal.png')
+  await writeFile(insideFile, validPng)
+
+  const symlinkFile = path.join(wsDir, 'link-to-secret.png')
+  await symlink(outsideFile, symlinkFile).catch(() => {})
+
+  const mockExec = { agent: { session: { header: { cwd: wsDir } } } }
+
+  const normalRes = await resolveConversationImage({}, mockExec, 'normal.png')
+  assert.ok(normalRes && normalRes.bytes, 'Normal file inside workspace must resolve')
+
+  const normalSource = await resolveSource({}, mockExec, 'normal.png')
+  assert.ok(normalSource && normalSource.bytes, 'Normal source file inside workspace must resolve')
+
+  if (fs.existsSync(symlinkFile)) {
+    await assert.rejects(
+      async () => resolveConversationImage({}, mockExec, 'link-to-secret.png'),
+      /Access denied: path "link-to-secret.png" points outside allowed workspace directory/
+    )
+
+    await assert.rejects(
+      async () => resolveSource({}, mockExec, 'link-to-secret.png'),
+      /Access denied: path "link-to-secret.png" points outside allowed workspace directory/
+    )
+  }
+
+  await rm(tmpDir, { recursive: true, force: true }).catch(() => {})
 })
