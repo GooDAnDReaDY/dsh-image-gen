@@ -163,3 +163,24 @@ test("lossless JSON (#195): strips undefined properties recursively and maintain
 
   assert.deepEqual(JSON.parse(JSON.stringify(clean)), clean)
 })
+
+test('frontend-assets (#374): optimizeSvgContent strips active SVG content, scripts, foreignObject and inline event handlers', () => {
+  const maliciousSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" onload="alert('xss')" onerror="console.log('err')">
+    <script>alert("AUDIT_SENTINEL_SCRIPT")</script>
+    <foreignObject><body xmlns="http://www.w3.org/1999/xhtml"><script>alert('nested')</script></body></foreignObject>
+    <a href="javascript:alert('link')"><circle cx="50" cy="50" r="40" fill="red" /></a>
+  </svg>`
+
+  const result = optimizeSvgContent(maliciousSvg, { componentName: 'SafeIcon' })
+
+  assert.ok(!result.svg.includes('<script'), 'Must strip <script> tags from SVG output')
+  assert.ok(!result.svg.includes('AUDIT_SENTINEL_SCRIPT'), 'Must strip script payload')
+  assert.ok(!result.svg.includes('<foreignObject'), 'Must strip <foreignObject> tags')
+  assert.ok(!result.svg.includes('onload='), 'Must strip onload event handler')
+  assert.ok(!result.svg.includes('onerror='), 'Must strip onerror event handler')
+  assert.ok(!result.svg.includes('javascript:'), 'Must strip javascript: URI schemes')
+
+  assert.ok(!result.reactTsx.includes('<script'), 'Must strip <script> tags from TSX output')
+  assert.ok(!result.reactTsx.includes('onload='), 'Must strip onload from TSX output')
+  assert.ok(result.reactTsx.includes('<circle'), 'Must preserve valid SVG vector elements')
+})
