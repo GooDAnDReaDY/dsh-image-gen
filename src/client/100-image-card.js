@@ -1,14 +1,50 @@
-    const IMAGE_URL_RE = /https?:\/\/[^\s)]+\.(png|jpg|jpeg|webp|gif)(\?[^\s)]*)?/i
+    const HTTP_IMAGE_URL_RE = /https?:\/\/[^\s)]+\.(png|jpg|jpeg|webp|gif)(\?[^\s)]*)?/i
+    const RELATIVE_IMAGE_URL_RE = /(\/dsh-image-gen\/image\?[^\s)"'<>]+)/i
+    const MARKDOWN_IMAGE_RE = /!\[.*?\]\(((\/|https?:\/\/)[^\s)]+)\)/i
+    const MARKDOWN_LINK_RE = /\[.*?\]\(((\/|https?:\/\/)[^\s)]+)\)/i
 
     function readResult(block) {
       if (!block) return { text: '', url: '', attachment: null }
       const text = block.output || block.text || ''
-      const attachment = block.attachment || (block.attachments && block.attachments[0]) || null
-      const linked = text.match(IMAGE_URL_RE)
+      const meta = block.presentationMeta || block.meta || block.data || block.result || null
+
+      let attachment = block.attachment
+        || (Array.isArray(block.attachments) && block.attachments[0])
+        || meta?.attachment
+        || null
+
+      let url = meta?.url || block.url || ''
+
+      if (!url && attachment) {
+        url = attachmentImageUrl(attachment)
+      }
+
+      let cleanText = text
+      if (!url && text) {
+        const mdImg = text.match(MARKDOWN_IMAGE_RE)
+        const relUrl = text.match(RELATIVE_IMAGE_URL_RE)
+        const httpUrl = text.match(HTTP_IMAGE_URL_RE)
+        const mdLink = text.match(MARKDOWN_LINK_RE)
+
+        if (mdImg) {
+          url = mdImg[1]
+          cleanText = text.replace(mdImg[0], '').trim()
+        } else if (relUrl) {
+          url = relUrl[1]
+          cleanText = text.replace(relUrl[0], '').trim()
+        } else if (httpUrl) {
+          url = httpUrl[0]
+          cleanText = text.replace(httpUrl[0], '').trim()
+        } else if (mdLink) {
+          url = mdLink[1]
+          cleanText = text.replace(mdLink[0], '').trim()
+        }
+      }
+
       return {
         attachment,
-        url: linked ? linked[0] : '',
-        text: linked ? text.replace(linked[0], '').trim() : text,
+        url,
+        text: cleanText,
       }
     }
 
@@ -215,6 +251,7 @@
         const draftSrc = block && (block.draftUrl || block.previewUrl || '')
         body.push(react.createElement(ProgressiveImagePreview, {
           key: 'prog-img',
+          callId: block && (block.id || block.callId || block.toolCallId || ''),
           src: displaySrc,
           draftSrc,
           isRunning: running,
@@ -323,8 +360,9 @@
         react,
         t,
         parsed,
-        imgUrl: parsed.imageUrl || parsed.url || parsed.attachment?.url,
-        targetRef: parsed.attachmentId || parsed.attachment?.attachmentId || parsed.imageUrl || parsed.url,
+        imgUrl: parsed.url || (parsed.attachment ? attachmentImageUrl(parsed.attachment) : ''),
+        targetRef: (parsed.attachment && (parsed.attachment.attachmentId || parsed.attachment.id)) || parsed.url || 'latest',
+        sendActionPrompt,
         onClose: () => setInpaintOpen(false),
       }) : null
 

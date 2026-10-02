@@ -84,11 +84,15 @@
 .ig-progress-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dsw-alias-label-secondary);font-weight:500}
 .ig-progress-track{height:6px;width:100%;background:var(--dsw-alias-bg-layer-1);border-radius:3px;overflow:hidden;position:relative}
 .ig-progress-fill{height:100%;background:var(--dsw-alias-state-brand);border-radius:3px;transition:width 0.25s ease-in-out}
+.ig-progress-indeterminate{width:40%;animation:ig-indeterminate-slide 1.5s infinite ease-in-out}
+@keyframes ig-indeterminate-slide{0%{transform:translateX(-100%)}50%{transform:translateX(150%)}100%{transform:translateX(300%)}}
 
 .ig-draft-overlay{position:absolute;bottom:8px;left:8px;padding:3px 8px;border-radius:4px;background:color-mix(in srgb, var(--dsw-alias-bg-layer-1) 80%, transparent);font-size:11px;font-weight:600;color:var(--dsw-alias-label-primary);display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px)}
 
 @media (prefers-reduced-motion: reduce){
   .ig-draft-img,.ig-final-img{transition:none !important}
+  .ig-progress-fill{transition:none !important;animation:none !important}
+  .ig-progress-indeterminate{animation:none !important;width:100%;opacity:0.6}
 }
 
 /* Asset Vault & Studio (#158, #159) */

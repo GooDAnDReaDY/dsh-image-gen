@@ -1,19 +1,72 @@
-    // -------------------------------------------------------------- Progressive Draft & Live Progress Preview (#147, #329)
+    // -------------------------------------------------------------- Progressive Draft & Live Progress Preview (#147, #329, #379)
     function ProgressiveImagePreview(props) {
       const src = props.src
-      const draftSrc = props.draftSrc
       const isRunning = props.isRunning
-      const progress = typeof props.progress === 'number' ? Math.min(100, Math.max(0, props.progress)) : undefined
-      const step = props.step
-      const stage = props.stage || (progress !== undefined && progress < 100 ? 'Rendering...' : 'Complete')
+      const callId = props.callId
       const alt = props.alt || 'Generated image'
       const t = props.t || ((k) => k)
 
       const [loaded, setLoaded] = react.useState(false)
+      const [liveState, setLiveState] = react.useState({
+        progress: undefined,
+        step: undefined,
+        stage: undefined,
+        draftSrc: '',
+      })
 
       react.useEffect(() => {
         setLoaded(false)
       }, [src])
+
+      // Subscribe to live events transport when running and callId is present (#379)
+      react.useEffect(() => {
+        const EventSourceImpl = typeof window !== 'undefined' ? window.EventSource : undefined
+        if (!isRunning || !callId || !EventSourceImpl) {
+          return
+        }
+        let es
+        try {
+          es = new EventSourceImpl('/dsh-image-gen/live-events?callId=' + encodeURIComponent(callId))
+          es.onmessage = (e) => {
+            try {
+              const data = JSON.parse(e.data)
+              if (!data) return
+              setLiveState((prev) => ({
+                progress: typeof data.progress === 'number' ? Math.min(100, Math.max(0, data.progress)) : prev.progress,
+                step: data.step !== undefined ? data.step : prev.step,
+                stage: data.stage !== undefined ? data.stage : prev.stage,
+                draftSrc: data.draftUrl || prev.draftSrc,
+              }))
+            } catch (_err) {
+              // Ignore event parsing errors
+            }
+          }
+          es.onerror = () => {
+            // EventSource handles retries or terminates on close
+          }
+        } catch (_err) {
+          // Ignore EventSource creation errors
+        }
+
+        return () => {
+          if (es) {
+            try {
+              es.close()
+            } catch (_err) {
+              // Ignore EventSource close errors
+            }
+          }
+        }
+      }, [isRunning, callId])
+
+      const draftSrc = liveState.draftSrc || props.draftSrc
+      const progress = liveState.progress !== undefined
+        ? liveState.progress
+        : (typeof props.progress === 'number' ? Math.min(100, Math.max(0, props.progress)) : undefined)
+      const step = liveState.step !== undefined ? liveState.step : props.step
+      const stage = liveState.stage
+        || props.stage
+        || (progress !== undefined && progress < 100 ? (t('card.rendering') || 'Rendering...') : (isRunning ? (t('card.generating') || 'Generating...') : 'Complete'))
 
       const showProgress = isRunning || (progress !== undefined && progress < 100)
 
@@ -30,8 +83,8 @@
           'div',
           { className: 'ig-progress-track' },
           react.createElement('div', {
-            className: 'ig-progress-fill',
-            style: { width: (progress !== undefined ? progress : 45) + '%' },
+            className: 'ig-progress-fill' + (progress === undefined ? ' ig-progress-indeterminate' : ''),
+            style: progress !== undefined ? { width: progress + '%' } : undefined,
           })
         )
       ) : null

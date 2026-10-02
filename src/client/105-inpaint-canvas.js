@@ -1,7 +1,14 @@
-// 105-inpaint-canvas.js — Interactive in-chat canvas drawing overlay for inpainting (#285, #301, #328).
+// 105-inpaint-canvas.js — Interactive in-chat canvas drawing overlay for inpainting (#285, #301, #328, #380).
+
+    function buildEditInstruction(opts) {
+      const p = (opts && opts.prompt ? opts.prompt.trim() : '') || 'inpaint masked region'
+      const img = (opts && opts.image) || 'latest'
+      const m = (opts && opts.mask) || ''
+      return 'Use edit_image with prompt: "' + p + '", image: "' + img + '", mask: "' + m + '"'
+    }
 
     function InpaintCanvas(props) {
-      const { imgUrl, targetRef, parsed, onClose, t } = props
+      const { imgUrl, targetRef, parsed, onClose, sendActionPrompt, t } = props
       const canvasRef = react.useRef(null)
       const isDrawingRef = react.useRef(false)
       const undoStackRef = react.useRef([])
@@ -12,8 +19,12 @@
       const [inpaintPrompt, setInpaintPrompt] = react.useState('')
       const [canvasDims, setCanvasDims] = react.useState({ width: 512, height: 512, ratio: '1/1' })
 
-      const effectiveImgUrl = imgUrl || parsed?.imageUrl || parsed?.url || parsed?.attachment?.url || ''
-      const effectiveTargetRef = targetRef || parsed?.attachmentId || parsed?.attachment?.attachmentId || parsed?.imageUrl || parsed?.url || 'current image'
+      const effectiveImgUrl = imgUrl || (parsed?.attachment ? attachmentImageUrl(parsed.attachment) : (parsed?.url || ''))
+      const effectiveTargetRef = targetRef
+        || (parsed?.attachment && (parsed.attachment.attachmentId || parsed.attachment.id))
+        || parsed?.attachmentId
+        || parsed?.url
+        || 'latest'
 
       const initCanvas = react.useCallback(() => {
         const canvas = canvasRef.current
@@ -33,11 +44,8 @@
         if (e.target && e.target.naturalWidth && e.target.naturalHeight) {
           const nw = e.target.naturalWidth
           const nh = e.target.naturalHeight
-          // Scale dimensions down to manageable working canvas size (max 768)
-          const scale = Math.min(1, 768 / Math.max(nw, nh))
-          const cw = Math.round(nw * scale)
-          const ch = Math.round(nh * scale)
-          setCanvasDims({ width: cw, height: ch, ratio: `${cw}/${ch}` })
+          // Preserve 1:1 intrinsic source dimensions for accurate mask generation (#380)
+          setCanvasDims({ width: nw, height: nh, ratio: `${nw}/${nh}` })
         }
       }
 
@@ -45,11 +53,12 @@
         const rect = canvas.getBoundingClientRect()
         const clientX = e.touches ? e.touches[0].clientX : e.clientX
         const clientY = e.touches ? e.touches[0].clientY : e.clientY
-        const scaleX = canvas.width / rect.width
-        const scaleY = canvas.height / rect.height
+        const scaleX = canvas.width / (rect.width || canvas.width)
+        const scaleY = canvas.height / (rect.height || canvas.height)
         return {
           x: (clientX - rect.left) * scaleX,
           y: (clientY - rect.top) * scaleY,
+          scale: (scaleX + scaleY) / 2,
         }
       }
 
@@ -61,16 +70,17 @@
         if (!ctx) return
         isDrawingRef.current = true
         const pos = getPos(e, canvas)
+        const actualBrush = brushSize * (pos.scale || 1)
         ctx.beginPath()
         ctx.moveTo(pos.x, pos.y)
-        ctx.lineWidth = brushSize
+        ctx.lineWidth = actualBrush
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
         const color = toolMode === 'eraser' ? 'black' : 'white'
         ctx.strokeStyle = color
         ctx.fillStyle = color
 
-        ctx.arc(pos.x, pos.y, brushSize / 2, 0, Math.PI * 2)
+        ctx.arc(pos.x, pos.y, actualBrush / 2, 0, Math.PI * 2)
         ctx.fill()
         ctx.beginPath()
         ctx.moveTo(pos.x, pos.y)
@@ -85,25 +95,26 @@
         const ctx = canvas.getContext('2d')
         if (!ctx) return
         const pos = getPos(e, canvas)
-        ctx.lineWidth = brushSize
+        const actualBrush = brushSize * (pos.scale || 1)
+        ctx.lineWidth = actualBrush
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
         const color = toolMode === 'eraser' ? 'black' : 'white'
         ctx.strokeStyle = color
         ctx.lineTo(pos.x, pos.y)
         ctx.stroke()
-        setHasStrokes(true)
+        ctx.beginPath()
+        ctx.moveTo(pos.x, pos.y)
       }
 
-      function stopDraw(e) {
+      function stopDraw() {
         if (!isDrawingRef.current) return
         isDrawingRef.current = false
         const canvas = canvasRef.current
         if (!canvas) return
         const ctx = canvas.getContext('2d')
         if (!ctx) return
-        ctx.closePath()
-
+        ctx.beginPath()
         if (undoStackRef.current.length >= 15) {
           undoStackRef.current.shift()
         }
@@ -156,7 +167,15 @@
         if (!canvas) return
         const maskDataUrl = canvas.toDataURL('image/png')
         const promptText = inpaintPrompt.trim() || 'inpaint masked region'
-        const instruction = 'Use edit_image with prompt: "' + promptText + '", source_image: "' + effectiveTargetRef + '", mask: "' + maskDataUrl + '"'
+        const instruction = buildEditInstruction({
+          prompt: promptText,
+          image: effectiveTargetRef,
+          mask: maskDataUrl,
+        })
+
+        if (typeof sendActionPrompt === 'function') {
+          sendActionPrompt(instruction)
+        }
 
         if (typeof navigator !== 'undefined' && navigator.clipboard) {
           navigator.clipboard.writeText(instruction)
