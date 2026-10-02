@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.29
+
+### Fixed
+- **Runtime Dependencies Contract (#398)**: Explicitly declare `sharp` (`^0.33.5 || ^0.35.0`) and `@deepseek-ai/dsh-atomic-write` (`^0.1.7-rc.2 || ^0.2.0-rc.1 || ^0.2.0-rc.2`) in `package.json` `dependencies`. Eliminate reliance on ambient or globally installed host modules.
+- **Reproducible Clean Installation & Lockfile Synchronization (#397)**: Synchronize `package-lock.json` to guarantee seamless `npm ci` execution on fresh checkouts without `EUSAGE` discrepancies or missing peer dependency errors.
+- **Project Agent Standards & Architectural Map (#400)**: Introduce canonical project-level `AGENTS.md` and `index.md` based on DEV root templates, specifying technical boundaries, offline test invariants, and deployment targets while keeping internal workflow documents strictly excluded from public product mirrors.
+
 ## 0.11.28
 
 ### Fixed
