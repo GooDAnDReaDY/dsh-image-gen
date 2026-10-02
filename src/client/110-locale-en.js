@@ -182,6 +182,9 @@
       'f.localA1111Url': 'Local A1111 URL (Legacy)',
       'f.localA1111UrlHint': 'Direct Automatic1111 endpoint URL.',
       'p.localA1111Url': 'http://127.0.0.1:7860',
+      'f.comfyWorkflowJson': 'ComfyUI Workflow JSON',
+      'f.comfyWorkflowJsonHint': 'Custom ComfyUI API workflow graph (JSON) with {{prompt}} placeholders.',
+      'p.comfyWorkflowJson': '{"3": {"class_type": "KSampler", ...}}',
 
       'f.subscriptionQuality': 'Subscription Quality',
       'f.subscriptionQualityHint': 'Target quality profile when using Codex or Grok subscriptions.',

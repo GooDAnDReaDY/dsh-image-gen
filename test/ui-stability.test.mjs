@@ -150,3 +150,13 @@ test('config validation: enforces numeric bounds and enum values before runtime 
   const validA1111 = plainConfig(Config({ localKind: 'a1111' }))
   assert.equal(validA1111.localKind, 'a1111')
 })
+
+test('ui-stability: UI keys are a strict subset of Config keys (#369)', () => {
+  const allowedKeys = new Set(Object.keys(Config.dict || {}))
+  const clientCode = fs.readFileSync('lib/client.js', 'utf8')
+  const matches = [...clientCode.matchAll(/field:\s*'([^']+)'/g)].map((m) => m[1])
+  const uniqueUiFields = new Set(matches)
+  for (const field of uniqueUiFields) {
+    assert.ok(allowedKeys.has(field), `UI field "${field}" is not in Config.dict schema!`)
+  }
+})

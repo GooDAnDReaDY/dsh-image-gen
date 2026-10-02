@@ -272,3 +272,85 @@ test('createSettingsAdapter: delete removes override and restores schema default
   assert.equal(liveCfg.stylePreset, 'none', 'live config updated')
   assert.equal(persisted.stylePreset, 'none', 'persisted with default')
 })
+
+test('settings-route: PUT with fallbackProviders as comma string parses to array (#369)', async () => {
+  let liveCfg = { enabled: true, fallbackProviders: [] }
+  const ctx = createMockCtx()
+  registerSettingsRoutes(ctx, {
+    live: () => liveCfg,
+    getSettingsApi: () => null,
+    setLiveConfig: (c) => { liveCfg = c },
+  })
+
+  const handler = ctx.routes.get('/dsh-image-gen/config')
+  const payload = JSON.stringify({ config: { fallbackProviders: 'custom, local' } })
+  const stream = Readable.from([payload])
+  stream.method = 'PUT'
+  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.socket = { remoteAddress: '127.0.0.1' }
+
+  const res = mockRes()
+  await handler(stream, res)
+
+  assert.equal(res.statusCode, 200)
+  const data = JSON.parse(res.body)
+  assert.equal(data.ok, true)
+  assert.deepEqual(data.config.fallbackProviders, ['custom', 'local'])
+  assert.deepEqual(liveCfg.fallbackProviders, ['custom', 'local'])
+})
+
+test('settings-route: PUT with valid comfyWorkflowJson persists to live config (#369)', async () => {
+  let liveCfg = { enabled: true }
+  const ctx = createMockCtx()
+  registerSettingsRoutes(ctx, {
+    live: () => liveCfg,
+    getSettingsApi: () => null,
+    setLiveConfig: (c) => { liveCfg = c },
+  })
+
+  const validWorkflow = JSON.stringify({
+    '3': { class_type: 'KSampler', inputs: { seed: 42 } },
+    '4': { class_type: 'SaveImage', inputs: {} },
+  })
+
+  const handler = ctx.routes.get('/dsh-image-gen/config')
+  const payload = JSON.stringify({ config: { comfyWorkflowJson: validWorkflow } })
+  const stream = Readable.from([payload])
+  stream.method = 'PUT'
+  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.socket = { remoteAddress: '127.0.0.1' }
+
+  const res = mockRes()
+  await handler(stream, res)
+
+  assert.equal(res.statusCode, 200)
+  const data = JSON.parse(res.body)
+  assert.equal(data.ok, true)
+  assert.equal(data.config.comfyWorkflowJson, validWorkflow)
+  assert.equal(liveCfg.comfyWorkflowJson, validWorkflow)
+})
+
+test('settings-route: PUT with invalid comfyWorkflowJson returns 400 (#369)', async () => {
+  let liveCfg = { enabled: true }
+  const ctx = createMockCtx()
+  registerSettingsRoutes(ctx, {
+    live: () => liveCfg,
+    getSettingsApi: () => null,
+    setLiveConfig: (c) => { liveCfg = c },
+  })
+
+  const handler = ctx.routes.get('/dsh-image-gen/config')
+  const payload = JSON.stringify({ config: { comfyWorkflowJson: 'invalid json without nodes' } })
+  const stream = Readable.from([payload])
+  stream.method = 'PUT'
+  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.socket = { remoteAddress: '127.0.0.1' }
+
+  const res = mockRes()
+  await handler(stream, res)
+
+  assert.equal(res.statusCode, 400)
+  const data = JSON.parse(res.body)
+  assert.equal(data.ok, false)
+  assert.ok(data.error.includes('Invalid comfyWorkflowJson'))
+})
