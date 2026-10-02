@@ -12,12 +12,17 @@ node_modules/
 *.key
 *.crt
 
-# build / cache
+# build / cache / test artifacts
 dist/
 build/
 .cache/
 *.log
 coverage/
+tmp-*/
+test-smoke-out/
+assets/
+icons/
+manifest.json
 
 # OS / editor
 .DS_Store
@@ -25,10 +30,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
-  
-# Internal project files 
-AGENTS.md 
-index.md 
 
 # worktrees & tarballs
 .worktrees/
