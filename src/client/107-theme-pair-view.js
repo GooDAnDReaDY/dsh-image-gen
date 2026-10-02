@@ -15,13 +15,19 @@
         const out = block && (block.output || block.text || '')
         const tagMatch = typeof out === 'string' ? out.match(/<dsh-image-gen-theme-pair>([\s\S]*?)<\/dsh-image-gen-theme-pair>/) : null
         if (tagMatch) {
-          try { data = JSON.parse(tagMatch[1]) } catch (_) {}
+          try {
+            data = JSON.parse(tagMatch[1])
+          } catch (_err) {
+            // Malformed XML payload
+          }
         }
         if (!data || (!data.light && !data.dark)) {
           try {
             if (typeof out === 'object') data = out
             else if (typeof out === 'string') data = JSON.parse(out)
-          } catch (_) {}
+          } catch (_err) {
+            // Malformed fallback output
+          }
         }
       }
       data = data || {}

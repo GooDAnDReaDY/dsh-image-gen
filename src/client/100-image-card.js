@@ -360,8 +360,9 @@
         react,
         t,
         parsed,
-        imgUrl: parsed.imageUrl || parsed.url || parsed.attachment?.url,
-        targetRef: parsed.attachmentId || parsed.attachment?.attachmentId || parsed.imageUrl || parsed.url,
+        imgUrl: parsed.url || (parsed.attachment ? attachmentImageUrl(parsed.attachment) : ''),
+        targetRef: (parsed.attachment && (parsed.attachment.attachmentId || parsed.attachment.id)) || parsed.url || 'latest',
+        sendActionPrompt,
         onClose: () => setInpaintOpen(false),
       }) : null
 

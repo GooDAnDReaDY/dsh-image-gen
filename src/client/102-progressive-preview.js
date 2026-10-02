@@ -37,16 +37,24 @@
                 stage: data.stage !== undefined ? data.stage : prev.stage,
                 draftSrc: data.draftUrl || prev.draftSrc,
               }))
-            } catch (_) {}
+            } catch (_err) {
+              // Ignore event parsing errors
+            }
           }
           es.onerror = () => {
             // EventSource handles retries or terminates on close
           }
-        } catch (_) {}
+        } catch (_err) {
+          // Ignore EventSource creation errors
+        }
 
         return () => {
           if (es) {
-            try { es.close() } catch (_) {}
+            try {
+              es.close()
+            } catch (_err) {
+              // Ignore EventSource close errors
+            }
           }
         }
       }, [isRunning, callId])
