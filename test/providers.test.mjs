@@ -635,11 +635,14 @@ test('applyStylePreset: подставляет пресет по ключу ил
   assert.equal(applyStylePreset('дом', 'custom_3d_style'), 'дом, custom_3d_style')
 })
 
-test('blendImagesFal: отправляет несколько картинок на слияние в FAL', async () => {
+test('blendImagesFal: отправляет несколько картинок на слияние в FAL (#381)', async () => {
+  let capturedBody = null
   const fetchImpl = async (url, init) => {
     if (String(url).endsWith('/fal-ai/flux/dev/image-to-image')) {
-      const parsed = JSON.parse(init.body)
-      assert.ok(parsed.image_url.startsWith('data:image/png;base64,'))
+      capturedBody = JSON.parse(init.body)
+      assert.ok(capturedBody.image_url.startsWith('data:image/png;base64,'))
+      assert.equal(capturedBody.images.length, 2)
+      assert.deepEqual(capturedBody.weights, [0.5, 0.5])
       return jsonRes({ request_id: 'b1', status_url: 'https://q/b_status', response_url: 'https://q/b_result' })
     }
     if (String(url) === 'https://q/b_status') return jsonRes({ status: 'COMPLETED', response_url: 'https://q/b_result' })
@@ -648,9 +651,14 @@ test('blendImagesFal: отправляет несколько картинок �
     }
     return bytesRes(PNG)
   }
-  const res = await blendImagesFal(deps(fetchImpl), { images: [{ bytes: PNG, mediaType: 'image/png' }], prompt: 'mix', signal })
+  const res = await blendImagesFal(deps(fetchImpl), {
+    images: [{ bytes: PNG, mediaType: 'image/png' }, { bytes: PNG, mediaType: 'image/png' }],
+    prompt: 'mix',
+    signal,
+  })
   assert.equal(res.width, 1024)
   assert.deepEqual(res.bytes, PNG)
+  assert.ok(capturedBody)
 })
 
 
