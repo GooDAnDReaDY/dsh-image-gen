@@ -99,3 +99,60 @@ test('extractComfyNodeErrors: parses ComfyUI node execution failures correctly',
   }
   assert.equal(extractComfyNodeErrors(rawErrorEntry), 'error')
 })
+
+test('history concurrency: parallel batch appends retain all unique entries without race (#365)', async () => {
+  const fs = await import('node:fs/promises')
+  const fsSync = await import('node:fs')
+  const path = await import('node:path')
+  const os = await import('node:os')
+  const { appendHistoryEntry, readHistory, historyFile, writeHistory } = await import('../lib/history.js')
+
+  const prevDshHome = process.env.DSH_HOME
+  const testHome = path.join(os.tmpdir(), 'dsh_history_race_test_' + Date.now())
+  process.env.DSH_HOME = testHome
+
+  try {
+    // 1. Initial write
+    await writeHistory([{ id: 'init-0', prompt: 'initial image', path: '/test/0.png' }])
+
+    // 2. Fire 8 concurrent appendHistoryEntry calls simulating a batch generation
+    const batchPromises = Array.from({ length: 8 }, (_, i) => {
+      const idx = i + 1
+      return appendHistoryEntry({
+        id: `batch-${idx}`,
+        attachmentId: `att-${idx}`,
+        prompt: `batch prompt ${idx}`,
+        path: `/test/${idx}.png`,
+        createdAt: new Date().toISOString(),
+      }, { pruneDays: 0, historyLimit: 50 })
+    })
+
+    await Promise.all(batchPromises)
+
+    // 3. Read back history - all 8 batch items plus init item must be present (total 9)
+    const finalHistory = await readHistory()
+    assert.equal(finalHistory.length, 9, 'All concurrent entries must be saved without loss')
+
+    const ids = new Set(finalHistory.map((e) => e.id))
+    for (let i = 1; i <= 8; i++) {
+      assert.ok(ids.has(`batch-${i}`), `History must contain batch-${i}`)
+    }
+    assert.ok(ids.has('init-0'), 'History must retain initial entry')
+
+    // 4. Verify file permissions (0600 file, 0700 dir)
+    const file = historyFile()
+    const statFile = fsSync.statSync(file)
+    const statDir = fsSync.statSync(path.dirname(file))
+    assert.equal(statFile.mode & 0o777, 0o600, 'History file must have 0600 mode')
+    assert.equal(statDir.mode & 0o777, 0o700, 'History dir must have 0700 mode')
+  } finally {
+    if (prevDshHome !== undefined) {
+      process.env.DSH_HOME = prevDshHome
+    } else {
+      delete process.env.DSH_HOME
+    }
+    try {
+      await fs.rm(testHome, { recursive: true, force: true })
+    } catch (_err) { /* cleanup */ }
+  }
+})
