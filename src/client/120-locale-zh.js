@@ -171,6 +171,9 @@
       'f.localA1111Url': '本地 A1111 地址 (Legacy)',
       'f.localA1111UrlHint': '直接指向 Automatic1111 的服务地址。',
       'p.localA1111Url': 'http://127.0.0.1:7860',
+      'f.comfyWorkflowJson': 'ComfyUI 工作流 JSON',
+      'f.comfyWorkflowJsonHint': '包含 {{prompt}} 等占位符的自定义 ComfyUI API 工作流 JSON。',
+      'p.comfyWorkflowJson': '{"3": {"class_type": "KSampler", ...}}',
 
       'f.subscriptionQuality': '订阅质量',
       'f.subscriptionQualityHint': 'Codex 或 Grok 订阅通道的质量档位。',

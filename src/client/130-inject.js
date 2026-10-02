@@ -80,31 +80,80 @@
           const target = activeTarget || resolveActiveScope(ctx)
           const snap = target?.getSnapshot ? target.getSnapshot() : null
           if (snap?.status === 'ready' && snap.writable && target.set) return target.set(key, val)
+          const prevValue = httpSnapshot.value
           httpSnapshot = { ...httpSnapshot, value: { ...httpSnapshot.value, [key]: val } }
           notify()
           try {
-            await fetch('/dsh-image-gen/config', {
+            const res = await fetch('/dsh-image-gen/config', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ [key]: val }),
             })
-          } catch { /* ignore */ }
+            if (!res.ok) {
+              let errText = `Failed to update setting (HTTP ${res.status})`
+              try {
+                const errData = await res.json()
+                if (errData?.error) errText = errData.error
+              } catch { /* ignore */ }
+              httpSnapshot = { ...httpSnapshot, value: prevValue }
+              notify()
+              throw new Error(errText)
+            }
+            const data = await res.json()
+            if (!data.ok) {
+              httpSnapshot = { ...httpSnapshot, value: prevValue }
+              notify()
+              throw new Error(data.error || 'Failed to update setting')
+            }
+            if (data.config) {
+              httpSnapshot = { status: 'ready', writable: true, value: data.config }
+              notify()
+            }
+            return data
+          } catch (err) {
+            httpSnapshot = { ...httpSnapshot, value: prevValue }
+            notify()
+            throw err
+          }
         },
         async delete(key) {
           const target = activeTarget || resolveActiveScope(ctx)
           const snap = target?.getSnapshot ? target.getSnapshot() : null
-          if (snap?.status === 'ready' && snap.writable && target.delete) return target.delete(key)
+          if (snap?.status === 'ready' && snap.writable && (target.delete || target.reset)) {
+            if (target.delete) return target.delete(key)
+            if (target.reset) return target.reset(key)
+          }
+          const prevValue = httpSnapshot.value
           const nextVal = { ...httpSnapshot.value }
           delete nextVal[key]
           httpSnapshot = { ...httpSnapshot, value: nextVal }
           notify()
           try {
-            await fetch('/dsh-image-gen/config', {
+            const res = await fetch('/dsh-image-gen/config', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ [key]: undefined }),
+              body: JSON.stringify({ resetFields: [key] }),
             })
-          } catch { /* ignore */ }
+            if (!res.ok) {
+              httpSnapshot = { ...httpSnapshot, value: prevValue }
+              notify()
+              throw new Error(`Failed to reset setting (HTTP ${res.status})`)
+            }
+            const data = await res.json()
+            if (!data.ok) {
+              httpSnapshot = { ...httpSnapshot, value: prevValue }
+              notify()
+              throw new Error(data.error || 'Failed to reset setting')
+            }
+            if (data.config) {
+              httpSnapshot = { status: 'ready', writable: true, value: data.config }
+              notify()
+            }
+          } catch (err) {
+            httpSnapshot = { ...httpSnapshot, value: prevValue }
+            notify()
+            throw err
+          }
         },
         subscribe(fn) {
           listeners.add(fn)

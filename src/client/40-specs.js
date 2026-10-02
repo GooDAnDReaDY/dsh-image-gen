@@ -62,10 +62,11 @@
       // Backward-compat aliases for tests
       { field: 'localComfyUrl', spec: textField('localComfyUrl'), kind: 'text', labelKey: 'f.localComfyUrl', hintKey: 'f.localComfyUrlHint', placeholderKey: 'p.localComfyUrl', when: ['local'], tab: 'provider' },
       { field: 'localA1111Url', spec: textField('localA1111Url'), kind: 'text', labelKey: 'f.localA1111Url', hintKey: 'f.localA1111UrlHint', placeholderKey: 'p.localA1111Url', when: ['local'], tab: 'provider' },
+      { field: 'comfyWorkflowJson', spec: jsonField('comfyWorkflowJson'), kind: 'text', labelKey: 'f.comfyWorkflowJson', hintKey: 'f.comfyWorkflowJsonHint', placeholderKey: 'p.comfyWorkflowJson', when: ['local'], tab: 'provider' },
 
       // Provider: Codex / Grok
       { field: 'subscriptionQuality', spec: selectField('subscriptionQuality', ['', 'low', 'medium', 'high']), kind: 'select', options: ['', 'low', 'medium', 'high'], labelKey: 'f.subscriptionQuality', hintKey: 'f.subscriptionQualityHint', when: ['codex', 'grok'], tab: 'provider' },
-      { field: 'fallbackProviders', spec: textField('fallbackProviders'), kind: 'text', labelKey: 'f.fallbackProviders', hintKey: 'f.fallbackProvidersHint', placeholderKey: 'p.fallbackProviders', tab: 'provider' },
+      { field: 'fallbackProviders', spec: arrayField('fallbackProviders'), kind: 'text', labelKey: 'f.fallbackProviders', hintKey: 'f.fallbackProvidersHint', placeholderKey: 'p.fallbackProviders', tab: 'provider' },
 
       // Enhancer & Style
       { field: 'autoEnhancePrompt', spec: booleanField('autoEnhancePrompt'), kind: 'select', options: ['true', 'false'], labelKey: 'f.autoEnhancePrompt', hintKey: 'f.autoEnhancePromptHint', tab: 'enhancer' },

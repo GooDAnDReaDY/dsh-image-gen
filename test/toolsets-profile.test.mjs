@@ -177,3 +177,59 @@ test('master switch: /image command returns error when cfg.enabled is false (#35
   const execResult = await registeredCmd.execute('futuristic neon city', {})
   assert.ok(execResult.includes('Image generation is disabled in settings'))
 })
+
+test('toolsets profile: reactive update on profile change (minimal -> all -> custom -> minimal) (#384)', () => {
+  let liveCfg = { toolsetProfile: 'minimal' }
+  const registeredTools = new Map()
+
+  const ctx = {
+    effect(fn) {
+      fn()
+    },
+    tools: {
+      register(def) {
+        registeredTools.set(def.name, def)
+        return () => {
+          registeredTools.delete(def.name)
+        }
+      },
+    },
+  }
+
+  const controller = registerAllTools(ctx, {
+    config: liveCfg,
+    live: () => liveCfg,
+    saveAndAttachResult: () => {},
+    resolveSource: () => {},
+    slugify: () => {},
+    resolveApiKey: () => {},
+  })
+
+  // 1. Initially minimal (3 core tools)
+  assert.equal(registeredTools.size, 3)
+  assert.deepEqual(Array.from(registeredTools.keys()).sort(), ['edit_image', 'generate_image', 'inspect_image_quality'])
+
+  // 2. Switch to "all" without restart
+  liveCfg = { toolsetProfile: 'all' }
+  controller.sync()
+  assert.equal(registeredTools.size, 30, 'Profile all must register exactly 30 tools without restart')
+  // Verify no duplicates
+  const namesAll = Array.from(registeredTools.keys())
+  const uniqueNamesAll = new Set(namesAll)
+  assert.equal(uniqueNamesAll.size, 30, 'Must have 30 unique tool names')
+
+  // 3. Switch to custom with design toolset only
+  liveCfg = { toolsetProfile: 'custom', toolsets: { design: true } }
+  controller.sync()
+  assert.equal(registeredTools.size, 9, 'Custom design toolset must have 3 core + 6 design = 9 tools')
+  assert.ok(registeredTools.has('set_style_anchor'))
+  assert.ok(registeredTools.has('generate_ui_asset'))
+  assert.ok(!registeredTools.has('sketch_to_image'), 'Non-design tools must be unregistered')
+  assert.ok(!registeredTools.has('remove_background'), 'Non-design tools must be unregistered')
+
+  // 4. Switch back to minimal
+  liveCfg = { toolsetProfile: 'minimal' }
+  controller.sync()
+  assert.equal(registeredTools.size, 3, 'Switching back to minimal must restore 3 core tools')
+  assert.deepEqual(Array.from(registeredTools.keys()).sort(), ['edit_image', 'generate_image', 'inspect_image_quality'])
+})

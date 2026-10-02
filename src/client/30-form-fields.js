@@ -45,3 +45,37 @@
       }
     }
 
+    function arrayField(field) {
+      return {
+        field,
+        format: (value) => (Array.isArray(value) ? value.join(', ') : typeof value === 'string' ? value : ''),
+        parse: (text) => {
+          if (text === '') return { kind: 'clear' }
+          const items = text.split(',').map((s) => s.trim()).filter(Boolean)
+          return { kind: 'set', value: items }
+        },
+      }
+    }
+
+    function jsonField(field) {
+      return {
+        field,
+        format: (value) => {
+          if (typeof value === 'string') return value
+          if (value && typeof value === 'object') {
+            try { return JSON.stringify(value, null, 2) } catch { return '' }
+          }
+          return ''
+        },
+        parse: (text) => {
+          if (text === '') return { kind: 'clear' }
+          try {
+            JSON.parse(text)
+            return { kind: 'set', value: text }
+          } catch (_) {
+            return void 0
+          }
+        },
+      }
+    }
+
