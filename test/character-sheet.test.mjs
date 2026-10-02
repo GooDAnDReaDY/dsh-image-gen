@@ -113,3 +113,89 @@ test('character-sheet: tool file declares generate_character_sheet with schema a
   assert.equal(sampleRender[0]?.text, 'OK')
   assert.ok(sampleRender.length >= 1)
 })
+
+test('character-sheet: registered execute runs through full provider and storage pipeline (#358)', async () => {
+  const registered = []
+  const mockCtx = {
+    effect(fn) { fn() },
+    tools: {
+      register(tool) {
+        registered.push(tool)
+      },
+    },
+    logger: {
+      warn() {},
+      info() {},
+    },
+  }
+
+  const liveConfig = {
+    enabled: true,
+    provider: 'fal',
+    outputDir: 'tmp-character-sheet-test',
+    dailyBudgetUsd: 10,
+    model: 'fal-ai/flux-2/klein/9b',
+  }
+
+  registerCharacterSheetTools(mockCtx, {
+    live: () => liveConfig,
+    slugify: (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    resolveApiKey: () => 'fake-key',
+  })
+
+  const tool = registered[0]
+  assert.ok(tool)
+
+  // Execute with mock global fetch to fal queue
+  const originalFetch = globalThis.fetch
+  const mockPng = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
+  globalThis.fetch = async (url, init) => {
+    const s = String(url)
+    if (s.includes('fal-ai/flux-2')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ request_id: 'r1', status_url: 'https://q/status', response_url: 'https://q/result' }),
+      }
+    }
+    if (s === 'https://q/status') {
+      return { ok: true, status: 200, json: async () => ({ status: 'COMPLETED', response_url: 'https://q/result' }) }
+    }
+    if (s === 'https://q/result') {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ images: [{ url: 'https://example.com/mock-sheet.png', width: 1024, height: 576 }], seed: 42 }),
+      }
+    }
+    return {
+      ok: true,
+      status: 200,
+      headers: { get: () => 'image/png' },
+      arrayBuffer: async () => mockPng.buffer.slice(mockPng.byteOffset, mockPng.byteOffset + mockPng.byteLength),
+    }
+  }
+
+  try {
+    const result = await tool.execute({
+      prompt: 'cyberpunk hacker with holographic glasses',
+      layout: 'turnaround',
+      style: 'anime',
+      seed: 42,
+    }, {
+      signal: new AbortController().signal,
+      agent: { session: { header: { cwd: process.cwd() } } },
+    })
+
+    assert.ok(result)
+    assert.equal(result.seed, 42)
+    assert.equal(result.layout, 'turnaround')
+    assert.equal(result.style, 'anime')
+    assert.equal(result.aspectRatio, '16:9')
+    assert.equal(result.provider, 'fal')
+    assert.ok(result.prompt.includes('cyberpunk hacker'))
+    assert.ok(result.path || result.url)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
