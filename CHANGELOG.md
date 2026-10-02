@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.26
+
+### Fixed
+- **Pixel-Accurate Image Heuristics & Seam Analysis (#371)**: Decode raster images to uncompressed raw pixels via Sharp before computing Laplacian gradients, variance, edge wrap seam continuity, and visual diffs. Eliminates compression-ratio artifacts and accurately rejects corrupt/blank images.
+- **Alpha-Aware Dominant Color Palette & WCAG Contrast (#372)**: Extract dominant colors, CSS gradients, and contrast ratios directly from decoded raw RGBA pixels. Transparent pixels are filtered out, colors are quantized into 16-level RGB bins, and harmonic shades are provided for monochrome images.
+- **Geometric Vectorization & Context Shielding (#373)**: Replace raster base64 SVG container wrapping with a greedy 2D contour-tracing vectorizer producing clean `<path>` geometry across color, grayscale, and binary modes. Omits raw raster data from LLM context to prevent prompt poisoning.
+- **Multi-Image Blending & Normalized Weights (#381)**: Require and validate at least two input images before any network requests. Compute mathematically exact weighted pixel composite references via Sharp and pass all normalized weights and image references in provider payloads.
+- **Comprehensive PWA Icon Suite & Favicon ICO (#387)**: Generate real PNG icons across all standard sizes (16, 32, 48, 180, 192, 512 px) using Sharp `contain` mode, construct multi-resolution binary `favicon.ico` containers (16/32/48 px frames), and enforce 10% safe zone padding for maskable icons.
+
 ## 0.11.25
 
 ### Fixed
