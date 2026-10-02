@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.25
+
+### Fixed
+- **Style Preset Handling & Prompt Sanitation (#376)**: Prevent appending raw `", none"` suffix when style preset is unset or set to default/none. Extend `STYLE_PRESETS` with all curated artistic presets (`editorial`, `product-shot`, `isometric-3d`, `macro-photography`, etc.) and isolate provider-level `style` parameters from user prompts.
+- **Batch History Race Condition (#365)**: Guard history reads, unshifts, prunes, and disk writes with process-level FIFO queue and cross-process file locks (`withFileLock` / `writeFileAtomic`). Prevents dropped history entries during concurrent multi-image generations and batch operations.
+- **Image Container Format Integrity (#386)**: Detect true media type via magic byte inspection (`detectImageMediaType`) and transcode image containers using Sharp (`ensureImageFormat`) when provider outputs do not match requested format (e.g. converting PNG bytes to true WebP/JPEG containers).
+- **Modern Gemini Imagen Model Protocol (#364)**: Update default Gemini model to `gemini-2.0-flash-exp-image-generation`, auto-migrate deprecated `imagen-*` model identifiers, merge quality and style parameters into structured `imageConfig` payload, and enable multimodal image source referencing.
+- **Quality Gate Integrity & Redundant Retry Prevention (#353)**: Inspect raw image buffer bytes directly in quality gate checks instead of synthetic metadata. Eliminate false-negative rerolls and duplicate disk writes on valid images, ensuring single-pass artifact generation while properly tracking multi-attempt API costs in Budget Guard.
+
 ## 0.11.24
 
 ### Fixed
