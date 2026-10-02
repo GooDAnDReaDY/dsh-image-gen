@@ -978,3 +978,43 @@ test('resolveApiKeyCandidates: возвращает порядок поиска 
   assert.deepEqual(resolveApiKeyCandidates(''), [])
   assert.deepEqual(resolveApiKeyCandidates(null), [])
 })
+
+test('свой API: edit режим отправляет multipart FormData без Content-Type: application/json и включает model (#362)', async () => {
+  let seenUrl = ''
+  let seenHeaders = null
+  let seenBody = null
+
+  const fetchImpl = async (url, init) => {
+    seenUrl = String(url)
+    seenHeaders = init.headers
+    seenBody = init.body
+    return jsonRes({ data: [{ b64_json: PNG.toString('base64') }] })
+  }
+
+  const jobWithSource = {
+    prompt: 'добавь шляпу',
+    size: '1024x1024',
+    format: 'png',
+    source: {
+      bytes: Buffer.from([1, 2, 3, 4]),
+      mediaType: 'image/png',
+    },
+    mask: {
+      bytes: Buffer.from([5, 6, 7, 8]),
+      mediaType: 'image/png',
+    },
+    signal,
+  }
+
+  const out = await makeProviders(deps(fetchImpl), jobWithSource).custom()
+
+  assert.ok(seenUrl.endsWith('/images/edits'))
+  assert.equal(seenHeaders['Content-Type'], undefined, 'Content-Type must not be application/json for FormData')
+  assert.equal(seenHeaders.Authorization, 'Bearer secret')
+  assert.ok(seenBody instanceof FormData, 'body must be FormData')
+  assert.equal(seenBody.get('model'), 'gpt-image-1', 'FormData must include model')
+  assert.equal(seenBody.get('prompt'), 'добавь шляпу', 'FormData must include prompt')
+  assert.ok(seenBody.get('image'), 'FormData must include image')
+  assert.ok(seenBody.get('mask'), 'FormData must include mask')
+  assert.deepEqual(Buffer.from(out.bytes), PNG)
+})
