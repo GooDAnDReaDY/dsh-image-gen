@@ -1,3 +1,4 @@
+import { computeGenerationHash } from '../lib/provider-utils.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { isFatalClientError, pollStatus } from '../lib/providers.js'
@@ -64,4 +65,39 @@ test('generation-cache: in-memory L1 LRU returns hit instantly and syncs with di
   const hit2 = getCachedGeneration(hash)
   assert.ok(hit2)
   assert.equal(Buffer.compare(hit2.bytes, bytes), 0)
+})
+
+test('cache identity: computeGenerationHash produces distinct hashes for format, aspect, and source (#357)', () => {
+  const baseParams = {
+    provider: 'fal',
+    model: 'fal-ai/flux/dev',
+    prompt: 'cyberpunk warrior',
+    seed: 12345,
+    size: '1024x1024',
+    format: 'png',
+    aspectRatio: '1:1',
+  }
+
+  const hBase = computeGenerationHash(baseParams)
+  assert.ok(hBase)
+
+  // Different format changes hash
+  const hWebp = computeGenerationHash({ ...baseParams, format: 'webp' })
+  assert.notEqual(hBase, hWebp, 'format change must produce distinct hash')
+
+  // Different aspect ratio changes hash
+  const h169 = computeGenerationHash({ ...baseParams, aspectRatio: '16:9' })
+  assert.notEqual(hBase, h169, 'aspectRatio change must produce distinct hash')
+
+  // Adding sourceImage changes hash
+  const hSource = computeGenerationHash({ ...baseParams, sourceImage: Buffer.from([1, 2, 3]) })
+  assert.notEqual(hBase, hSource, 'sourceImage must produce distinct hash')
+
+  // Adding negativePrompt changes hash
+  const hNeg = computeGenerationHash({ ...baseParams, negativePrompt: 'blurry, low quality' })
+  assert.notEqual(hBase, hNeg, 'negativePrompt must produce distinct hash')
+
+  // force option bypasses cache
+  const forceHit = getCachedGeneration(hBase, { force: true })
+  assert.equal(forceHit, null, 'force: true must return null and bypass cache')
 })

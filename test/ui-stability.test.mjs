@@ -1,3 +1,4 @@
+import { Config, plainConfig } from '../lib/config-schema.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
@@ -105,4 +106,47 @@ test('ui-stability: budget and loop guard throw descriptive errors when limits a
     () => assertBudgetAvailable(5.00, 1.00),
     /Daily image generation budget exceeded/
   )
+})
+
+test('config validation: enforces numeric bounds and enum values before runtime (#385)', () => {
+  // Negative numbers must throw during schema validation
+  assert.throws(
+    () => Config({ historyLimit: -1 }),
+    /historyLimit/
+  )
+  assert.throws(
+    () => Config({ pruneDays: -5 }),
+    /pruneDays/
+  )
+  assert.throws(
+    () => Config({ dailyBudgetUsd: -10 }),
+    /dailyBudgetUsd/
+  )
+  assert.throws(
+    () => Config({ loopGuardLimit: -1 }),
+    /loopGuardLimit/
+  )
+
+  // Invalid enum/union values must throw
+  assert.throws(
+    () => Config({ localKind: 'arbitrary' }),
+    /localKind/
+  )
+
+  // Valid zero values and enum options pass
+  const validZero = plainConfig(Config({
+    historyLimit: 0,
+    pruneDays: 0,
+    dailyBudgetUsd: 0,
+    loopGuardLimit: 0,
+    localKind: 'comfyui',
+  }))
+  assert.equal(validZero.historyLimit, 0)
+  assert.equal(validZero.pruneDays, 0)
+  assert.equal(validZero.dailyBudgetUsd, 0)
+  assert.equal(validZero.loopGuardLimit, 0)
+  assert.equal(validZero.localKind, 'comfyui')
+
+  const validA1111 = plainConfig(Config({ localKind: 'a1111' }))
+  assert.equal(validA1111.localKind, 'a1111')
 })

@@ -53,3 +53,31 @@ test('assertBudgetAvailable: allows within budget and blocks when exceeding', ()
     /Daily image generation budget exceeded/
   )
 })
+
+test('budget enforcer: saveAndAttachResult records spend in cost-meter storage (#355)', async () => {
+  const { saveAndAttachResult } = await import('../lib/attachment-helper.js')
+  const before = loadDailySpend()
+  const initialSpend = before.totalSpendUsd
+
+  const mockCtx = {
+    assets: {
+      upload: async () => ({ id: 'att-cost-test' }),
+    },
+  }
+
+  await saveAndAttachResult(mockCtx, {}, { outputDir: 'tmp-test' }, {
+    bytes: Buffer.from([1, 2, 3]),
+    mediaType: 'image/png',
+    name: 'test-cost.png',
+    stem: 'test-cost',
+    prompt: 'cost meter prompt test',
+    size: '1024x1024',
+    format: 'png',
+    seed: 42,
+    provider: 'fal',
+    cost: 0.025,
+  })
+
+  const after = loadDailySpend()
+  assert.equal(+(after.totalSpendUsd - initialSpend).toFixed(4), 0.025)
+})

@@ -95,3 +95,33 @@ test('resolve-image: rejects empty (0 bytes) or non-existent files', async () =>
     fs.unlinkSync(emptyFilePath)
   } catch {}
 })
+
+test('loop-guard: resets on new user turn and isolates sessions (#370)', () => {
+  const sid1 = 'user_session_1_' + Date.now()
+  const sid2 = 'user_session_2_' + Date.now()
+
+  // Initial turn 1: generates 3 times and reaches limit
+  trackAndAssertLoopGuard(sid1, { limit: 3, prompt: 'cat', turnId: 'turn_1' })
+  trackAndAssertLoopGuard(sid1, { limit: 3, prompt: 'cat', turnId: 'turn_1' })
+  trackAndAssertLoopGuard(sid1, { limit: 3, prompt: 'cat', turnId: 'turn_1' })
+
+  // 4th call in turn_1 must throw
+  assert.throws(
+    () => trackAndAssertLoopGuard(sid1, { limit: 3, prompt: 'cat', turnId: 'turn_1' }),
+    /Generation loop limit reached/
+  )
+
+  // Session 2 is completely isolated and unaffected by session 1
+  const resSid2 = trackAndAssertLoopGuard(sid2, { limit: 3, prompt: 'dog', turnId: 'turn_1' })
+  assert.equal(resSid2.count, 1)
+
+  // Next user turn (turn_2) in session 1 automatically resets loop count
+  const resTurn2 = trackAndAssertLoopGuard(sid1, { limit: 3, prompt: 'cat enhanced', turnId: 'turn_2' })
+  assert.equal(resTurn2.count, 1)
+  assert.equal(resTurn2.allowed, true)
+
+  // resetLoopGuard() with no argument clears all sessions
+  resetLoopGuard()
+  const resAfterTeardown = trackAndAssertLoopGuard(sid1, { limit: 3, prompt: 'fresh' })
+  assert.equal(resAfterTeardown.count, 1)
+})
