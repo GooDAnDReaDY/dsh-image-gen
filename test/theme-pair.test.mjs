@@ -84,3 +84,85 @@ test('theme-pair: tool file declares generate_theme_pair with schema and paramet
   assert.ok(Array.isArray(sampleRender))
   assert.ok(sampleRender.length >= 1)
 })
+test('theme-pair: registered execute generates both light and dark variants (#361)', async () => {
+  const registered = []
+  const mockCtx = {
+    effect: (fn) => fn(),
+    tools: {
+      register: (tool) => registered.push(tool),
+    },
+    logger: {
+      warn() {},
+      info() {},
+    },
+  }
+
+  const liveConfig = {
+    enabled: true,
+    provider: 'fal',
+    outputDir: 'tmp-theme-pair-test',
+    dailyBudgetUsd: 10,
+    model: 'fal-ai/flux-2/klein/9b',
+  }
+
+  registerThemePairTools(mockCtx, {
+    live: () => liveConfig,
+    slugify: (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    resolveApiKey: () => 'fake-key',
+  })
+
+  const tool = registered[0]
+  assert.ok(tool)
+
+  const originalFetch = globalThis.fetch
+  const mockPng = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
+  globalThis.fetch = async (url) => {
+    const s = String(url)
+    if (s.includes('fal-ai/flux-2')) {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ request_id: 'r1', status_url: 'https://q/status', response_url: 'https://q/result' }),
+      }
+    }
+    if (s === 'https://q/status') {
+      return { ok: true, status: 200, json: async () => ({ status: 'COMPLETED', response_url: 'https://q/result' }) }
+    }
+    if (s === 'https://q/result') {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ images: [{ url: 'https://example.com/theme.png', width: 1344, height: 768 }], seed: 77 }),
+      }
+    }
+    return {
+      ok: true,
+      status: 200,
+      headers: { get: () => 'image/png' },
+      arrayBuffer: async () => mockPng.buffer.slice(mockPng.byteOffset, mockPng.byteOffset + mockPng.byteLength),
+    }
+  }
+
+  try {
+    const result = await tool.execute({
+      prompt: 'dashboard analytics hero card',
+      style: 'minimalist',
+      aspect_ratio: '16:9',
+      seed: 77,
+    }, {
+      signal: new AbortController().signal,
+      agent: { session: { header: { cwd: process.cwd() } } },
+    })
+
+    assert.ok(result)
+    assert.equal(result.style, 'minimalist')
+    assert.ok(result.light)
+    assert.ok(result.dark)
+    assert.ok(result.light.path)
+    assert.ok(result.dark.path)
+    assert.ok(result.html_snippet.includes('<picture'))
+    assert.ok(result.html_snippet.includes('prefers-color-scheme')); assert.ok(result.css_snippet.includes('.dsh-theme-pair'))
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
