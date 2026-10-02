@@ -4,7 +4,18 @@
       const t = props.t || ((k) => k)
       const block = props.block || {}
       const parsed = react.useMemo(() => {
+        const meta = block.presentationMeta || block.meta || block.data || block.result
+        if (meta && Array.isArray(meta.cells) && meta.cells.length) {
+          return meta
+        }
         const raw = block.output || block.text || ''
+        const tagMatch = raw.match(/<dsh-image-gen-matrix>([\s\S]*?)<\/dsh-image-gen-matrix>/)
+        if (tagMatch) {
+          const fromTag = tryParseJsonObject(tagMatch[1])
+          if (fromTag && Array.isArray(fromTag.cells) && fromTag.cells.length) {
+            return fromTag
+          }
+        }
         const obj = tryParseJsonObject(raw)
         return obj || { base_prompt: '', blind_mode: false, cells: [] }
       }, [block])
