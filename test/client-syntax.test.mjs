@@ -332,3 +332,101 @@ test('lib/client.js inject supports both DSH 0.1.5-rc.3 (settingsScope) and 0.1.
     assert.equal(snapAfter.provider.text, 'seedart')
   }
 })
+
+test('lib/client.js: HTTP fallback rolls back optimistic state and marks save as failed on HTTP 400 (#366)', async () => {
+  const clientPath = path.join(rootDir, 'lib', 'client.js')
+  const clientCode = readFileSync(clientPath, 'utf8')
+
+  let fetchCalled = false
+  const mockFetch = async (url, options) => {
+    fetchCalled = true
+    if (url === '/dsh-image-gen/config' && options?.method === 'PUT') {
+      return {
+        ok: false,
+        status: 400,
+        json: async () => ({ ok: false, error: 'unknown config field: invalidField' }),
+      }
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true, config: { provider: 'fal' } }),
+    }
+  }
+
+  let loadedModule = null
+  const context = vm.createContext({
+    window: {
+      __ModuleLoader__: {
+        load: (entry) => {
+          loadedModule = entry
+        },
+      },
+    },
+    document: {
+      head: { appendChild: () => {} },
+      createElement: () => ({ setAttribute: () => {}, appendChild: () => {} }),
+    },
+    fetch: mockFetch,
+    console,
+  })
+
+  vm.runInContext(clientCode, context)
+  const mockRequire = (id) => {
+    if (id === 'react') {
+      return {
+        createElement: () => ({}),
+        useState: (init) => [init, () => {}],
+        useEffect: () => {},
+      }
+    }
+    if (id === 'react/jsx-runtime') {
+      return { jsx: () => ({}), jsxs: () => ({}) }
+    }
+    throw new Error(`Cannot find module '${id}'`)
+  }
+
+  const moduleExports = loadedModule.factory(mockRequire)
+  let registeredItem = null
+  const mockCtx = {
+    locale: { define: () => {} },
+    slots: {
+      inject: (name, cb) => cb(),
+      register: (desc) => {
+        if (desc.name === 'plugins.item' || desc.name === 'plugins.row.config') {
+          registeredItem = { desc, injected: desc.inject ? desc.inject() : null }
+        }
+      },
+    },
+  }
+
+  moduleExports.apply(mockCtx)
+  assert.ok(registeredItem?.injected, 'card controller injected')
+
+  // Allow async syncHttpConfig to settle
+  await new Promise((r) => setTimeout(r, 20))
+
+  const card = registeredItem.injected
+  const store = card.hooks.falSettingsCard
+
+  // Initial value
+  assert.equal(store.getSnapshot().provider.text, 'fal')
+
+  // Edit provider to custom
+  card.edit('provider', 'custom')
+  assert.equal(store.getSnapshot().dirty, true)
+
+  // Trigger save which calls HTTP PUT and receives 400
+  await card.save()
+
+  // State should have failed=true, dirty=true, and snapshot value rolled back
+  const snapAfterFail = store.getSnapshot()
+  assert.equal(snapAfterFail.failed, true, 'CardForm must mark failed=true on HTTP 400')
+  assert.equal(snapAfterFail.dirty, true, 'Dirty state must NOT be cleared on failure')
+
+  // Discard should clear the failed status
+  card.discard()
+  const snapAfterDiscard = store.getSnapshot()
+  assert.equal(snapAfterDiscard.failed, false, 'Discard must clear failed status')
+  assert.equal(snapAfterDiscard.dirty, false, 'Discard must clear dirty state')
+})
