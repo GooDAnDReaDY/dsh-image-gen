@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.27
+
+### Fixed
+- **Result Cards Structured Presentation & Relative URLs (#378)**: Deliver structured `presentationMeta` in rendered output blocks and enrich result card parsing (`readResult`) to extract image cards, style matrices, and theme pairs from Markdown links, relative URLs (`/dsh-image-gen/image/...`), and canonical attachments.
+- **Honest Live Progress & ComfyUI Progressive Preview (#379)**: Connect real-time progress and draft preview frames from ComfyUI WebSocket events and FAL queue polling through a unified server-sent events (`/dsh-image-gen/live-events`) hub. Discontinue fabricated percentages during queue waits, support indeterminate progress states, and ensure proper stream teardown upon abort.
+- **Inpaint UI Argument Alignment & Mask Intrinsic Dimensions (#380)**: Align inpaint client builder arguments (`image:` instead of `source_image:`), preserve intrinsic image dimensions on Canvas overlays without 768px downscale clamps, normalize opaque black-and-white canvas masks into alpha-transparent PNGs for OpenAI `/images/edits`, and auto-resize masks to match source dimensions before dispatching.
+
 ## 0.11.26
 
 ### Fixed
