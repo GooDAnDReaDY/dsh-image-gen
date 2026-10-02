@@ -1,3 +1,4 @@
+import { registerImageCommand } from '../lib/commands.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { registerAllTools } from '../lib/register-tools.js'
@@ -85,4 +86,94 @@ test('toolsets profile: custom mode with flat boolean keys (#337)', () => {
   assert.ok(names.includes('extract_design_tokens'))
   assert.ok(names.includes('generate_responsive_mockups'))
   assert.ok(!names.includes('generate_spritesheet'))
+})
+
+test('master switch: all 30 tools reject with disabled error when cfg.enabled is false (#356)', async () => {
+  let liveConfig = {
+    enabled: false,
+    toolsetProfile: 'all',
+  }
+
+  const tools = []
+  const ctx = {
+    effect(fn) { fn() },
+    tools: {
+      register(def) { tools.push(def) },
+    },
+  }
+
+  registerAllTools(ctx, {
+    config: liveConfig,
+    live: () => liveConfig,
+    saveAndAttachResult: () => {},
+    resolveSource: () => {},
+    slugify: () => {},
+    resolveApiKey: () => {},
+  })
+
+  assert.equal(tools.length, 30, 'Profile all must register 30 tools')
+
+  // When enabled is false, executing any tool must reject with disabled message
+  for (const t of tools) {
+    if (typeof t.execute === 'function') {
+      await assert.rejects(
+        async () => {
+          await t.execute({}, {})
+        },
+        /Image generation is disabled in settings/,
+        `Tool ${t.name} must reject when enabled is false`
+      )
+    }
+  }
+
+  // Toggling settings dynamically to enabled: true allows execution to pass disabled check
+  liveConfig = {
+    enabled: true,
+    toolsetProfile: 'all',
+  }
+
+  // For inspect_image_quality with empty args it won't throw "Image generation is disabled in settings"
+  const inspectTool = tools.find((t) => t.name === 'inspect_image_quality')
+  assert.ok(inspectTool)
+  try {
+    await inspectTool.execute({}, {})
+  } catch (err) {
+    assert.ok(
+      !err.message.includes('Image generation is disabled in settings'),
+      'When enabled=true, tool execution must proceed past enabled guard'
+    )
+  }
+})
+
+test('master switch: /image command returns error when cfg.enabled is false (#356)', async () => {
+  let liveConfig = { enabled: false }
+  let registeredCmd = null
+
+  const ctx = {
+    inject(deps, callback) {
+      callback({
+        commands: {
+          register(cmd) {
+            registeredCmd = cmd
+          },
+        },
+      })
+    },
+  }
+
+  registerImageCommand(ctx, {
+    config: liveConfig,
+    live: () => liveConfig,
+    saveAndAttachResult: () => {},
+    resolveApiKey: () => {},
+    slugify: () => {},
+  })
+
+  assert.ok(registeredCmd, 'registerImageCommand must register command')
+  const handlerResult = await registeredCmd.handler({ rawInput: 'futuristic neon city' })
+  assert.equal(handlerResult.kind, 'error')
+  assert.ok(handlerResult.text.includes('Image generation is disabled in settings'))
+
+  const execResult = await registeredCmd.execute('futuristic neon city', {})
+  assert.ok(execResult.includes('Image generation is disabled in settings'))
 })
