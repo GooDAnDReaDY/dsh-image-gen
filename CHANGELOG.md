@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.24
+
+### Fixed
+- **Settings Persistence Race Condition (#368)**: Defer mutating live in-memory config and notifying subscribers until settings persistence (`svc.replace` / `svc.update`) succeeds. Failed persist leaves live config and GET endpoints untouched.
+- **Settings Reset & Field Deletion Contract (#367)**: Support explicit `resetFields` and `null` values in REST PUT endpoint and client scope delete handler. Correctly clears overrides and restores schema defaults instead of sending empty objects.
+- **Client HTTP Fallback Error Handling (#366)**: Check `res.ok` and error payload in HTTP settings fallback. On failure, rollback optimistic snapshot, preserve dirty state, and surface error banner in SettingsCard.
+- **Config & UI Field Synchronization (#369)**: Add `comfyWorkflowJson` with JSON graph validation, normalize string `fallbackProviders` to arrays, and align legacy alias fields with schema so all UI controls pass validation without rejection.
+- **Reactive Tool Registration on Profile Changes (#384)**: Dynamically re-evaluate and re-register tools when `toolsetProfile` or `toolsets` changes via settings watch, disposing former registrations without requiring a server restart.
+
 ## 0.11.16
 
 ### Fixed
