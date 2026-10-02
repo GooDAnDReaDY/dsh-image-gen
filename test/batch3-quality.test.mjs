@@ -125,3 +125,150 @@ test('loop-guard: resets on new user turn and isolates sessions (#370)', () => {
   const resAfterTeardown = trackAndAssertLoopGuard(sid1, { limit: 3, prompt: 'fresh' })
   assert.equal(resAfterTeardown.count, 1)
 })
+
+test('style preset: handles style_preset correctly and never appends default "none" to prompt (#376)', async () => {
+  const { resolveStylePreset, applyStylePreset } = await import('../lib/providers.js')
+  const { prepareGenerationPrompt } = await import('../lib/generation-helpers.js')
+
+  // 1. None should never add suffix
+  assert.equal(resolveStylePreset('none').promptSuffix, '')
+  assert.equal(resolveStylePreset('None').promptSuffix, '')
+  assert.equal(resolveStylePreset('off').promptSuffix, '')
+  assert.equal(resolveStylePreset('default').promptSuffix, '')
+  assert.equal(resolveStylePreset('').promptSuffix, '')
+  assert.equal(resolveStylePreset(null).promptSuffix, '')
+
+  assert.equal(applyStylePreset('a sunset', 'none'), 'a sunset')
+  assert.equal(applyStylePreset('a sunset', ''), 'a sunset')
+
+  // 2. All 10 presets and their aliases produce distinct suffixes
+  const presets = [
+    'cinematic',
+    'photorealistic',
+    'anime',
+    'minimalist_vector',
+    'isometric_3d',
+    'analog_film',
+    'cyberpunk',
+    'pixel_art',
+    'oil_painting',
+    'claymation',
+  ]
+  for (const p of presets) {
+    const res = resolveStylePreset(p)
+    assert.ok(res.promptSuffix.length > 0, `Preset ${p} should have a prompt suffix`)
+    assert.notEqual(res.promptSuffix, p, `Preset ${p} should expand, not be literal name`)
+  }
+
+  // Aliases
+  assert.equal(resolveStylePreset('photo').promptSuffix, resolveStylePreset('photorealistic').promptSuffix)
+  assert.equal(resolveStylePreset('isometric').promptSuffix, resolveStylePreset('isometric_3d').promptSuffix)
+  assert.equal(resolveStylePreset('vector').promptSuffix, resolveStylePreset('minimalist_vector').promptSuffix)
+  assert.equal(resolveStylePreset('analog').promptSuffix, resolveStylePreset('analog_film').promptSuffix)
+
+  // 3. prepareGenerationPrompt respects args.style_preset
+  const fakeCtx = {}
+  const fakeExec = { signal: new AbortController().signal }
+  const cfg = { stylePreset: 'none', defaultStylePreset: 'none', enhancePrompt: false }
+
+  // Default with no style_preset -> prompt unmodified, no ", none"
+  const p1 = await prepareGenerationPrompt({
+    ctx: fakeCtx,
+    cfg,
+    args: { prompt: 'a beautiful castle' },
+    exec: fakeExec,
+    sessionId: 's1',
+    provider: 'fal',
+    resolveSource: async () => ({}),
+  })
+  assert.equal(p1.effectivePrompt, 'a beautiful castle')
+  assert.ok(!p1.effectivePrompt.includes('none'))
+
+  // With explicit style_preset: 'anime'
+  const p2 = await prepareGenerationPrompt({
+    ctx: fakeCtx,
+    cfg,
+    args: { prompt: 'a beautiful castle', style_preset: 'anime' },
+    exec: fakeExec,
+    sessionId: 's2',
+    provider: 'fal',
+    resolveSource: async () => ({}),
+  })
+  assert.ok(p2.effectivePrompt.includes('Makoto Shinkai'))
+  assert.ok(p2.effectiveNegative.includes('photorealistic'))
+
+  // Explicit provider style (e.g. style: 'vivid') does not replace preset or contaminate prompt
+  const p3 = await prepareGenerationPrompt({
+    ctx: fakeCtx,
+    cfg,
+    args: { prompt: 'a beautiful castle', style: 'vivid' },
+    exec: fakeExec,
+    sessionId: 's3',
+    provider: 'openai',
+    resolveSource: async () => ({}),
+  })
+  assert.equal(p3.effectivePrompt, 'a beautiful castle')
+})
+
+test('output format: ensures matching image container bytes and truthful MIME (#386)', async () => {
+  const { detectImageMediaType, ensureImageFormat, makeProviders } = await import('../lib/providers.js')
+
+  // 1x1 valid PNG
+  const validPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+  assert.equal(detectImageMediaType(validPng), 'image/png')
+
+  // Transcode PNG -> WebP
+  const webpRes = await ensureImageFormat(validPng, 'webp')
+  assert.equal(webpRes.mediaType, 'image/webp')
+  assert.equal(detectImageMediaType(webpRes.bytes), 'image/webp', 'Magic bytes must be RIFF...WEBP')
+
+  // Transcode PNG -> JPEG
+  const jpegRes = await ensureImageFormat(validPng, 'jpeg')
+  assert.equal(jpegRes.mediaType, 'image/jpeg')
+  assert.equal(detectImageMediaType(jpegRes.bytes), 'image/jpeg', 'Magic bytes must be JPEG')
+
+  // Matching format returns untouched
+  const pngRes = await ensureImageFormat(validPng, 'png')
+  assert.equal(pngRes.mediaType, 'image/png')
+  assert.deepEqual(pngRes.bytes, validPng)
+
+  // Unsupported format throws descriptive error
+  await assert.rejects(
+    async () => ensureImageFormat(validPng, 'bmp'),
+    /Unsupported output format "bmp"/
+  )
+
+  // Custom backend integration: mock provider returns PNG for format=webp
+  let capturedBody
+  const mockFetch = async (url, init) => {
+    if (init && init.body) capturedBody = JSON.parse(init.body)
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [{ b64_json: validPng.toString('base64') }]
+      }),
+    }
+  }
+
+  const deps = {
+    fetchImpl: mockFetch,
+    resolveKey: async () => 'test-key',
+    cfg: { customBaseURL: 'https://api.example.com/v1', customModel: 'dall-e-3' },
+  }
+  const job = {
+    prompt: 'test format transcoding',
+    size: '1024x1024',
+    format: 'webp',
+  }
+
+  const providers = makeProviders(deps, job)
+  const result = await providers.custom()
+
+  // Verify request included output_format
+  assert.equal(capturedBody.output_format, 'webp', 'Request body must pass output_format: webp')
+
+  // Verify returned result was transcoded to real WebP
+  assert.equal(result.mediaType, 'image/webp')
+  assert.equal(detectImageMediaType(result.bytes), 'image/webp', 'Custom backend output bytes must match declared WebP mediaType')
+})

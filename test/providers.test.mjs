@@ -481,6 +481,52 @@ test('gemini: generateContent запрос и разбор inlineData', async ()
   assert.equal(body.contents[0].parts[0].text, 'кот в скафандре')
 })
 
+test('gemini: transparently migrates deprecated imagen model ID and unifies imageConfig (#364)', async () => {
+  let url = ''
+  let body = null
+  const fetchImpl = async (u, init) => {
+    url = String(u)
+    body = JSON.parse(init.body)
+    return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: PNG.toString('base64') } }] } }] }) }
+  }
+  const d = deps(fetchImpl, {
+    keys: { GEMINI_API_KEY: 'g-key' },
+    cfg: { geminiKeyEnv: 'GEMINI_API_KEY', geminiModel: 'imagen-3.0-generate-002' },
+  })
+  const customJob = job({ quality: 'high', style: 'vivid', aspectRatio: '16:9' })
+  await makeProviders(d, customJob).gemini()
+
+  // Deprecated imagen model migrated
+  assert.ok(url.includes('gemini-2.0-flash-exp-image-generation'), 'Must migrate deprecated imagen-3 model')
+  assert.ok(!url.includes('imagen-3.0-generate-002'), 'Must not call deprecated endpoint')
+
+  // imageConfig unification without overwrite
+  assert.deepEqual(body.generationConfig.imageConfig, {
+    aspectRatio: '16:9',
+    imageQuality: 'high',
+    imageStyle: 'vivid',
+  }, 'quality and style must coexist without overwriting each other')
+})
+
+test('gemini: supports multimodal image inputs for image editing / img2img (#364)', async () => {
+  let body = null
+  const fetchImpl = async (u, init) => {
+    body = JSON.parse(init.body)
+    return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: PNG.toString('base64') } }] } }] }) }
+  }
+  const d = deps(fetchImpl, { keys: { GEMINI_API_KEY: 'g-key' }, cfg: { geminiKeyEnv: 'GEMINI_API_KEY' } })
+  const editJob = job({
+    prompt: 'make it snowy',
+    source: { bytes: Buffer.from([1, 2, 3, 4]), mediaType: 'image/jpeg' },
+  })
+  await makeProviders(d, editJob).gemini()
+
+  assert.equal(body.contents[0].parts.length, 2)
+  assert.equal(body.contents[0].parts[0].inlineData.mimeType, 'image/jpeg')
+  assert.equal(body.contents[0].parts[0].inlineData.data, Buffer.from([1, 2, 3, 4]).toString('base64'))
+  assert.equal(body.contents[0].parts[1].text, 'make it snowy')
+})
+
 
 test('pxSize: aspect_ratio приоритетнее именованного размера', () => {
   assert.deepEqual(pxSize([1344, 768], 'square_hd'), [1344, 768])
