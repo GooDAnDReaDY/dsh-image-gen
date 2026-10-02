@@ -209,3 +209,66 @@ test('style preset: handles style_preset correctly and never appends default "no
   })
   assert.equal(p3.effectivePrompt, 'a beautiful castle')
 })
+
+test('output format: ensures matching image container bytes and truthful MIME (#386)', async () => {
+  const { detectImageMediaType, ensureImageFormat, makeProviders } = await import('../lib/providers.js')
+
+  // 1x1 valid PNG
+  const validPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+  assert.equal(detectImageMediaType(validPng), 'image/png')
+
+  // Transcode PNG -> WebP
+  const webpRes = await ensureImageFormat(validPng, 'webp')
+  assert.equal(webpRes.mediaType, 'image/webp')
+  assert.equal(detectImageMediaType(webpRes.bytes), 'image/webp', 'Magic bytes must be RIFF...WEBP')
+
+  // Transcode PNG -> JPEG
+  const jpegRes = await ensureImageFormat(validPng, 'jpeg')
+  assert.equal(jpegRes.mediaType, 'image/jpeg')
+  assert.equal(detectImageMediaType(jpegRes.bytes), 'image/jpeg', 'Magic bytes must be JPEG')
+
+  // Matching format returns untouched
+  const pngRes = await ensureImageFormat(validPng, 'png')
+  assert.equal(pngRes.mediaType, 'image/png')
+  assert.deepEqual(pngRes.bytes, validPng)
+
+  // Unsupported format throws descriptive error
+  await assert.rejects(
+    async () => ensureImageFormat(validPng, 'bmp'),
+    /Unsupported output format "bmp"/
+  )
+
+  // Custom backend integration: mock provider returns PNG for format=webp
+  let capturedBody
+  const mockFetch = async (url, init) => {
+    if (init && init.body) capturedBody = JSON.parse(init.body)
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [{ b64_json: validPng.toString('base64') }]
+      }),
+    }
+  }
+
+  const deps = {
+    fetchImpl: mockFetch,
+    resolveKey: async () => 'test-key',
+    cfg: { customBaseURL: 'https://api.example.com/v1', customModel: 'dall-e-3' },
+  }
+  const job = {
+    prompt: 'test format transcoding',
+    size: '1024x1024',
+    format: 'webp',
+  }
+
+  const providers = makeProviders(deps, job)
+  const result = await providers.custom()
+
+  // Verify request included output_format
+  assert.equal(capturedBody.output_format, 'webp', 'Request body must pass output_format: webp')
+
+  // Verify returned result was transcoded to real WebP
+  assert.equal(result.mediaType, 'image/webp')
+  assert.equal(detectImageMediaType(result.bytes), 'image/webp', 'Custom backend output bytes must match declared WebP mediaType')
+})
