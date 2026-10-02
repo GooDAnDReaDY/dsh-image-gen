@@ -595,11 +595,12 @@ test('upscaleImageFal: отправляет масштаб и параметры
   assert.equal(res.height, 2048)
 })
 
-test('traceToSvg: генерирует валидную SVG разметку', () => {
-  const res = traceToSvg(PNG, { colorMode: 'color' })
+test('traceToSvg: генерирует валидную SVG разметку с векторными путями без embedded raster (#373)', async () => {
+  const res = await traceToSvg(PNG, { colorMode: 'color' })
   assert.equal(res.mediaType, 'image/svg+xml')
   assert.ok(res.svg.includes('<svg'))
-  assert.ok(res.svg.includes('<image href="data:image/png;base64,'))
+  assert.ok(res.svg.includes('<path'))
+  assert.ok(!res.svg.includes('<image href="data:image'), 'Must not contain embedded raster')
 })
 
 
