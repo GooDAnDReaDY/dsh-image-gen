@@ -36,14 +36,33 @@ test('frontend-assets: WCAG relative luminance and contrast ratio', () => {
   assert.equal(sameContrast, 1)
 })
 
-test('frontend-assets: extractSampleColorsFromBuffer fallback and svg parsing', () => {
-  const defaultColors = extractSampleColorsFromBuffer(Buffer.alloc(0))
+test('frontend-assets: extractSampleColorsFromBuffer fallback and svg parsing', async () => {
+  const defaultColors = await extractSampleColorsFromBuffer(Buffer.alloc(0))
   assert.ok(Array.isArray(defaultColors))
   assert.ok(defaultColors.length >= 5)
 
   const svgMock = Buffer.from('<svg><rect fill="#3b82f6"/><circle fill="#ef4444"/><path fill="#3b82f6"/></svg>')
-  const svgColors = extractSampleColorsFromBuffer(svgMock)
+  const svgColors = await extractSampleColorsFromBuffer(svgMock)
   assert.ok(svgColors.includes('#3b82f6'))
+})
+
+test('frontend-assets (#372): solid red and black fixtures yield true colors', async () => {
+  const sharp = (await import('sharp')).default
+
+  const redPng = await sharp({ create: { width: 16, height: 16, channels: 3, background: { r: 255, g: 0, b: 0 } } }).png().toBuffer()
+  const redColors = await extractSampleColorsFromBuffer(redPng)
+  assert.equal(redColors[0], '#ff0000', 'Solid red image must yield #ff0000 dominant color')
+
+  const blackPng = await sharp({ create: { width: 16, height: 16, channels: 3, background: { r: 0, g: 0, b: 0 } } }).png().toBuffer()
+  const blackColors = await extractSampleColorsFromBuffer(blackPng)
+  assert.equal(blackColors[0], '#000000', 'Solid black image must yield #000000 dominant color')
+
+  // Transparent pixels with red content
+  const transparentPng = await sharp({ create: { width: 16, height: 16, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: Buffer.from([255, 0, 0, 255]), raw: { width: 1, height: 1, channels: 4 } }])
+    .png().toBuffer()
+  const transparentColors = await extractSampleColorsFromBuffer(transparentPng)
+  assert.equal(transparentColors[0], '#ff0000', 'Alpha transparency must be respected, selecting opaque pixel')
 })
 
 test('frontend-assets (#172): extractDesignTokens', () => {

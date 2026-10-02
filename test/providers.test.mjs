@@ -595,11 +595,12 @@ test('upscaleImageFal: отправляет масштаб и параметры
   assert.equal(res.height, 2048)
 })
 
-test('traceToSvg: генерирует валидную SVG разметку', () => {
-  const res = traceToSvg(PNG, { colorMode: 'color' })
+test('traceToSvg: генерирует валидную SVG разметку с векторными путями без embedded raster (#373)', async () => {
+  const res = await traceToSvg(PNG, { colorMode: 'color' })
   assert.equal(res.mediaType, 'image/svg+xml')
   assert.ok(res.svg.includes('<svg'))
-  assert.ok(res.svg.includes('<image href="data:image/png;base64,'))
+  assert.ok(res.svg.includes('<path'))
+  assert.ok(!res.svg.includes('<image href="data:image'), 'Must not contain embedded raster')
 })
 
 
@@ -634,11 +635,14 @@ test('applyStylePreset: подставляет пресет по ключу ил
   assert.equal(applyStylePreset('дом', 'custom_3d_style'), 'дом, custom_3d_style')
 })
 
-test('blendImagesFal: отправляет несколько картинок на слияние в FAL', async () => {
+test('blendImagesFal: отправляет несколько картинок на слияние в FAL (#381)', async () => {
+  let capturedBody = null
   const fetchImpl = async (url, init) => {
     if (String(url).endsWith('/fal-ai/flux/dev/image-to-image')) {
-      const parsed = JSON.parse(init.body)
-      assert.ok(parsed.image_url.startsWith('data:image/png;base64,'))
+      capturedBody = JSON.parse(init.body)
+      assert.ok(capturedBody.image_url.startsWith('data:image/png;base64,'))
+      assert.equal(capturedBody.images.length, 2)
+      assert.deepEqual(capturedBody.weights, [0.5, 0.5])
       return jsonRes({ request_id: 'b1', status_url: 'https://q/b_status', response_url: 'https://q/b_result' })
     }
     if (String(url) === 'https://q/b_status') return jsonRes({ status: 'COMPLETED', response_url: 'https://q/b_result' })
@@ -647,9 +651,14 @@ test('blendImagesFal: отправляет несколько картинок �
     }
     return bytesRes(PNG)
   }
-  const res = await blendImagesFal(deps(fetchImpl), { images: [{ bytes: PNG, mediaType: 'image/png' }], prompt: 'mix', signal })
+  const res = await blendImagesFal(deps(fetchImpl), {
+    images: [{ bytes: PNG, mediaType: 'image/png' }, { bytes: PNG, mediaType: 'image/png' }],
+    prompt: 'mix',
+    signal,
+  })
   assert.equal(res.width, 1024)
   assert.deepEqual(res.bytes, PNG)
+  assert.ok(capturedBody)
 })
 
 
@@ -809,19 +818,23 @@ test('embedPngMetadata: вшивает tEXt чанк с ключевым сло�
   assert.ok(text.includes('Seed: 42'))
 })
 
-test('estimateSharpnessAndVariance: детектирует пустые/поврежденные буферы и валидные картинки', () => {
+test('estimateSharpnessAndVariance: детектирует пустые/поврежденные буферы и валидные картинки', async () => {
   const corrupt = Buffer.alloc(10, 0)
-  const corruptRes = estimateSharpnessAndVariance(corrupt)
+  const corruptRes = await estimateSharpnessAndVariance(corrupt)
   assert.equal(corruptRes.passed, false)
   assert.equal(corruptRes.score, 0)
 
-  const solidBlank = Buffer.alloc(2048, 128)
-  const blankRes = estimateSharpnessAndVariance(solidBlank)
+  const sharp = (await import('sharp')).default
+  const solidBlank = await sharp({ create: { width: 4, height: 4, channels: 3, background: { r: 128, g: 128, b: 128 } } }).png().toBuffer()
+  const blankRes = await estimateSharpnessAndVariance(solidBlank)
   assert.equal(blankRes.isBlank, true)
   assert.equal(blankRes.passed, false)
 
-  const validPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mNk+M9QzwAEjAwACXEB+V38FswAAAAASUVORK5CYII=', 'base64')
-  const validRes = estimateSharpnessAndVariance(validPng)
+  const validPng = await sharp({ create: { width: 16, height: 16, channels: 3, background: { r: 255, g: 0, b: 0 } } })
+    .composite([{ input: Buffer.from([0, 255, 0, 255, 0, 0, 255, 255]), raw: { width: 2, height: 1, channels: 4 } }])
+    .png()
+    .toBuffer()
+  const validRes = await estimateSharpnessAndVariance(validPng)
   assert.equal(validRes.isBlank, false)
   assert.ok(validRes.score >= 0.5)
 })

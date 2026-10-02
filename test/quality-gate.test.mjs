@@ -9,18 +9,18 @@ test('evaluateImageQuality: rejects corrupt or tiny buffers', async () => {
 })
 
 test('evaluateImageQuality: rejects solid monochrome or blank images', async () => {
-  // 1024 bytes of identical bytes (zero variance)
-  const blankBuf = Buffer.alloc(1024, 128)
+  const sharp = (await import('sharp')).default
+  const blankBuf = await sharp({ create: { width: 32, height: 32, channels: 3, background: { r: 128, g: 128, b: 128 } } }).png().toBuffer()
   const result = await evaluateImageQuality(blankBuf)
   assert.equal(result.passed, false)
   assert.equal(result.defect, 'blank_or_solid_frame')
 })
 
 test('evaluateImageQuality: accepts high-entropy varied image buffers', async () => {
-  const variedBuf = Buffer.alloc(2048)
-  for (let i = 0; i < variedBuf.length; i++) {
-    variedBuf[i] = (i * 37) % 256
-  }
+  const sharp = (await import('sharp')).default
+  const variedRaw = Buffer.alloc(32 * 32)
+  for (let i = 0; i < variedRaw.length; i++) variedRaw[i] = (i * 37) % 256
+  const variedBuf = await sharp(variedRaw, { raw: { width: 32, height: 32, channels: 1 } }).png().toBuffer()
   const result = await evaluateImageQuality(variedBuf)
   assert.equal(result.passed, true)
   assert.equal(result.defect, null)
@@ -28,13 +28,15 @@ test('evaluateImageQuality: accepts high-entropy varied image buffers', async ()
 })
 
 test('executeWithQualityGate: passes through immediately when quality is good', async () => {
-  const goodBuf = Buffer.alloc(2048)
-  for (let i = 0; i < goodBuf.length; i++) goodBuf[i] = (i * 43) % 256
+  const sharp = (await import('sharp')).default
+  const goodRaw = Buffer.alloc(32 * 32)
+  for (let i = 0; i < goodRaw.length; i++) goodRaw[i] = (i * 43) % 256
+  const goodBuf = await sharp(goodRaw, { raw: { width: 32, height: 32, channels: 1 } }).png().toBuffer()
 
   let callCount = 0
   const generateFn = async (seed) => {
     callCount++
-    return { seed, bytes: goodBuf, width: 512, height: 512 }
+    return { seed, bytes: goodBuf, width: 32, height: 32 }
   }
 
   const { generated, qualityReport } = await executeWithQualityGate(generateFn, {
@@ -49,17 +51,19 @@ test('executeWithQualityGate: passes through immediately when quality is good', 
 })
 
 test('executeWithQualityGate: performs silent re-roll when first attempt fails', async () => {
-  const badBuf = Buffer.alloc(1024, 0) // blank
-  const goodBuf = Buffer.alloc(2048)
-  for (let i = 0; i < goodBuf.length; i++) goodBuf[i] = (i * 17) % 256
+  const sharp = (await import('sharp')).default
+  const badBuf = await sharp({ create: { width: 32, height: 32, channels: 3, background: { r: 0, g: 0, b: 0 } } }).png().toBuffer()
+  const goodRaw = Buffer.alloc(32 * 32)
+  for (let i = 0; i < goodRaw.length; i++) goodRaw[i] = (i * 17) % 256
+  const goodBuf = await sharp(goodRaw, { raw: { width: 32, height: 32, channels: 1 } }).png().toBuffer()
 
   let callCount = 0
   const generateFn = async (seed) => {
     callCount++
     if (callCount === 1) {
-      return { seed, bytes: badBuf, width: 512, height: 512 }
+      return { seed, bytes: badBuf, width: 32, height: 32 }
     }
-    return { seed, bytes: goodBuf, width: 512, height: 512 }
+    return { seed, bytes: goodBuf, width: 32, height: 32 }
   }
 
   const { generated, qualityReport } = await executeWithQualityGate(generateFn, {
@@ -100,12 +104,12 @@ test('pipeline regression: generate_image inspects raw bytes without false posit
   process.env.DSH_HOME = testDir
 
   try {
-    // 1. Build a valid high-entropy PNG buffer (> 1000 bytes)
-    const validPng = Buffer.alloc(1205)
-    validPng[0] = 0x89; validPng[1] = 0x50; validPng[2] = 0x4e; validPng[3] = 0x47;
-    for (let i = 4; i < validPng.length; i++) {
-      validPng[i] = (i * 73 + 19) % 256
-    }
+    // 1. Build a valid high-entropy PNG buffer via sharp
+    const sharp = (await import('sharp')).default
+    const validPng = await sharp({ create: { width: 32, height: 32, channels: 3, background: { r: 255, g: 0, b: 0 } } })
+      .composite([{ input: Buffer.from([0, 255, 0, 255, 0, 0, 255, 255]), raw: { width: 2, height: 1, channels: 4 } }])
+      .png()
+      .toBuffer()
 
     let apiCalls = 0
     const mockFetch = async () => {
@@ -208,9 +212,10 @@ test('pipeline regression: defective buffer triggers silent reroll and saves cho
     // Blank buffer (defect) for attempt 1, valid buffer for attempt 2
     const sharp = (await import('sharp')).default
     const blankPng = await sharp({ create: { width: 64, height: 64, channels: 3, background: { r: 0, g: 0, b: 0 } } }).png().toBuffer()
-    const validPng = Buffer.alloc(1205)
-    validPng[0] = 0x89; validPng[1] = 0x50; validPng[2] = 0x4e; validPng[3] = 0x47;
-    for (let i = 4; i < validPng.length; i++) validPng[i] = (i * 47) % 256
+    const validPng = await sharp({ create: { width: 32, height: 32, channels: 3, background: { r: 255, g: 0, b: 0 } } })
+      .composite([{ input: Buffer.from([0, 255, 0, 255, 0, 0, 255, 255]), raw: { width: 2, height: 1, channels: 4 } }])
+      .png()
+      .toBuffer()
 
     let apiCalls = 0
     const mockFetch = async () => {
