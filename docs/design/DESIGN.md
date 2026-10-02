@@ -213,7 +213,7 @@
 
 ### 1. Toolsets Profiles & Lightweight Agent Context (#337)
 - **`toolsetProfile` Configuration**:
-  - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `upscale_image`) with schema size <= 5k chars, preserving agent context window.
+  - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `inspect_image_quality`) with schema size <= 5k chars, preserving agent context window.
   - `all`: registers all 30 tools across all suites.
   - `custom`: enables fine-grained selection per suite (`toolsets.creative`, `toolsets.studio`, etc.) or individual flat boolean toggles.
 - **Suite Architecture (30 tools total)**:

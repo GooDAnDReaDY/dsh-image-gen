@@ -169,3 +169,12 @@ test('client: inpaint canvas declares brush, eraser, and invert mode controls (#
   assert.match(clientSrc, /setToolMode\('eraser'\)/)
   assert.match(clientSrc, /handleInvert/)
 })
+test('lifecycle (#383): DESIGN.md is tracked, not export-ignored, and documents canonical minimal core tools', () => {
+  const root = path.join(here, '..')
+  const gitattributes = readFileSync(path.join(root, '.gitattributes'), 'utf8')
+  assert.doesNotMatch(gitattributes, /^\s*docs\/\s+export-ignore/m, 'docs/ must not be export-ignored entirely')
+
+  const design = readFileSync(path.join(root, 'docs/design/DESIGN.md'), 'utf8')
+  assert.match(design, /`minimal` \(default\): registers <= 3 essential core tools \(`generate_image`, `edit_image`, `inspect_image_quality`\)/)
+  assert.doesNotMatch(design, /`minimal` \(default\): registers <= 3 essential core tools \(`generate_image`, `edit_image`, `upscale_image`\)/)
+})
