@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.28
+
+### Fixed
+- **Source Archive Contract & Minimal Core Alignment (#383)**: Exclude internal documentation drafts (`docs/plans/`) from `git archive` while preserving canonical design contracts (`docs/design/DESIGN.md`) in release archives. Align minimal toolset profile declarations in documentation with active runtime tools (`generate_image`, `edit_image`, `inspect_image_quality`).
+- **Honest Diagnostics States, Health Endpoints & Subscription Contract (#377)**: Overhaul provider diagnostic suite (`testProviderConnection`) to reject unconfigured/unknown providers with honest `unsupported` states and never return synthetic `ok: true` for offline hosts. Bind `/health` and model endpoint reachability checks for local ComfyUI/Automatic1111, and query live `subscriptionImages` cordis service instead of deprecated stubs without triggering billable requests or leaking secret tokens.
+- **Face & Reference Identity Anchors Bytes Delivery (#375)**: Support `mode: 'face'` and `anchor_type: 'face'` in `set_style_anchor`, resolve facial reference bytes and weights (`faceReference`, `faceStrength`, `referenceImage`, `referenceStrength`) into generation pipelines, interpolate ComfyUI FaceID/IP-Adapter template placeholders, and forward reference payloads to FAL, Gemini, and Replicate while failing fast on unsupported backends prior to network dispatch.
+- **Comprehensive Tool Execution Smoke & Runtime Regression Coverage (#382)**: Expand test coverage to execute real `.execute()` pipelines across all 30 registered tools within isolated test sandbox environments. Eliminate unhandled `TypeError` crashes upon omitted execution contexts or missing parameters, enforce fail-fast validation across design and vision tools, and verify live progress event stream flow.
+
 ## 0.11.27
 
 ### Fixed
