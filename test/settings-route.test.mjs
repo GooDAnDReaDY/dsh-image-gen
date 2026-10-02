@@ -200,3 +200,75 @@ test('settings-route: PUT failure does not mutate live config or trigger setLive
   assert.equal(setLiveCalled, false, 'setLiveConfig must not be called')
   assert.equal(liveCfg.provider, 'custom', 'liveCfg must remain intact')
 })
+
+test('settings-route: PUT with resetFields removes override and restores schema default (#367)', async () => {
+  let liveCfg = { enabled: true, stylePreset: 'cinematic', provider: 'fal' }
+  const ctx = createMockCtx()
+  registerSettingsRoutes(ctx, {
+    live: () => liveCfg,
+    getSettingsApi: () => null,
+    setLiveConfig: (c) => { liveCfg = c },
+  })
+
+  const handler = ctx.routes.get('/dsh-image-gen/config')
+  const payload = JSON.stringify({ resetFields: ['stylePreset'] })
+  const stream = Readable.from([payload])
+  stream.method = 'PUT'
+  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.socket = { remoteAddress: '127.0.0.1' }
+
+  const res = mockRes()
+  await handler(stream, res)
+
+  assert.equal(res.statusCode, 200)
+  const data = JSON.parse(res.body)
+  assert.equal(data.ok, true)
+  assert.equal(data.config.stylePreset, 'none', 'schema default is restored in response')
+  assert.equal(liveCfg.stylePreset, 'none', 'schema default is restored in liveCfg')
+})
+
+test('settings-route: PUT with null field resets it to schema default (#367)', async () => {
+  let liveCfg = { enabled: true, stylePreset: 'anime', provider: 'fal' }
+  const ctx = createMockCtx()
+  registerSettingsRoutes(ctx, {
+    live: () => liveCfg,
+    getSettingsApi: () => null,
+    setLiveConfig: (c) => { liveCfg = c },
+  })
+
+  const handler = ctx.routes.get('/dsh-image-gen/config')
+  const payload = JSON.stringify({ stylePreset: null })
+  const stream = Readable.from([payload])
+  stream.method = 'PUT'
+  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.socket = { remoteAddress: '127.0.0.1' }
+
+  const res = mockRes()
+  await handler(stream, res)
+
+  assert.equal(res.statusCode, 200)
+  const data = JSON.parse(res.body)
+  assert.equal(data.ok, true)
+  assert.equal(data.config.stylePreset, 'none', 'null resets to default')
+  assert.equal(liveCfg.stylePreset, 'none')
+})
+
+test('createSettingsAdapter: delete removes override and restores schema default (#367)', async () => {
+  let liveCfg = { provider: 'fal', stylePreset: 'cinematic', enabled: true }
+  let persisted = null
+  const mockSvc = {
+    replace: async (ns, payload) => {
+      persisted = payload
+    },
+  }
+  const adapter = createSettingsAdapter(mockSvc, {
+    ns: 'dsh-image-gen',
+    getLive: () => liveCfg,
+    setLive: (c) => { liveCfg = c },
+  })
+
+  const res = await adapter.delete('stylePreset')
+  assert.equal(res.stylePreset, 'none', 'deleted field reset to default')
+  assert.equal(liveCfg.stylePreset, 'none', 'live config updated')
+  assert.equal(persisted.stylePreset, 'none', 'persisted with default')
+})
