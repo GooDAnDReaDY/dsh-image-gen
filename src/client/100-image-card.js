@@ -251,6 +251,7 @@
         const draftSrc = block && (block.draftUrl || block.previewUrl || '')
         body.push(react.createElement(ProgressiveImagePreview, {
           key: 'prog-img',
+          callId: block && (block.id || block.callId || block.toolCallId || ''),
           src: displaySrc,
           draftSrc,
           isRunning: running,
