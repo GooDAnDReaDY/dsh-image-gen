@@ -1018,3 +1018,28 @@ test('свой API: edit режим отправляет multipart FormData бе
   assert.ok(seenBody.get('mask'), 'FormData must include mask')
   assert.deepEqual(Buffer.from(out.bytes), PNG)
 })
+
+test('local provider: default localKind=a1111 and automatic1111 call txt2img; unknown kind throws (#363)', async () => {
+  let seenUrl = ''
+  const fetchImpl = async (url) => {
+    seenUrl = String(url)
+    return { ok: true, status: 200, json: async () => ({ images: [PNG.toString('base64')] }) }
+  }
+
+  // 1. Default (omitted localKind) -> a1111 -> txt2img
+  const dDefault = deps(fetchImpl, { cfg: { localBaseURL: 'http://127.0.0.1:7860' } })
+  await makeProviders(dDefault, job()).local()
+  assert.ok(seenUrl.endsWith('/sdapi/v1/txt2img'))
+
+  // 2. automatic1111 legacy string -> normalized to a1111 -> txt2img
+  const dAuto = deps(fetchImpl, { cfg: { localKind: 'automatic1111', localBaseURL: 'http://127.0.0.1:7860' } })
+  await makeProviders(dAuto, job()).local()
+  assert.ok(seenUrl.endsWith('/sdapi/v1/txt2img'))
+
+  // 3. Unknown kind -> throws descriptive error rather than silently picking comfyui
+  const dUnknown = deps(fetchImpl, { cfg: { localKind: 'unknown_kind', localBaseURL: 'http://127.0.0.1:7860' } })
+  await assert.rejects(
+    makeProviders(dUnknown, job()).local(),
+    /Unknown local generation backend kind "unknown_kind"/,
+  )
+})
