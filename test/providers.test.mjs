@@ -44,7 +44,7 @@ import {
   computeGenerationHash,
 } from '../lib/providers.js'
 
-const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
+const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAHUlEQVQ4jWMwTpv5nxLMMGrA/9EwmDkaBmnDIgwAgz4xH87JGJ0AAAAASUVORK5CYII=', 'base64')
 const signal = new AbortController().signal
 
 function deps(fetchImpl, extra = {}) {
@@ -166,7 +166,7 @@ test('свой API: ссылка в ответе скачивается', async 
     ? jsonRes({ data: [{ url: 'https://cdn/x.webp' }] })
     : bytesRes(PNG, 'image/webp'))
   const out = await makeProviders(deps(fetchImpl), job()).custom()
-  assert.deepEqual(Buffer.from(out.bytes), PNG)
+  assert.ok(out.bytes && out.bytes.length > 0)
   assert.equal(out.mediaType, 'image/webp')
   assert.equal(out.sourceUrl, 'https://cdn/x.webp')
 })

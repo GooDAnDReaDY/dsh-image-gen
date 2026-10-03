@@ -109,7 +109,7 @@ test('vision-ocr: registered execute runs through OCR grounding, inpaint, compos
     model: 'fal-ai/flux-2/klein/9b',
   }
 
-  const mockSourcePng = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
+  const mockSourcePng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAHUlEQVQ4jWMwTpv5nxLMMGrA/9EwmDkaBmnDIgwAgz4xH87JGJ0AAAAASUVORK5CYII=', 'base64')
 
   registerVisionOcrTools(mockCtx, {
     live: () => liveConfig,
@@ -128,7 +128,7 @@ test('vision-ocr: registered execute runs through OCR grounding, inpaint, compos
   assert.ok(tool)
 
   const originalFetch = globalThis.fetch
-  const mockInpaintedPng = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3, 4, 5])
+  const mockInpaintedPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAHUlEQVQ4jWMwTpv5nxLMMGrA/9EwmDkaBmnDIgwAgz4xH87JGJ0AAAAASUVORK5CYII=', 'base64')
   globalThis.fetch = async (url) => {
     const s = String(url)
     if (s.includes('fal-ai/flux')) {

@@ -36,7 +36,7 @@ test('audit (#269): gemini backend enforces fallback timeout signal', async () =
     return {
       ok: true,
       json: async () => ({
-        candidates: [{ content: { parts: [{ inlineData: { data: 'AQID', mimeType: 'image/png' } }] } }],
+        candidates: [{ content: { parts: [{ inlineData: { data: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAHUlEQVQ4jWMwTpv5nxLMMGrA/9EwmDkaBmnDIgwAgz4xH87JGJ0AAAAASUVORK5CYII=', mimeType: 'image/png' } }] } }],
       }),
     };
   };

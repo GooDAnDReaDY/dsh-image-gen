@@ -32,3 +32,34 @@ test('live-progress: card forwards progress metadata to preview', () => {
   assert.match(cardSrc, /step:\s*parsed\?\.step/)
   assert.match(cardSrc, /stage:\s*parsed\?\.stage/)
 })
+
+test('live-progress (#379): pre-registered subscriber receives events across session reset', async () => {
+  const {
+    subscribeLiveProgress,
+    createLiveProgressSession,
+    publishLiveProgress,
+    completeLiveProgress,
+  } = await import('../lib/live-progress.js')
+
+  const callId = `test-progress-${Date.now()}`
+  const stages = []
+
+  // Subscribe before session is created
+  const unsubscribe = subscribeLiveProgress(callId, (data) => {
+    stages.push(data.stage)
+  })
+
+  // Start/reset session
+  createLiveProgressSession(callId)
+
+  // Publish incremental progress
+  publishLiveProgress(callId, { stage: 'Generating', progress: 50 })
+  completeLiveProgress(callId)
+
+  assert.ok(stages.includes('Starting...'), 'Initial replay received')
+  assert.ok(stages.includes('Generating'), 'Generating progress delivered to pre-registered listener')
+  assert.ok(stages.includes('Complete'), 'Complete status delivered')
+
+  unsubscribe()
+})
+
