@@ -253,6 +253,7 @@ test('Issue #375: FAL, Gemini and Replicate generators forward face reference pa
   })
   await falGen()
   assert.ok(capturedFalBody, 'FAL fetch must be called')
+  assert.ok(capturedFalBody.image_url.startsWith('data:image/jpeg;base64,'))
   assert.ok(capturedFalBody.face_image_url.startsWith('data:image/jpeg;base64,'))
   assert.ok(capturedFalBody.reference_image_url.startsWith('data:image/jpeg;base64,'))
   assert.equal(capturedFalBody.id_weight, 0.85)
@@ -379,4 +380,85 @@ test('Issue #375: Unsupported providers reject faceReference before billing or n
   const subResult = await subFactory('chatgpt')()
   assert.equal(subResult.ok, false)
   assert.ok(subResult.reason.includes('does not support facial identity references (FaceID)'))
+})
+
+test('Issue #375: FAL Redux generator conforms to official schema (requires image_url) with referenceImage', async () => {
+  let capturedFalBody = null
+  const falDeps = {
+    fetchImpl: async (url, opts) => {
+      const u = String(url)
+      if (opts?.body) {
+        capturedFalBody = JSON.parse(opts.body)
+        // Strict mock conforming to https://fal.ai/models/fal-ai/flux/dev/redux/api
+        if (!capturedFalBody.image_url) {
+          return {
+            ok: false,
+            status: 422,
+            json: async () => ({ detail: [{ loc: ['body', 'image_url'], msg: 'field required', type: 'value_error.missing' }] }),
+          }
+        }
+      }
+      if (u.includes('requests/')) {
+        return { ok: true, status: 200, json: async () => ({ status: 'COMPLETED', response_url: 'https://queue.fal.run/res' }) }
+      }
+      if (u === 'https://queue.fal.run/res') {
+        return { ok: true, status: 200, json: async () => ({ images: [{ url: 'https://cdn/img.png', width: 1024, height: 1024 }] }) }
+      }
+      if (u === 'https://cdn/img.png') {
+        return { ok: true, status: 200, arrayBuffer: async () => PNG.buffer }
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ request_id: 'req_redux_1', status_url: 'https://queue.fal.run/requests/req_redux_1/status', response_url: 'https://queue.fal.run/res' }),
+      }
+    },
+    resolveKey: async () => 'mock-fal-key',
+    cfg: { apiKeyEnv: 'FAL_KEY', model: 'fal-ai/flux/dev/redux' },
+  }
+
+  const refImage = { bytes: PNG, mediaType: 'image/png', url: 'https://example.com/style.png' }
+  const falGen = createFalGenerator(falDeps, {
+    prompt: 'style variation',
+    size: '1024x1024',
+    format: 'png',
+    referenceImage: refImage,
+    referenceStrength: 0.75,
+  })
+
+  const res = await falGen()
+  assert.ok(res.bytes)
+  assert.ok(capturedFalBody, 'FAL Redux fetch must be called')
+  assert.ok(capturedFalBody.image_url, 'FAL Redux schema requires image_url')
+  assert.ok(capturedFalBody.image_url.startsWith('data:image/png;base64,'))
+  assert.ok(capturedFalBody.reference_image_url.startsWith('data:image/png;base64,'))
+  assert.equal(capturedFalBody.reference_weight, 0.75)
+})
+
+test('Issue #375 (Codex regression): fal_redux_payload has requiredImageUrlPresent and referenceImageUrlPresent', async () => {
+  let payload
+  let stage = 0
+  const gen = createFalGenerator({
+    cfg: { model: 'fal-ai/flux/dev/redux', baseURL: 'https://mock.fal', apiKeyEnv: 'X', pollIntervalMs: 1 },
+    resolveKey: async () => 'x',
+    fetchImpl: async (url, opts) => {
+      if (stage++ === 0) {
+        payload = JSON.parse(opts.body)
+        return { ok: true, json: async () => ({ request_id: 'x', status_url: 'https://status' }) }
+      }
+      if (url === 'https://status') return { ok: true, json: async () => ({ status: 'COMPLETED', response_url: 'https://res' }) }
+      if (url === 'https://res') return { ok: true, json: async () => ({ images: [{ url: 'https://img', content_type: 'image/png' }] }) }
+      return { ok: true, arrayBuffer: async () => PNG.buffer }
+    },
+  }, {
+    prompt: 'style',
+    size: 'square',
+    format: 'png',
+    referenceImage: { bytes: PNG, mediaType: 'image/png' },
+  })
+
+  await gen(1, 'style')
+  assert.ok(payload.image_url, 'requiredImageUrlPresent must be true')
+  assert.ok(payload.reference_image_url, 'referenceImageUrlPresent must be true')
+  assert.ok(Object.keys(payload).includes('image_url'))
 })
