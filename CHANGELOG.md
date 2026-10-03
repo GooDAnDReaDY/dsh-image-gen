@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.30
+
+### Fixed
+- **SVG Sanitization & Script Neutralization (#374)**: Harden SVG content optimization against obfuscated script vectors by decoding HTML entities (e.g. `java&#x73;cript:`), sanitizing unquoted and malformed `href`/`xlink:href` attributes, and stripping SMIL animation tags (`<animate>`, `<set>`) that manipulate hyperlinks or target script execution.
+- **Live Progress Listeners Preservation (#379)**: Retain existing subscribers in `createLiveProgressSession` when sessions are re-initialized, preventing loss of progress event handlers registered prior to generation dispatch.
+- **Turn-Aware Loop Guard & Editing Tools Context (#370)**: Tie conversational turn detection directly to the latest user message (`role === 'user'`) in host session history to prevent assistant follow-ups from evading repetition limits. Forward execution context (`limit`, `prompt`, `exec`, `sessionId`) across all editing and transformation tools (`edit_image`, `upscale_image`, `remove_background`, etc.).
+- **Strict History Cache Identity & Cache Provenance (#357)**: Enforce rigorous parameter matching (`format`, `aspectRatio`, `size`, `width`, `height`) during history cache lookups (`findCached`, `findCachedByPrompt`) to eliminate format mismatches and explicitly flag cached responses with `fromCache: true`.
+- **Vision OCR Text Replacement & Canvas Dimensions (#360)**: Dynamically measure source image dimensions via Sharp metadata, support grounding lookups without mandatory source refs, resize and position text overlay SVG masks to exactly match inpaint buffer dimensions, and report truthful `replacedCount` (reporting 0 if compositing fails).
+- **Strict Image Decoding & Error Propagation (#399)**: Eliminate fallback generation of synthetic PNGs, fake color palettes, and assumed MIME types upon image decoding failures in `blendImageBuffers`, `extractSampleColorsFromBuffer`, and `ensureImageFormat`, failing fast with truthful decode error exceptions.
+
 ## 0.11.29
 
 ### Fixed
