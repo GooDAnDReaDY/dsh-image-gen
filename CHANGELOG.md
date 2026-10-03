@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.31
+
+### Fixed
+- **Quality Gate Budget Limit on Silent Retries (#353)**: Re-rolls in Quality Gate now verify and reserve daily budget before each generation retry (`rawGenerate`); if budget is exceeded on re-roll, the process halts without error and returns the initial attempt's image marked with `exhausted: true, budgetExceeded: true`.
+- **Concurrent Spend Reservations & Atomic Accounting (#355)**: Implement active in-memory spend reservations (`reserveSpend` / `commit` / `release`) and serialized accounting to prevent double-spending across concurrent generation requests; write spend journal atomically via temporary sibling files and atomic rename.
+- **Strict Google Gemini 3.1 Model & Clean ImageConfig (#364)**: Upgrade default Gemini model to `gemini-3.1-flash-image` (Nano Banana 2), seamlessly migrate legacy `imagen-*` and preview models, and purge undocumented schema fields (`imageQuality`, `imageStyle`) from `imageConfig` payload.
+- **Provider Identity Capabilities & Model Validation (#375)**: Enforce strict identity anchor capability checks before network dispatch, rejecting FaceID/Reference requests on unsupported txt2img models (e.g. `fal-ai/flux/dev`) and local Automatic1111 backends, and validating required IP-Adapter/InstantID nodes in custom ComfyUI workflows.
+- **Extended Contract Smoke Suite & Regression Coverage (#382)**: Expand test suite (`test/tools-execute-smoke-382.test.mjs`, `test/providers.test.mjs`, `test/anchor-face-identity-375.test.mjs`) with assertions for concurrent budget reservations, Quality Gate retry cutoff, Gemini payload schema conformance, and identity capability rejection.
+
 ## 0.11.30
 
 ### Fixed
