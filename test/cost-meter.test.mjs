@@ -66,7 +66,7 @@ test('budget enforcer: saveAndAttachResult records spend in cost-meter storage (
   }
 
   await saveAndAttachResult(mockCtx, {}, { outputDir: 'tmp-test' }, {
-    bytes: Buffer.from([1, 2, 3]),
+    bytes: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAHUlEQVQ4jWMwTpv5nxLMMGrA/9EwmDkaBmnDIgwAgz4xH87JGJ0AAAAASUVORK5CYII=', 'base64'),
     mediaType: 'image/png',
     name: 'test-cost.png',
     stem: 'test-cost',
