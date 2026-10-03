@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.33
+
+### Fixed
+- **FAL Redux & Face Reference Schema Conformance (#375)**: Include mandatory `image_url` property in submission payloads for style reference (`fal-ai/flux/dev/redux`) and facial identity anchors on FAL platform, strictly conforming to the official FAL Redux API schema. Ensure fallback polling `statusUrl` uses effective `targetModel`.
+
 ## 0.11.32
 
 ### Fixed
