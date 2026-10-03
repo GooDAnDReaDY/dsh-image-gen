@@ -157,7 +157,7 @@
 
       'f.geminiModel': 'Gemini Model ID',
       'f.geminiModelHint': 'Google Gemini image generation model identifier.',
-      'p.geminiModel': 'gemini-2.0-flash-exp-image-generation',
+      'p.geminiModel': 'gemini-3.1-flash-image',
       'f.geminiKeyEnv': 'Gemini Key Reference',
       'f.geminiKeyEnvHint': 'Credential reference holding Google Gemini API key.',
       'p.geminiKeyEnv': 'GEMINI_API_KEY',

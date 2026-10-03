@@ -473,10 +473,10 @@ test('gemini: generateContent запрос и разбор inlineData', async ()
     body = JSON.parse(init.body)
     return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: PNG.toString('base64') } }] } }] }) }
   }
-  const d = deps(fetchImpl, { keys: { GEMINI_API_KEY: 'g-key' }, cfg: { geminiKeyEnv: 'GEMINI_API_KEY', geminiModel: 'gemini-2.0-flash-exp-image-generation' } })
+  const d = deps(fetchImpl, { keys: { GEMINI_API_KEY: 'g-key' }, cfg: { geminiKeyEnv: 'GEMINI_API_KEY', geminiModel: 'gemini-3.1-flash-image' } })
   const out = await makeProviders(d, job()).gemini()
   assert.deepEqual(Buffer.from(out.bytes), PNG)
-  assert.ok(url.includes('gemini-2.0-flash-exp-image-generation'))
+  assert.ok(url.includes('gemini-3.1-flash-image'))
   assert.ok(url.includes('g-key'))
   assert.equal(body.contents[0].parts[0].text, 'кот в скафандре')
 })
@@ -497,15 +497,13 @@ test('gemini: transparently migrates deprecated imagen model ID and unifies imag
   await makeProviders(d, customJob).gemini()
 
   // Deprecated imagen model migrated
-  assert.ok(url.includes('gemini-2.0-flash-exp-image-generation'), 'Must migrate deprecated imagen-3 model')
+  assert.ok(url.includes('gemini-3.1-flash-image'), 'Must migrate deprecated imagen-3 model')
   assert.ok(!url.includes('imagen-3.0-generate-002'), 'Must not call deprecated endpoint')
 
-  // imageConfig unification without overwrite
+  // #364: Strict Google Gemini ImageConfig: only valid fields (aspectRatio)
   assert.deepEqual(body.generationConfig.imageConfig, {
     aspectRatio: '16:9',
-    imageQuality: 'high',
-    imageStyle: 'vivid',
-  }, 'quality and style must coexist without overwriting each other')
+  }, 'only official ImageConfig fields are passed')
 })
 
 test('gemini: supports multimodal image inputs for image editing / img2img (#364)', async () => {
