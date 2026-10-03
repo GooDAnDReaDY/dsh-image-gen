@@ -146,7 +146,7 @@
 
       'f.geminiModel': 'Gemini 模型 ID',
       'f.geminiModelHint': 'Google Gemini 图像生成模型标识符。',
-      'p.geminiModel': 'gemini-2.0-flash-exp-image-generation',
+      'p.geminiModel': 'gemini-3.1-flash-image',
       'f.geminiKeyEnv': 'Gemini 凭证名称',
       'f.geminiKeyEnvHint': '存储 Google Gemini 密钥的凭证名称。',
       'p.geminiKeyEnv': 'GEMINI_API_KEY',

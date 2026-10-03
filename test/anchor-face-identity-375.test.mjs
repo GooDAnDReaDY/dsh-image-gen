@@ -242,7 +242,7 @@ test('Issue #375: FAL, Gemini and Replicate generators forward face reference pa
       }
     },
     resolveKey: async () => 'mock-fal-key',
-    cfg: { apiKeyEnv: 'FAL_KEY', model: 'fal-ai/flux/dev' },
+    cfg: { apiKeyEnv: 'FAL_KEY', model: 'fal-ai/flux-lora/face-to-many' },
   }
   const falGen = createFalGenerator(falDeps, {
     prompt: 'test prompt',
@@ -258,6 +258,18 @@ test('Issue #375: FAL, Gemini and Replicate generators forward face reference pa
   assert.equal(capturedFalBody.id_weight, 0.85)
   assert.equal(capturedFalBody.reference_weight, 0.85)
 
+  // Verify non-identity model rejection before network (#375)
+  const nonIdFalGen = createFalGenerator({ ...falDeps, cfg: { apiKeyEnv: 'FAL_KEY', model: 'fal-ai/flux/dev' } }, {
+    prompt: 'test prompt',
+    size: '1024x1024',
+    format: 'png',
+    faceReference: faceRef,
+  })
+  await assert.rejects(
+    () => nonIdFalGen(),
+    /does not support face identity anchors/
+  )
+
   // 2. Gemini
   let capturedGeminiBody = null
   const geminiDeps = {
@@ -272,7 +284,7 @@ test('Issue #375: FAL, Gemini and Replicate generators forward face reference pa
       }
     },
     resolveKey: async () => 'mock-gemini-key',
-    cfg: { geminiKeyEnv: 'GEMINI_API_KEY', geminiModel: 'imagen-3.0-generate-002' },
+    cfg: { geminiKeyEnv: 'GEMINI_API_KEY', geminiModel: 'gemini-3.1-flash-image' },
   }
   const geminiGen = createGeminiGenerator(geminiDeps, {
     prompt: 'test prompt',

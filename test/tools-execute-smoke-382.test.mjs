@@ -7,6 +7,8 @@ import { writeFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { registerAllTools } from '../lib/register-tools.js'
 import { resetLoopGuard } from '../lib/loop-guard.js'
+import { clearAllAnchors } from '../lib/anchor-helpers.js'
+import { loadDailySpend, clearSpendReservations } from '../lib/cost-meter.js'
 
 const PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg==',
@@ -15,6 +17,8 @@ const PNG = Buffer.from(
 
 function createMockEnvironment() {
   resetLoopGuard()
+  clearAllAnchors()
+  clearSpendReservations()
   const registeredTools = new Map()
   const ctx = {
     effect(fn) { fn() },
@@ -243,6 +247,101 @@ test('tools-execute-smoke-382: live progress event flow receives progress update
 
     // Verify progress session was activated
     assert.ok(execWithProgress.onProgress, 'onProgress handler must be active')
+  } finally {
+    globalThis.fetch = originalFetch
+    env.controller.dispose()
+  }
+})
+
+test('tools-execute-smoke-382 (#355): serialized concurrent budget reservations prevent overspend', async () => {
+  const env = createMockEnvironment()
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = env.mockFetch
+
+  try {
+    const genTool = env.registeredTools.get('generate_image')
+    const exec1 = { signal: new AbortController().signal, agent: { session: { id: 'c-sess-1', header: { cwd: process.cwd() } } } }
+    const exec2 = { signal: new AbortController().signal, agent: { session: { id: 'c-sess-2', header: { cwd: process.cwd() } } } }
+
+    const curSpend = loadDailySpend().totalSpendUsd
+    // Each call costs 0.025. Two calls need 0.05. Budget is curSpend + 0.04. Parallel calls cannot both succeed.
+    env.deps.config.dailyBudgetUsd = +(curSpend + 0.04).toFixed(4)
+    const results = await Promise.allSettled([
+      genTool.execute({ prompt: 'concurrent req 1', seed: 101 }, exec1),
+      genTool.execute({ prompt: 'concurrent req 2', seed: 102 }, exec2),
+    ])
+
+    const fulfilled = results.filter((r) => r.status === 'fulfilled')
+    const rejected = results.filter((r) => r.status === 'rejected')
+
+    assert.equal(fulfilled.length, 1, 'Exactly one concurrent call should succeed within budget')
+    assert.equal(rejected.length, 1, 'Second concurrent call must be rejected before API call')
+    assert.ok(rejected[0].reason.message.includes('Daily image generation budget exceeded'))
+  } finally {
+    globalThis.fetch = originalFetch
+    env.controller.dispose()
+  }
+})
+
+test('tools-execute-smoke-382 (#353): quality gate stops silent retries when daily budget is exhausted', async () => {
+  const env = createMockEnvironment()
+  const originalFetch = globalThis.fetch
+
+  let submitCalls = 0
+  globalThis.fetch = async (url, opts) => {
+    if (opts && opts.method === 'POST') {
+      submitCalls++
+    }
+    return env.mockFetch(url, opts)
+  }
+
+  try {
+    const genTool = env.registeredTools.get('generate_image')
+    const exec = { signal: new AbortController().signal, agent: { session: { id: 'qg-sess-1', header: { cwd: process.cwd() } } } }
+
+    const curSpend = loadDailySpend().totalSpendUsd
+    // First call costs 0.025. Budget is curSpend + 0.04. Blank image triggers QG, but retry needs another 0.025 (total 0.05 > 0.04).
+    // Must stop after 1 call and return output with exhausted: true.
+    env.deps.config.dailyBudgetUsd = +(curSpend + 0.04).toFixed(4)
+    env.deps.config.qualityGate = true
+
+    const res = await genTool.execute({ prompt: 'blank quality check', seed: 999 }, exec)
+    assert.equal(submitCalls, 1, 'Must execute exactly 1 provider submit and halt re-rolls due to budget constraint')
+    assert.equal(res.qualityReport?.attempts, 1, 'Quality report must record exactly 1 attempt')
+    assert.equal(res.qualityReport?.exhausted, true, 'Quality report must flag exhausted re-rolls')
+    assert.equal(res.qualityReport?.budgetExceeded, true, 'Quality report must flag budgetExceeded')
+    assert.ok(res.images?.length > 0 || res.path, 'Accepted image must be returned')
+  } finally {
+    globalThis.fetch = originalFetch
+    env.controller.dispose()
+  }
+})
+
+test('tools-execute-smoke-382 (#375): local and non-identity backends reject face identity anchors', async () => {
+  const env = createMockEnvironment()
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = env.mockFetch
+
+  try {
+    const genTool = env.registeredTools.get('generate_image')
+    const exec = { signal: new AbortController().signal, agent: { session: { id: 'caps-sess', header: { cwd: process.cwd() } } } }
+
+    // 1. Local A1111 rejection
+    env.deps.config.provider = 'local'
+    env.deps.config.localKind = 'a1111'
+    env.deps.config.localBaseURL = 'http://127.0.0.1:7860'
+    await assert.rejects(
+      () => genTool.execute({ prompt: 'face local test', face_reference: 'https://example.com/face.png' }, exec),
+      /Local A1111 does not support facial identity references/
+    )
+
+    // 2. FAL with non-identity model rejection
+    env.deps.config.provider = 'fal'
+    env.deps.config.model = 'fal-ai/flux/dev'
+    await assert.rejects(
+      () => genTool.execute({ prompt: 'face fal test', face_reference: 'https://example.com/face.png' }, exec),
+      /does not support face identity anchors/
+    )
   } finally {
     globalThis.fetch = originalFetch
     env.controller.dispose()
