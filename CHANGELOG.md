@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.32
+
+### Fixed
+- **Cache Identity with Effective Model & Source Bytes (#404)**: Include provider, effective model (`customModel`/`geminiModel`/`model`), and SHA-256 hashes of actual resolved image buffers (`sourceImage`, `maskImage`, `referenceImage`) in cache identity for disk cache, `cacheBySeed`, and `cacheByPrompt`. Enforce strict criteria matching in `findCached` and `findCachedByPrompt`, preventing stale cache hits after switching models or modifying source image content on disk.
+- **Fail-Safe Spend Reservation Release on Failure Paths (#405)**: Wrap all paid processing and generation pipelines (`remove_background`, `upscale_image`, `blend_images`, `character-sheet`, `ui-asset`, `vision-ocr`, `diagram`, `style-matrix`, `theme-pair`, `generation`) in `try ... finally { if (!committed) reservation.release(); }`. Ensure active reservations never leak into memory (`getTotalActiveReservations() === 0`) upon provider exceptions, network timeouts, cancellation signals, or input validation errors.
+- **JSX Expression Injection Prevention in SVG to TSX Export (#406)**: Escape curly braces `{` and `}` outside attribute values into safe XML/HTML entities (`&#123;` and `&#125;`) via `escapeJsxText` during SVG optimization in `optimizeSvgContent`. Prevent SVG text content containing JavaScript code or expressions from being executed during React component compilation and runtime rendering.
+
 ## 0.11.31
 
 ### Fixed
