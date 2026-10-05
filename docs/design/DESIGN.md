@@ -148,7 +148,7 @@
 |---|---|---|---|
 | `/dsh-image-gen/image` | `GET`, `HEAD` | Доставка сгенерированных изображений по SHA-256 | `isTrustedLocalRequest`: Loopback / LAN host, отклонение `Sec-Fetch-Site: cross-site`, валидация sha256 и метаданных. |
 | `/dsh-fal-image-gen/image` | `GET`, `HEAD` | Legacy-алиас для обратной совместимости истории чатов | Тот же обработчик `imageHandler`, что и для `/dsh-image-gen/image`. |
-| `/dsh-image-gen/diagnostics/test` | `GET` | Диагностическая проверка связи с провайдером | `isTrustedLocalRequest`: только доверенные локальные/LAN запросы. Предотвращает несанкционированную инициацию внешних запросов со сторонних сайтов. |
+| `/dsh-image-gen/diagnostics/test` | `GET`, `POST` | Диагностическая проверка связи с провайдером | `isTrustedLocalRequest`: только доверенные локальные/LAN запросы. Предотвращает несанкционированную инициацию внешних запросов со сторонних сайтов. |
 | `/dsh-image-gen/history` | `GET` | Выгрузка списка недавних генераций для вкладки галереи | `isTrustedLocalRequest`: блокировка cross-site запросов. В выдаче JSON локальные абсолютные пути файлов (`path`) строго опускаются (`_discardPath`), предотвращая раскрытие структуры каталогов сервера. |
 | `/api/dsh-image-gen/update` | `POST` | One-click обновление плагина хостом DSH | `isTrustedUpdateRequest`: строгая проверка `x-dsh-plugin-update: 1`, loopback/LAN remoteAddress, совпадение `Host` и `Origin`, отклонение `Sec-Fetch-Site != same-origin`. |
 
