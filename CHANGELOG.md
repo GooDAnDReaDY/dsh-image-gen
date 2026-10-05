@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.35
+
+### Fixed
+- **Volatile Box Unwrapping & Diagnostics Fallback (#415, #416, #417)**: Deeply unwrap nested Cosmokit/Schemastery Volatile boxes and function getters in `plainConfig`. Prevent diagnostic route `/dsh-image-gen/diagnostics/test` from silently falling back to `fal` when another provider is configured. Guarantee plain unwrapped configs across provider factories (`makeProviders`, `editImageDirect`, `varyImageDirect`, `testProviderConnection`).
+
 ## 0.11.34
 
 ### Fixed
