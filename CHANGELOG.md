@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.34
+
+### Fixed
+- **Directory Traversal & Path Containment (#409, #410, #411, #412, #418, #420)**: Enforce workspace containment across all output directories (`saveAndAttachResult`, `generatePwaIconSuite`, `frontend`, `responsive`, `processing-advanced`) via unified `resolveInside()` with lexical and symlink ancestor validation. Restrict `deleteVaultEntry` to allowed system/workspace roots.
+
 ## 0.11.33
 
 ### Fixed
