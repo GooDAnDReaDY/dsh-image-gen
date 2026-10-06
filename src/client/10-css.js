@@ -111,7 +111,7 @@
 .ig-studio-canvas{display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);border-radius:12px;align-items:center;justify-content:center;position:relative}
 
 /* Backward-compatibility alias styles for toolview */
-.fal_head{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--dsw-alias-label-primary)}
+.ig-card-head{font-size:13px;font-weight:600;margin-bottom:8px;color:var(--dsw-alias-label-primary)}
 .ig-prompt{font-size:13px;padding:8px 12px;background:var(--dsw-alias-bg-layer-2);border-radius:6px;border:1px solid var(--dsw-alias-border-l2);margin-bottom:8px;word-break:break-word}
 .ig-meta{font-size:11px;color:var(--dsw-alias-label-secondary);margin-top:6px}
 .ig-err{padding:10px;border-radius:6px;background:var(--dsw-alias-state-error-bg, color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent));color:var(--dsw-alias-state-error-primary);font-size:12px}

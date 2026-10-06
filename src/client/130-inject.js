@@ -24,7 +24,7 @@
 
       const syncHttpConfig = () => {
         if (typeof fetch !== 'function') return
-        fetch('/dsh-image-gen/config', { cache: 'no-store' })
+        fetchJson('/dsh-image-gen/config', { cache: 'no-store' })
           .then((r) => r.json())
           .then((data) => {
             if (data && data.ok && data.config) {
@@ -84,7 +84,7 @@
           httpSnapshot = { ...httpSnapshot, value: { ...httpSnapshot.value, [key]: val } }
           notify()
           try {
-            const res = await fetch('/dsh-image-gen/config', {
+            const res = await fetchJson('/dsh-image-gen/config', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ [key]: val }),
@@ -129,7 +129,7 @@
           httpSnapshot = { ...httpSnapshot, value: nextVal }
           notify()
           try {
-            const res = await fetch('/dsh-image-gen/config', {
+            const res = await fetchJson('/dsh-image-gen/config', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ resetFields: [key] }),

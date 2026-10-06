@@ -58,3 +58,33 @@ window.__ModuleLoader__.load({
       }
       return (k, def) => def || k
     }
+
+    async function fetchJson(path, options = {}) {
+      const { timeoutMs = 15000, signal, ...rest } = options
+      let timer = null
+      let sig = signal
+
+      if (!sig) {
+        if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+          sig = AbortSignal.timeout(timeoutMs)
+        } else if (typeof AbortController !== 'undefined') {
+          const ctrl = new AbortController()
+          timer = setTimeout(() => {
+            try { ctrl.abort(new Error('Request timeout')) } catch (_) {}
+          }, timeoutMs)
+          sig = ctrl.signal
+        }
+      } else if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.any === 'function') {
+        const timeoutSig = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(timeoutMs) : null
+        if (timeoutSig) {
+          sig = AbortSignal.any([signal, timeoutSig])
+        }
+      }
+
+      try {
+        const res = await fetch(path, { ...rest, signal: sig })
+        return res
+      } finally {
+        if (timer) clearTimeout(timer)
+      }
+    }

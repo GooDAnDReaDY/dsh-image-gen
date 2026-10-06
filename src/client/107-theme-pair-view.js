@@ -55,7 +55,7 @@
       return react.createElement(
         'div',
         { className: 'ig-page', style: { padding: '4px 0', gap: '10px' } },
-        react.createElement('div', { className: 'fal_head' }, '🌓 ' + (t('themePair.title') || 'Theme Pair Graphic')),
+        react.createElement('div', { className: 'ig-card-head' }, '🌓 ' + (t('themePair.title') || 'Theme Pair Graphic')),
         args.prompt ? react.createElement('div', { className: 'ig-prompt' }, args.prompt) : null,
         react.createElement(
           'div',

@@ -118,7 +118,9 @@
 ### Security & Endpoint Protection Invariants (v0.11.8)
 - **Bounded Request Payloads:** All mutating endpoints (`PUT /dsh-image-gen/config`, `DELETE /dsh-image-gen/vault`) enforce maximum request body limits via `readBoundedRequestBody`. Requests exceeding 64 KB are terminated with HTTP 413 `Payload Too Large` and incoming socket streams are destroyed to protect host process heap memory against DoS.
 - **Thin Core Facade:** `lib/index.js` acts strictly as an injection and lifecycle facade (<400 lines). Zod schema definitions reside in `lib/config-schema.js`, source path validation and resolution in `lib/resolve-source.js`.
-- **Client Build Parity Gate:** `scripts/build-client.mjs --check` validates that compiled `lib/client.js` matches modular sources under `src/client/*` during `npm test`, preventing uncommitted or manual desynchronization.
+- **Client Build & Locale Parity Gate:** `scripts/build-client.mjs --check` validates that compiled `lib/client.js` matches modular sources under `src/client/*` and enforces strict 100% key parity between `en` and `zh` dictionaries (`keys(en) == keys(zh)`) as well as complete coverage of all `t()` literals during `npm test` (#425).
+- **Client Network Reliability:** All client network requests across `src/client/*` route through unified `fetchJson(path, { timeoutMs = 15000, signal })` with `AbortSignal.timeout` to prevent permanent loading spinners on stalled routes (#426).
+- **Plugin Style Namespacing:** All CSS rules and UI component class names adhere to the unified `ig-*` namespace (`ig-card-head`), eliminating unnamespaced selectors (#430).
 - **Style Preset Contract:** `applyStylePreset(prompt, styleKeyOrText)` is a standard deterministic prompt decorator returning `prompt, {promptSuffix}` when a matching preset is found, integrated into `/image` command execution.
 
 ## Architecture Modular Decomposition & Line Standards (v0.10.26, #239, #235, #238)

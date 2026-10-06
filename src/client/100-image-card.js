@@ -189,7 +189,7 @@
 
       const head = react.createElement(
         'div',
-        { className: 'fal_head' },
+        { className: 'ig-card-head' },
         running ? '⏳ ' + t('card.generating') : failed ? '❌ ' + t('card.failed') : '🖼️ ' + t('card.image')
       )
 
