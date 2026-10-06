@@ -26,7 +26,7 @@
       ]
 
       const refreshRecent = () => {
-        fetch('/dsh-image-gen/vault?limit=12')
+        fetchJson('/dsh-image-gen/vault?limit=12')
           .then((r) => r.json())
           .then((data) => {
             if (data && data.ok && Array.isArray(data.items)) {

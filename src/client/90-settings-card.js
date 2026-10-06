@@ -135,10 +135,10 @@
                     react.createElement(
                       'span',
                       { className: qualityGateOn ? 'ig-badge ig-badge-ok' : 'ig-badge ig-badge-warn' },
-                      qualityGateOn ? 'Gate Active' : 'Off'
+                      qualityGateOn ? t('stat.gateActive') : t('stat.gateOff')
                     ),
                     ' ',
-                    react.createElement('span', { className: 'ig-badge ig-badge-ok' }, 'Guard ' + loopLimit)
+                    react.createElement('span', { className: 'ig-badge ig-badge-ok' }, (t('stat.guard') || '{n}').replace('{n}', loopLimit))
                   ),
                   react.createElement('div', { className: 'ig-stat-lbl' }, t('stat.safety_status'))
                 ),
@@ -151,10 +151,10 @@
                     react.createElement(
                       'span',
                       { className: diskCacheOn ? 'ig-badge ig-badge-ok' : 'ig-badge ig-badge-warn' },
-                      diskCacheOn ? 'Cache ON' : 'Off'
+                      diskCacheOn ? t('stat.cacheOn') : t('stat.cacheOff')
                     ),
                     ' ',
-                    budgetText !== '0' ? '$' + budgetText : 'No limit'
+                    budgetText !== '0' ? '$' + budgetText : t('stat.noLimit')
                   ),
                   react.createElement('div', { className: 'ig-stat-lbl' }, t('stat.budget_cache'))
                 )
@@ -162,7 +162,7 @@
               // Tab Navigation
               react.createElement(
                 'div',
-                { className: 'ig-tabs', role: 'tablist', 'aria-label': 'Settings Sections' },
+                { className: 'ig-tabs', role: 'tablist', 'aria-label': t('label.settingsSections') },
                 tabs.map((tab) =>
                   react.createElement(
                     'button',

@@ -7,7 +7,7 @@
         setTesting(true)
         setResult(null)
         try {
-          const res = await fetch('/dsh-image-gen/diagnostics/test?provider=' + encodeURIComponent(props.provider || 'fal'))
+          const res = await fetchJson('/dsh-image-gen/diagnostics/test?provider=' + encodeURIComponent(props.provider || 'fal'))
           const data = await res.json()
           setResult(data)
         } catch (e) {

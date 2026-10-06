@@ -10,7 +10,7 @@
         setLoading(true)
         setMsg(null)
         try {
-          const res = await fetch('/api/dsh-image-gen/update', {
+          const res = await fetchJson('/api/dsh-image-gen/update', {
             headers: { accept: 'application/json' },
             cache: 'no-store',
           })
@@ -28,7 +28,7 @@
         setUpdating(true)
         setMsg(null)
         try {
-          const res = await fetch('/api/dsh-image-gen/update', {
+          const res = await fetchJson('/api/dsh-image-gen/update', {
             method: 'POST',
             headers: {
               'x-dsh-plugin-update': '1',

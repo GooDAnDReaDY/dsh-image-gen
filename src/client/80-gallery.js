@@ -8,7 +8,7 @@
 
       const loadHistory = () => {
         setLoading(true)
-        fetch('/dsh-image-gen/history')
+        fetchJson('/dsh-image-gen/history')
           .then((r) => r.json())
           .then((data) => {
             setItems(Array.isArray(data) ? data : [])

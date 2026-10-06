@@ -28,7 +28,7 @@
           offset: String(newOffset),
           limit: '24',
         })
-        fetch('/dsh-image-gen/vault?' + params.toString())
+        fetchJson('/dsh-image-gen/vault?' + params.toString())
           .then((r) => r.json())
           .then((data) => {
             setLoading(false)
@@ -47,7 +47,7 @@
 
       const handleDelete = (id) => {
         if (!window.confirm(t('vault.confirmDelete') || 'Are you sure you want to delete this asset?')) return
-        fetch('/dsh-image-gen/vault?id=' + encodeURIComponent(id), { method: 'DELETE' })
+        fetchJson('/dsh-image-gen/vault?id=' + encodeURIComponent(id), { method: 'DELETE' })
           .then((r) => r.json())
           .then((res) => {
             if (res.ok) {
