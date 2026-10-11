@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.43
+
+### Fixed
+- **Client Fetch Timeout & Composite Abort Fallback (#444)**: Renamed internal helper to `fetchWithTimeout` (aliased to `fetchJson`) to accurately reflect raw `Response` return type. Added robust fallback abort listener for environments lacking `AbortSignal.any` when caller supplies a custom signal. Added 5 behavior tests with a mock server covering hung requests, caller aborts, and missing `AbortSignal.any`.
+
 ## 0.11.35
 
 ### Fixed
