@@ -267,3 +267,28 @@
   - Tools: `manage_project_profiles` and `resolve_project_profile_params`.
   - Settings UI: `activeProjectProfile` selector with 100% en/zh parity in SettingsCard.
   - REST route: `GET, POST /dsh-image-gen/profiles`.
+
+### 8. Inpaint Staging & Review Workflow (#436)
+- **Staging Lifecycle & Review State Machine (`lib/inpaint-staging.js`)**:
+  - Encapsulates localized image editing into a distinct review session (`staged` -> `accepted` | `rejected` | `cancelled` | `retry`).
+  - Pre-flight capability verification prevents non-inpainting models from corrupting edits.
+  - Safe Review:
+    - `accept`: Commits staged result as active version, preserving `parentImageId` link back to original.
+    - `reject`: Safely discards preview; guarantees original image remains 100% intact.
+    - `retry`: Allows modifying instruction prompt and generating new preview without resetting base context.
+  - Pixel-Level Local Compositing (`compositeInpaintPatch`): Utilizes Sharp to seamlessly overlay the inpaint patch back onto the source canvas, ensuring pixels outside the target bounding box are bit-for-bit identical to the source.
+  - Agent Tools: `stage_image_edit` and `review_staged_edit`.
+  - REST route: `GET, POST /dsh-image-gen/staging`.
+
+### 9. Resilient Batch Queue & Job Reconciliation (#437)
+- **Persistent Batch Queue (`lib/batch-queue.js`)**:
+  - Persistent queue saved in `~/.dsh/dsh-image-gen/batch-queue.json` for batch generation and processing series.
+  - Jobs transition across explicit states: `queued`, `running`, `succeeded`, `failed`, `cancelled`, `interrupted`.
+  - Concurrency control: Throttles parallel active executions (default 2 workers).
+  - Pre-flight Budget Assertions: Computes total estimated cost of all batch jobs and rejects queue creation if exceeding specified `maxBudget`.
+  - Startup Reconciliation (`reconcileQueueOnStartup`):
+    - Automatically executed on plugin startup.
+    - Identifies any jobs stuck in `running` status from prior crash or system restart and transitions them to `interrupted`.
+    - Blind automatic retries of paid external API jobs are strictly prevented to eliminate accidental duplicate billing.
+  - Agent Tools: `enqueue_batch_jobs` and `manage_batch_queue`.
+  - REST route: `GET, POST /dsh-image-gen/queue`.
