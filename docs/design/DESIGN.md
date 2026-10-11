@@ -247,3 +247,23 @@
   - Curated, versioned ComfyUI templates (`txt2img_sdxl`, `img2img_sdxl`, `face_instantid`, `upscale_esrgan`) with license, version, required nodes, and required models metadata.
   - Pre-validation tool `validate_comfy_workflow` and runtime dependency checker querying `${baseURL}/object_info` for node classes, checkpoints, and LoRA/upscale weights before pipeline dispatch.
   - REST route `/dsh-image-gen/comfy/templates` providing catalog discovery for frontend and agent toolsets.
+
+### 6. Capability-Based Provider & Model Selector (#434)
+- **Centralized Capability Registry (`lib/capabilities.js`)**:
+  - Detailed catalog of backend models (Fal, Gemini, Replicate, Local ComfyUI, Seedream) with capabilities (`txt2img`, `img2img`, `inpaint`, `text_rendering`, `face_preservation`, `controlnet`), max resolutions, aspect ratios, estimated costs in USD, and audit verification dates.
+  - Pre-flight capability validation (`validateModelCapability`): Rejects unsupported operations and features before provider dispatch, avoiding financial charges and preventing accidental dropping of masks or references.
+  - Task-aware recommendation engine (`recommendModelForTask`): Selects the optimal model for requested operations with human-readable rationale and fallback alternatives.
+  - Tools: `select_image_model` and `validate_model_features`.
+  - REST route: `GET /dsh-image-gen/capabilities`.
+
+### 7. Visual Project Profiles & Series Consistency (#435)
+- **Persistent Project Visual Profiles (`lib/project-profiles.js`)**:
+  - Configurable aesthetic profiles (`cyberpunk_neon`, `minimal_nordic`, `corporate_editorial`, plus user custom profiles) persisting palette, style prompt, negative prompt, target dimensions/format, and typography/background design rules in `~/.dsh/dsh-image-gen/project-profiles.json`.
+  - Cascading parameter resolution (`resolveEffectiveParams`):
+    - Defaults -> Profile -> Request parameters.
+    - Explicit request overrides take precedence while preserving profile styles.
+    - Full provenance tracking (`provenance: { prompt: 'request+profile', size: 'request' }`).
+    - Immutable profile tag (`appliedProfile: { id, name, version }`) written to image generation history so subsequent profile updates do not alter past generation records.
+  - Tools: `manage_project_profiles` and `resolve_project_profile_params`.
+  - Settings UI: `activeProjectProfile` selector with 100% en/zh parity in SettingsCard.
+  - REST route: `GET, POST /dsh-image-gen/profiles`.
