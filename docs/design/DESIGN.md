@@ -292,3 +292,26 @@
     - Blind automatic retries of paid external API jobs are strictly prevented to eliminate accidental duplicate billing.
   - Agent Tools: `enqueue_batch_jobs` and `manage_batch_queue`.
   - REST route: `GET, POST /dsh-image-gen/queue`.
+
+### 10. Variant Comparison & Winner Selection Workflow (#438)
+- **Variant Evaluation Sessions (`lib/variant-selection.js`)**:
+  - Establishes side-by-side evaluation sessions for candidate generation variants (`createVariantSession`).
+  - Structured decision tagging: options are tagged as `winner`, `refine`, or `discard`.
+  - Continuation Dispatch (`selectVariantWinner`):
+    - Automatically builds an execution payload for the selected winner for downstream tools (`upscale`, `edit`, `remix`, `vectorize`).
+    - Inherits original seed, prompt, and image path into the next tool call without modifying source asset files.
+    - Preserves session isolation in `~/.dsh/dsh-image-gen/variant-selections.json`.
+  - Agent Tools: `evaluate_image_variants` and `select_variant_winner`.
+  - REST route: `GET, POST /dsh-image-gen/variants`.
+
+### 11. Image Lineage & Version Branching (#439)
+- **Lineage DAG & Version History (`lib/lineage.js`)**:
+  - Treats generation history as a Directed Acyclic Graph (DAG) connecting roots, modifications, and branches.
+  - Standardized node attributes: `revisionId`, `parentId`, `branchId`, `operation`, `prompt`, `seed`, `params`.
+  - Backward compatibility: automatically normalizes legacy history records without explicit revision IDs on read.
+  - Ancestry & Branch Navigation (`getImageLineage`): Traverses ancestors from any leaf up to root and discovers alternative branches.
+  - Sanitized Replay Extraction (`getReplayPayload`):
+    - Extracts complete generation recipe while stripping API credentials and internal runtime/host paths.
+    - Attaches reproducibility guidance distinguishing deterministic local ComfyUI runs from cloud API providers.
+  - Agent Tools: `inspect_image_lineage` and `get_image_replay_payload`.
+  - REST route: `GET /dsh-image-gen/lineage`.
