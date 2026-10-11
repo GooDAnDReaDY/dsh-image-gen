@@ -64,7 +64,7 @@ test('audit-fixes #426: client fetch calls use fetchJson with timeout and no raw
 
   // Verify fetchJson is defined in 00-runtime.js with timeout support
   const runtimeSrc = readFileSync(join(root, 'src/client/00-runtime.js'), 'utf8')
-  assert.ok(runtimeSrc.includes('async function fetchJson('), 'fetchJson should be declared in 00-runtime.js')
+  assert.ok(runtimeSrc.includes('async function fetchWithTimeout(') && runtimeSrc.includes('const fetchJson = fetchWithTimeout'), 'fetchWithTimeout/fetchJson alias should be declared in 00-runtime.js')
   assert.ok(runtimeSrc.includes('timeoutMs = 15000'), 'fetchJson should define default 15s timeout')
   assert.ok(runtimeSrc.includes('AbortSignal.timeout'), 'fetchJson should support AbortSignal.timeout')
 })

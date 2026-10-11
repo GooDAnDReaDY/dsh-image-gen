@@ -59,10 +59,11 @@ window.__ModuleLoader__.load({
       return (k, def) => def || k
     }
 
-    async function fetchJson(path, options = {}) {
+    async function fetchWithTimeout(path, options = {}) {
       const { timeoutMs = 15000, signal, ...rest } = options
       let timer = null
       let sig = signal
+      let removeCallerAbort = null
 
       if (!sig) {
         if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
@@ -75,10 +76,38 @@ window.__ModuleLoader__.load({
           sig = ctrl.signal
         }
       } else if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.any === 'function') {
-        const timeoutSig = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(timeoutMs) : null
+        const timeoutSig = typeof AbortSignal.timeout === 'function'
+          ? AbortSignal.timeout(timeoutMs)
+          : (() => {
+              const ctrl = new AbortController()
+              timer = setTimeout(() => {
+                try { ctrl.abort(new Error('Request timeout')) } catch (_) {}
+              }, timeoutMs)
+              return ctrl.signal
+            })()
         if (timeoutSig) {
           sig = AbortSignal.any([signal, timeoutSig])
         }
+      } else if (typeof AbortController !== 'undefined') {
+        // Fallback for environments lacking AbortSignal.any when caller provides signal
+        const ctrl = new AbortController()
+        if (signal.aborted) {
+          try { ctrl.abort(signal.reason) } catch (_) { ctrl.abort() }
+        } else {
+          const onCallerAbort = () => {
+            try { ctrl.abort(signal.reason) } catch (_) { ctrl.abort() }
+          }
+          if (typeof signal.addEventListener === 'function') {
+            signal.addEventListener('abort', onCallerAbort, { once: true })
+            removeCallerAbort = () => {
+              try { signal.removeEventListener('abort', onCallerAbort) } catch (_) {}
+            }
+          }
+        }
+        timer = setTimeout(() => {
+          try { ctrl.abort(new Error('Request timeout')) } catch (_) {}
+        }, timeoutMs)
+        sig = ctrl.signal
       }
 
       try {
@@ -86,5 +115,7 @@ window.__ModuleLoader__.load({
         return res
       } finally {
         if (timer) clearTimeout(timer)
+        if (removeCallerAbort) removeCallerAbort()
       }
     }
+    const fetchJson = fetchWithTimeout
