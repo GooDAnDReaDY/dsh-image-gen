@@ -306,4 +306,6 @@
       'vault.title': 'Asset Browser & Vault',
       'f.comfyTemplate': 'ComfyUI Workflow Template',
       'f.comfyTemplateHint': 'Pre-vetted workflow template (e.g. SDXL txt2img, img2img, InstantID face transfer, RealESRGAN upscaler).',
+      'f.activeProjectProfile': 'Active Project Profile',
+      'f.activeProjectProfileHint': 'Select a saved visual profile (palette, style, format) to consistently apply across generations (#435).',
     }

@@ -26,6 +26,7 @@
       { field: 'toolsetProcessing', spec: booleanField('toolsetProcessing'), kind: 'select', options: ['true', 'false'], labelKey: 'f.toolsetProcessing', hintKey: 'f.toolsetProcessingHint', tab: 'general' },
       { field: 'toolsetFrontend', spec: booleanField('toolsetFrontend'), kind: 'select', options: ['true', 'false'], labelKey: 'f.toolsetFrontend', hintKey: 'f.toolsetFrontendHint', tab: 'general' },
       { field: 'toolsetCreative', spec: booleanField('toolsetCreative'), kind: 'select', options: ['true', 'false'], labelKey: 'f.toolsetCreative', hintKey: 'f.toolsetCreativeHint', tab: 'general' },
+      { field: 'activeProjectProfile', spec: selectField('activeProjectProfile', ['', 'cyberpunk_neon', 'minimal_nordic', 'corporate_editorial']), kind: 'select', options: ['', 'cyberpunk_neon', 'minimal_nordic', 'corporate_editorial'], labelKey: 'f.activeProjectProfile', hintKey: 'f.activeProjectProfileHint', tab: 'general' },
 
       // Provider: FAL
       { field: 'model', spec: textField('model'), kind: 'text', labelKey: 'f.model', hintKey: 'f.modelHint', placeholderKey: 'p.model', when: ['fal'], tab: 'provider' },
