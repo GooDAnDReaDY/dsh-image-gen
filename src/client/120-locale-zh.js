@@ -304,4 +304,6 @@
       'vault.search': '搜索提示词或标签...',
       'vault.seed': '种子',
       'vault.title': '图像素材库与浏览器',
+      'f.comfyTemplate': 'ComfyUI 工作流模板',
+      'f.comfyTemplateHint': '经过验证的预设工作流模板（例如 SDXL 文生图、图生图、InstantID 人脸迁移、RealESRGAN 放大器）。',
     }

@@ -237,3 +237,13 @@
 - **Profile Lock Recovery (#341)**: Detects dead lockfiles (`pnpm-lock.yaml`, active PIDs) and gracefully purges stale locks on updater timeout.
 - **Security Sanitization (#348)**: Strict regex-based masking of API keys, bearer tokens, and internal provider credentials in all tool exceptions and log messages.
 - **Modular Tool Decomposition (#349)**: Strict adherence to `< 600` lines per file constraint by separating tool registration from execution and caching helpers (`lib/generation-helpers.js`).
+
+### 5. Sequential Recipe Pipelines & Vetted ComfyUI Catalog (#432, #433)
+- **Sequential Multi-step Recipes (#432)**:
+  - High-level automated pipelines (`run_image_recipe`, `manage_image_recipes`) chaining generation and post-processing tools (`product_card`, `social_promo`, `vector_asset`, `character_pipeline`).
+  - Pre-flight budget verification (`assertBudget`), parameter interpolation (`{{inputs.x}}`, `{{steps.id.path}}`), and clean error boundary preventing cascade billing on partial failures.
+  - User custom recipe registry persisted at `~/.dsh/dsh-image-gen/recipes.json` with REST endpoint `/dsh-image-gen/recipes`.
+- **Vetted ComfyUI Workflow Catalog (#433)**:
+  - Curated, versioned ComfyUI templates (`txt2img_sdxl`, `img2img_sdxl`, `face_instantid`, `upscale_esrgan`) with license, version, required nodes, and required models metadata.
+  - Pre-validation tool `validate_comfy_workflow` and runtime dependency checker querying `${baseURL}/object_info` for node classes, checkpoints, and LoRA/upscale weights before pipeline dispatch.
+  - REST route `/dsh-image-gen/comfy/templates` providing catalog discovery for frontend and agent toolsets.

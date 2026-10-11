@@ -304,4 +304,6 @@
       'vault.search': 'Search prompt or tags...',
       'vault.seed': 'Seed',
       'vault.title': 'Asset Browser & Vault',
+      'f.comfyTemplate': 'ComfyUI Workflow Template',
+      'f.comfyTemplateHint': 'Pre-vetted workflow template (e.g. SDXL txt2img, img2img, InstantID face transfer, RealESRGAN upscaler).',
     }
