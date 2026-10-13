@@ -81,6 +81,24 @@
         }
       }
 
+      const handleExportDesign = (item) => {
+        const assetId = item.id || item.attachmentId
+        fetchJson('/dsh-image-gen/design/export?image=' + encodeURIComponent(assetId) + '&name=' + encodeURIComponent(item.prompt || 'asset'))
+          .then((r) => r.json())
+          .then((data) => {
+            if (data && data.ok && data.export) {
+              const snippet = data.export.figmaHtml || data.export.dataUrl
+              if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                navigator.clipboard.writeText(snippet)
+                showFeedback(t('vault.exportDesignCopied') || 'Figma/Penpot snippet & Data-URL copied to clipboard!')
+              }
+            } else {
+              showFeedback(t('vault.exportDesignFailed') || 'Failed to export design snippet')
+            }
+          })
+          .catch(() => showFeedback(t('vault.exportDesignFailed') || 'Failed to export design snippet'))
+      }
+
       return react.createElement(
         'div',
         { className: 'ig-vault-container', style: { display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' } },
@@ -224,6 +242,7 @@
                 { style: { display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' } },
                 react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleReroll(selected) }, '🎲 ' + (t('vault.reroll') || 'Re-roll')),
                 react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleInsert(selected) }, '💬 ' + (t('vault.insert') || 'Insert in Chat')),
+                react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleExportDesign(selected), title: 'Export for Figma / Penpot / OpenDesign' }, t('vault.exportDesign') || '🎨 OpenDesign'),
                 react.createElement(
                   'a',
                   { href: selected.url || selected.thumbnailUrl, download: 'vault-asset-' + (selected.id || 'image') + '.png', className: 'ig-tab-btn', style: { textDecoration: 'none', display: 'inline-flex', alignItems: 'center' } },

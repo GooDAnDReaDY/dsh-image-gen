@@ -114,6 +114,7 @@
 * **`check_image_contrast` (#175)**: Computes WCAG 2.1 AA/AAA contrast ratios and provides CSS scrim overlays.
 * **`optimize_vector_svg` (#176)**: Strips SVG metadata, normalizes viewBox, and exports clean React TSX components.
 * **`generate_pwa_icon_suite` (#190)**: Provides complete PWA icon specs (16px to 512px maskable) and web app manifest.json.
+* **`export_design_asset` (#446)**: Exports generated images and SVG stencils into Figma HTML snippets, Penpot SVG payloads, CSS Data-URLs, and pushes files directly into local OpenDesign daemon project directories (`.od/projects/<id>`).
 
 ### Security & Endpoint Protection Invariants (v0.11.8)
 - **Bounded Request Payloads:** All mutating endpoints (`PUT /dsh-image-gen/config`, `DELETE /dsh-image-gen/vault`) enforce maximum request body limits via `readBoundedRequestBody`. Requests exceeding 64 KB are terminated with HTTP 413 `Payload Too Large` and incoming socket streams are destroyed to protect host process heap memory against DoS.
