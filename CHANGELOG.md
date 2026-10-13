@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.12.0
+## 0.12.1
 
 ### Added
 - **OpenDesign, Figma & Penpot Integration (#446)**: Added `export_design_asset` tool and `/dsh-image-gen/design/export` endpoint. Formats generated visual assets into design-ready clipboard snippets (Figma HTML image tag, Penpot SVG wrapper, and CSS Data-URL). Pushes files directly into local OpenDesign daemon project directories (`.od/projects/<id>`). Added one-click `🎨 OpenDesign` export button inside Asset Vault inspector modal with full bilingual i18n support.
