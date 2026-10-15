@@ -71,7 +71,7 @@ window.__ModuleLoader__.load({
         } else if (typeof AbortController !== 'undefined') {
           const ctrl = new AbortController()
           timer = setTimeout(() => {
-            try { ctrl.abort(new Error('Request timeout')) } catch (_) {}
+            try { ctrl.abort(new Error('Request timeout')) } catch (_) { /* ignore abort race */ }
           }, timeoutMs)
           sig = ctrl.signal
         }
@@ -81,7 +81,7 @@ window.__ModuleLoader__.load({
           : (() => {
               const ctrl = new AbortController()
               timer = setTimeout(() => {
-                try { ctrl.abort(new Error('Request timeout')) } catch (_) {}
+                try { ctrl.abort(new Error('Request timeout')) } catch (_) { /* ignore abort race */ }
               }, timeoutMs)
               return ctrl.signal
             })()
@@ -100,12 +100,12 @@ window.__ModuleLoader__.load({
           if (typeof signal.addEventListener === 'function') {
             signal.addEventListener('abort', onCallerAbort, { once: true })
             removeCallerAbort = () => {
-              try { signal.removeEventListener('abort', onCallerAbort) } catch (_) {}
+              try { signal.removeEventListener('abort', onCallerAbort) } catch (_) { /* ignore listener cleanup */ }
             }
           }
         }
         timer = setTimeout(() => {
-          try { ctrl.abort(new Error('Request timeout')) } catch (_) {}
+          try { ctrl.abort(new Error('Request timeout')) } catch (_) { /* ignore abort race */ }
         }, timeoutMs)
         sig = ctrl.signal
       }

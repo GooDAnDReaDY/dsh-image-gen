@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.2
+
+### Fixed
+- **Live Settings Adoption & Volatile Updates (#448)**: Corrected `readServedConfig` to accept settings descriptors where `row.status` is undefined or `'ready'`. Restores dynamic adoption of settings card updates and `loader/volatile-update` without requiring process restart.
+- **Strict Output Directory Containment Across All Tools (#448)**: Replaced unconstrained `path.resolve` with `resolveInside` across 13 tool output sites (`character-sheet`, `ui-asset`, `vision-ocr`, `diagram`, `style-matrix`, `processing-basic`, `theme-pair`, `pattern`, `spritesheet`, `processing-advanced`). Enforces lexical and symlink containment within session cwd regardless of configured `outputDir`.
+- **Loop Guard Reset on User Message Events (#448)**: Bound loop guard counter reset to canonical DSH `user/message` events, ensuring generation counter resets reliably on new user input turns.
+
 ## 0.12.1
 
 ### Added
