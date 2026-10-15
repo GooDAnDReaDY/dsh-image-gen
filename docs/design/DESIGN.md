@@ -316,3 +316,14 @@
     - Attaches reproducibility guidance distinguishing deterministic local ComfyUI runs from cloud API providers.
   - Agent Tools: `inspect_image_lineage` and `get_image_replay_payload`.
   - REST route: `GET /dsh-image-gen/lineage`.
+
+### 12. Security Containment, Live Settings & Loop-Guard Invariants (#448)
+- **Live Settings Adoption (`readServedConfig`)**:
+  - Dynamically adopts served settings from the host service (`settings.describe()`) without requiring server restart.
+  - Accommodates DSH runtime behavior where `row.status` is undefined or `'ready'`, ensuring UI card edits and `volatile-update` events take immediate effect.
+- **Universal Output Directory Containment**:
+  - Enforces workspace containment across all 13 tool output sites via `resolveInside(sessionCwd || process.cwd(), ...)`.
+  - Disallows absolute or traversing `outputDir` values that escape session workspace, preventing unauthorized filesystem writes.
+- **User Message Loop Guard Reset**:
+  - Listens to canonical `user/message` DSH session events (in addition to legacy `chat/message` and `message`).
+  - Guarantees consecutive generation counter is cleanly reset upon each new user prompt, preventing false-positive blocking after multiple turns.
