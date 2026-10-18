@@ -34,3 +34,6 @@ Thumbs.db
 # worktrees & tarballs
 .worktrees/
 *.tgz
+
+# internal agent plans
+docs/plans/

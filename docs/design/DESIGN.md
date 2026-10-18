@@ -327,3 +327,14 @@
 - **User Message Loop Guard Reset**:
   - Listens to canonical `user/message` DSH session events (in addition to legacy `chat/message` and `message`).
   - Guarantees consecutive generation counter is cleanly reset upon each new user prompt, preventing false-positive blocking after multiple turns.
+
+### 13. Curated Style Presets & Precision Tuning Engine (#457, #466)
+- **Style Presets Engine (`lib/style-presets.js`, #457)**:
+  - 8 canonical aesthetic presets: `photorealistic`, `anime`, `isometric_3d`, `pixel_art`, `cinematic`, `minimalist_vector`, `claymation`, `cyberpunk` (plus `analog_film`, `oil_painting`).
+  - Seamless aliasing (`isometric`, `vector`, `photo`, `clay`, `pixel`, `film`).
+  - Automated injection of vetted positive aesthetic modifiers, complementary negative prompt filters, and recommended default guidance scales.
+- **Advanced Generation Parameters & Fallback Adapter (`lib/generation-helpers.js`, `lib/negative-sanitizer.js`, #466)**:
+  - Tool arguments: `steps` (1–150), `sampler_name` (e.g. `euler`, `euler_ancestral`, `dpmpp_2m`, `dpmpp_sde`, `ddim`), `guidance_scale` (1–30), `seed`, `negative_prompt`.
+  - Pass-through payload propagation across Fal, Replicate, Local (A1111 / ComfyUI), Custom gateways, and Seedream.
+  - Automatic natural-language negative prompt fallback adapter for non-negative models (DALL-E, FLUX, Gemini).
+  - Full sidecar, PNG metadata, and history persistence.
