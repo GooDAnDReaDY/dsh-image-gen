@@ -37,6 +37,7 @@
 
       // Provider: Custom
       { field: 'customBaseURL', spec: textField('customBaseURL'), kind: 'text', labelKey: 'f.customBaseURL', hintKey: 'f.customBaseURLHint', placeholderKey: 'p.customBaseURL', when: ['custom'], tab: 'provider' },
+      { field: 'allowCustomBaseUrl', spec: booleanField('allowCustomBaseUrl'), kind: 'select', options: ['true', 'false'], labelKey: 'f.allowCustomBaseUrl', hintKey: 'f.allowCustomBaseUrlHint', when: ['fal', 'custom', 'seedream'], tab: 'provider' },
       { field: 'customModel', spec: textField('customModel'), kind: 'text', labelKey: 'f.customModel', hintKey: 'f.customModelHint', placeholderKey: 'p.customModel', when: ['custom'], tab: 'provider' },
       { field: 'customKeyEnv', spec: textField('customKeyEnv'), kind: 'text', labelKey: 'f.customKeyEnv', hintKey: 'f.customKeyEnvHint', placeholderKey: 'p.customKeyEnv', when: ['custom'], tab: 'provider' },
       { field: 'customSize', spec: textField('customSize'), kind: 'text', labelKey: 'f.customSize', hintKey: 'f.customSizeHint', placeholderKey: 'p.customSize', when: ['custom'], tab: 'provider' },

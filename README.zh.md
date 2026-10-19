@@ -126,7 +126,9 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 * **`智能服务商自动故障转移链` (#282)**: 主服务商 429、5xx、超时或额度耗尽时自动无缝切换备选渠道。
 
 ## 🛡️ 安全性
+* **内部端点会话鉴权与 SSRF 防护 (#474)**：所有 HTTP 路由接入 DSH 会话鉴权 (`ctx.connection?.requestRejection`)，阻断未认证局域网客户端与伪造来源；对提供商 Base URL 执行严格协议与域名白名单校验，新增 `allowCustomBaseUrl` 配置项。
 * **配置请求大小限制 (#313)**：`PUT /dsh-image-gen/config` 限制请求体最大 64 KB，超出返回 HTTP 413，防止内存耗尽 DoS。
 * **客户端构建校验 (#316)**：`scripts/build-client.mjs` 支持 `--check` 模式，确保构建一致性。
-* **架构解耦优化 (#317)**：`lib/index.js` 精简为轻量级门面（<400 行），拆分 `config-schema.js` 与 `resolve-source.js`。
+* **架构解耦优化 (#317)**：`lib/index.js` 精简为轻量级门面，拆分 `config-schema.js`、`resolve-source.js` 与 `studio-routes.js`。
 * **启动与运行时清理 (#318, #319)**：优化历史记录权限修复，移除废弃的 `loc.get` 调用。
+

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.7
+
+### Security
+- **Enforce Session Authentication on Internal Routes (#474)**: Protect all internal HTTP endpoints (`/dsh-image-gen/config`, `/dsh-image-gen/vault`, `/dsh-image-gen/status`, `/dsh-image-gen/image`, `/dsh-image-gen/diagnostics/test`, `/dsh-image-gen/history`, `/dsh-image-gen/recipes`, `/dsh-image-gen/comfy/templates`, `/dsh-image-gen/capabilities`, `/dsh-image-gen/profiles`, `/dsh-image-gen/staging`, `/dsh-image-gen/queue`, `/dsh-image-gen/variants`, `/dsh-image-gen/lineage`, `/dsh-image-gen/offload`, `/dsh-image-gen/design/export`) via `ctx.connection?.requestRejection(req)`. Unauthenticated LAN requests and requests with unknown/missing remote addresses fail closed with 401/403.
+- **CSRF Protection on Mutating Routes (#474)**: Implement `getRouteWriteRejectionStatus` to reject cross-site mutating requests (POST, PUT, DELETE) by validating `Sec-Fetch-Site`, `Origin`, and `Referer` headers.
+- **SSRF Prevention & Base URL Restriction (#474)**: Enforce strict URL format validation (blocking credentials in URLs and cloud metadata endpoints such as 169.254.169.254) and allowlist check for provider endpoints (`baseURL`, `seedreamBaseURL`, `customBaseURL`, `localBaseURL`). Added explicit administrator toggle `allowCustomBaseUrl` (default `false`) required to point providers at custom or third-party gateways.
+- **Thin Host Architectural Refactor (#216, #474)**: Extracted studio and workbench REST endpoints into modular `lib/studio-routes.js`, keeping `lib/index.js` thin and maintainable at ~560 lines (strictly <800 lines).
+
 ## 0.12.2
 
 ### Fixed
@@ -211,3 +219,4 @@ Notable changes to `@goodandready/dsh-image-gen`.
 
 ### Added
 - This changelog.
+

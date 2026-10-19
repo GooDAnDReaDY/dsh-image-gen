@@ -48,6 +48,8 @@
       'f.comfyWorkflowJsonHint': 'Custom ComfyUI API workflow graph (JSON) with {{prompt}} placeholders.',
       'f.customBaseURL': 'Custom API Base URL',
       'f.customBaseURLHint': 'OpenAI-compatible image endpoint root (e.g. https://api.openai.com/v1).',
+      'f.allowCustomBaseUrl': 'Allow Custom Provider Host',
+      'f.allowCustomBaseUrlHint': 'Explicitly permit customBaseURL or baseURL to target external hosts outside the trusted AI provider allowlist.',
       'f.customKeyEnv': 'Custom Key Reference',
       'f.customKeyEnvHint': 'Credential reference holding the API key for custom endpoint.',
       'f.customModel': 'Custom Model ID',
