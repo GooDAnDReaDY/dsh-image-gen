@@ -111,6 +111,95 @@
       return []
     }
 
+    
+    function FalApprovalCard(props) {
+      const approval = props.approval || {}
+      const callId = props.callId || approval.callId || ''
+      const t = props.t || ((k) => k)
+      const sendActionPrompt = props.sendActionPrompt
+      const [status, setStatus] = react.useState('pending')
+      const [acting, setActing] = react.useState(false)
+
+      const handleApprove = async () => {
+        setActing(true)
+        try {
+          if (callId) {
+            await fetchJson('/dsh-image-gen/approval?callId=' + encodeURIComponent(callId) + '&action=approve', { method: 'POST' })
+          }
+          setStatus('approved')
+        } catch (_) {
+          if (sendActionPrompt && approval.originalPrompt) {
+            sendActionPrompt((t('approval.confirmPrompt') || 'Generate image confirmed: generate_image(prompt: "{p}", approved: true)').replace('{p}', approval.originalPrompt))
+          }
+          setStatus('approved')
+        } finally {
+          setActing(false)
+        }
+      }
+
+      const handleReject = async () => {
+        setActing(true)
+        try {
+          if (callId) {
+            await fetchJson('/dsh-image-gen/approval?callId=' + encodeURIComponent(callId) + '&action=reject', { method: 'POST' })
+          }
+          setStatus('rejected')
+        } catch (_) {
+          setStatus('rejected')
+        } finally {
+          setActing(false)
+        }
+      }
+
+      return react.createElement(
+        'div',
+        { className: 'ig-approval-card' },
+        react.createElement(
+          'div',
+          { className: 'ig-approval-head' },
+          react.createElement('span', null, '⏸️ ' + (t('approval.title') || 'Interactive Generation Approval Required')),
+          approval.estimatedCost !== undefined
+            ? react.createElement('span', { className: 'ig-badge ig-badge-warn' }, '$' + Number(approval.estimatedCost || 0).toFixed(4) + ' USD')
+            : null
+        ),
+        react.createElement(
+          'div',
+          { className: 'ig-approval-body' },
+          react.createElement('div', null, react.createElement('strong', null, (t('approval.promptLabel') || 'Prompt') + ': '), approval.prompt || approval.originalPrompt || ''),
+          react.createElement('div', null, react.createElement('strong', null, (t('approval.modelLabel') || 'Model / Provider') + ': '), (approval.provider || 'fal') + ' / ' + (approval.model || 'default')),
+          react.createElement('div', null, react.createElement('strong', null, (t('approval.aspectLabel') || 'Aspect / Size') + ': '), (approval.aspectRatio || 'default') + ' · ' + (approval.size || 'default') + ' (' + (approval.count || 1) + ' image' + (approval.count > 1 ? 's' : '') + ')')
+        ),
+        status === 'approved'
+          ? react.createElement('div', { style: { marginTop: '8px', fontSize: '12px', color: 'var(--dsw-alias-state-success-primary)', fontWeight: '600' } }, '🚀 ' + (t('approval.confirmed') || 'Generation approved by user!'))
+          : status === 'rejected'
+          ? react.createElement('div', { style: { marginTop: '8px', fontSize: '12px', color: 'var(--dsw-alias-state-error-primary)', fontWeight: '600' } }, '❌ ' + (t('approval.cancelled') || 'Generation cancelled.'))
+          : react.createElement(
+              'div',
+              { className: 'ig-approval-actions' },
+              react.createElement(
+                'button',
+                {
+                  type: 'button',
+                  className: 'ig-btn ig-btn-primary',
+                  disabled: acting,
+                  onClick: handleApprove,
+                },
+                '🚀 ' + (t('approval.confirmBtn') || 'Confirm Generation')
+              ),
+              react.createElement(
+                'button',
+                {
+                  type: 'button',
+                  className: 'ig-btn',
+                  disabled: acting,
+                  onClick: handleReject,
+                },
+                '✏️ ' + (t('approval.editBtn') || 'Modify / Cancel')
+              )
+            )
+      )
+    }
+
     function FalImageCard(props) {
       const block = props.block
       const running = !('kind' in (block || {}))
@@ -258,8 +347,10 @@
           progress: typeof parsed?.progress === 'number' ? parsed.progress : (typeof block?.progress === 'number' ? block.progress : undefined),
           step: parsed?.step || block?.step,
           stage: parsed?.stage || block?.stage,
+          approval: block?.approval || block?.plan || parsed?.approval || parsed?.plan,
           alt: prompt || 'generated image',
           t,
+          sendActionPrompt,
         }))
       }
 

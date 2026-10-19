@@ -21,7 +21,7 @@ test('ui-stability: Config schema has all required keys synchronized with client
     'subscriptionQuality',
     'autoEnhancePrompt', 'defaultStylePreset',
     'enhancePrompt', 'enhanceModel', 'enhanceBelowChars', 'stylePreset',
-    'qualityGate', 'dailyBudgetUsd', 'loopGuardLimit',
+    'qualityGate', 'dailyBudgetUsd', 'loopGuardLimit', 'requireApproval', 'approvalTimeoutSec',
     'diskCache', 'cacheBySeed', 'cacheByPrompt',
   ]
 
@@ -125,6 +125,14 @@ test('config validation: enforces numeric bounds and enum values before runtime 
   assert.throws(
     () => Config({ loopGuardLimit: -1 }),
     /loopGuardLimit/
+  )
+  assert.throws(
+    () => Config({ approvalTimeoutSec: 4 }),
+    /approvalTimeoutSec/
+  )
+  assert.throws(
+    () => Config({ approvalTimeoutSec: 601 }),
+    /approvalTimeoutSec/
   )
 
   // Invalid enum/union values must throw

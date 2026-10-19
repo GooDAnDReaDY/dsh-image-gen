@@ -36,6 +36,7 @@
                 step: data.step !== undefined ? data.step : prev.step,
                 stage: data.stage !== undefined ? data.stage : prev.stage,
                 draftSrc: data.draftUrl || prev.draftSrc,
+                approval: data.approval !== undefined ? data.approval : prev.approval,
               }))
             } catch (_err) {
               // Ignore event parsing errors
@@ -67,6 +68,15 @@
       const stage = liveState.stage
         || props.stage
         || (progress !== undefined && progress < 100 ? (t('card.rendering') || 'Rendering...') : (isRunning ? (t('card.generating') || 'Generating...') : 'Complete'))
+
+      if ((liveState.stage === 'waiting_approval' || props.stage === 'waiting_approval') && (liveState.approval || props.approval)) {
+        return react.createElement(FalApprovalCard, {
+          approval: liveState.approval || props.approval,
+          callId,
+          t,
+          sendActionPrompt: props.sendActionPrompt,
+        })
+      }
 
       const showProgress = isRunning || (progress !== undefined && progress < 100)
 

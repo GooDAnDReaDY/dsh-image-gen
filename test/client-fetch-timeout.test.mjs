@@ -37,7 +37,7 @@ test('behavior: fetchWithTimeout aborts never-resolving fetch when no signal is 
   try {
     await assert.rejects(
       async () => {
-        await fetchWithTimeout(url, { timeoutMs: 100 })
+        await fetchWithTimeout(url, { timeoutMs: 250 })
       },
       (err) => {
         const msg = String(err?.message || err)

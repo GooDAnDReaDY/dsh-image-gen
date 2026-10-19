@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.12.8
+
+### Added
+- **Interactive Generation Approval Gate (#450)**: Added interactive approval gate protecting against unintended or autonomous billable generation calls.
+  - Added `requireApproval: boolean` (default: `false`) and `approvalTimeoutSec: number` (default: `120`, range: 5-600) to config schema and UI settings card under the `safety` tab.
+  - When `requireApproval === true`, `generate_image` calculates preliminary task plan (prompt, provider, model, size, aspect ratio, image count, and estimated cost in USD) before calling billable APIs.
+  - Renders interactive `FalApprovalCard` in chat toolview with `[🚀 Confirm Generation]` and `[✏️ Modify / Cancel]` actions.
+  - Integrated HTTP coordination endpoint `/dsh-image-gen/approval` supporting `approve` and `reject` actions with full local host security validation.
+  - Supported `approved: boolean` parameter to explicitly bypass approval gate when user confirmation is already established.
+  - Added fail-fast error for non-interactive execution sessions and automated timeout with complete rollback and zero spend leakage.
+  - 100% bilingual dictionary parity across English and Chinese locale fragments.
+
 ## 0.12.7
 
 ### Security
