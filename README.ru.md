@@ -273,6 +273,9 @@ graph LR
 * **`seedream`**: ByteDance Doubao / SeaDream API.
 * **`gemini`**: Google Imagen 3 через GenAI API.
 
+> [!NOTE]
+> **Защита от SSRF и валидация URL**: По умолчанию адреса провайдеров (`baseURL`, `customBaseURL`, `seedreamBaseURL`, `localBaseURL`) валидируются по белому списку официальных доменов и локальных адресов. Для подключения произвольных прокси и сторонних шлюзов включите параметр **Разрешить кастомные Base URL** (`allowCustomBaseUrl: true`) во вкладке «Провайдер».
+
 ---
 
 ## 📦 Быстрая установка

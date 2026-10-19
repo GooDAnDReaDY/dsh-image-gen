@@ -234,6 +234,9 @@
 * **`seedream`**: ByteDance SeaDream generative API.
 * **`gemini`**: Google Imagen 3 via GenAI API.
 
+> [!NOTE]
+> **SSRF Protection & Base URLs**: By default, provider endpoints (`baseURL`, `customBaseURL`, `seedreamBaseURL`, `localBaseURL`) are validated against an allowlist of official provider domains and loopback/LAN addresses. To configure custom reverse proxies or third-party gateways, enable **Allow Custom Base URLs** (`allowCustomBaseUrl: true`) in the Provider settings tab.
+
 ---
 
 ## 📦 Quick Installation

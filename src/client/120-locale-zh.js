@@ -48,6 +48,8 @@
       'f.comfyWorkflowJsonHint': '包含 {{prompt}} 等占位符的自定义 ComfyUI API 工作流 JSON。',
       'f.customBaseURL': 'Custom API 地址',
       'f.customBaseURLHint': '兼容 OpenAI 图像接口的基础地址。',
+      'f.allowCustomBaseUrl': '允许自定义提供商地址',
+      'f.allowCustomBaseUrlHint': '显式允许 customBaseURL 或 baseURL 连接白名单之外的外部服务地址。',
       'f.customKeyEnv': 'Custom 凭证名称',
       'f.customKeyEnvHint': '存储自定义接口 API 密钥的凭证名称。',
       'f.customModel': 'Custom 模型 ID',

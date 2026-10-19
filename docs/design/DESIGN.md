@@ -171,11 +171,30 @@
 
 | Маршрут | Метод | Назначение | Политика доступа и защита |
 |---|---|---|---|
-| `/dsh-image-gen/image` | `GET`, `HEAD` | Доставка сгенерированных изображений по SHA-256 | `isTrustedLocalRequest`: Loopback / LAN host, отклонение `Sec-Fetch-Site: cross-site`, валидация sha256 и метаданных. |
+| `/dsh-image-gen/config` | `GET`, `PUT` | Чтение и изменение конфигурации плагина | `getRouteRejectionStatus`: аутентификация сессии через `ctx.connection?.requestRejection(req)`. `getRouteWriteRejectionStatus`: CSRF-защита мутирующих PUT-запросов (Origin/Referer/Sec-Fetch-Site). Валидация Base URL против SSRF. |
+| `/dsh-image-gen/vault` | `GET`, `DELETE` | Управление хранилищем ассетов и метаданных | `getRouteRejectionStatus` + `getRouteWriteRejectionStatus`: проверка сессии и защита от несанкционированного удаления. |
+| `/dsh-image-gen/status` | `GET` | Чтение публичного статуса плагина | `getRouteRejectionStatus`: закрыт для неавторизованных внешних и LAN клиентов. |
+| `/dsh-image-gen/image` | `GET`, `HEAD` | Доставка сгенерированных изображений по SHA-256 | `isTrustedLocalRequest` + `getRouteRejectionStatus`: Loopback / LAN host, отклонение `Sec-Fetch-Site: cross-site`, валидация sha256 и метаданных. |
 | `/dsh-fal-image-gen/image` | `GET`, `HEAD` | Legacy-алиас для обратной совместимости истории чатов | Тот же обработчик `imageHandler`, что и для `/dsh-image-gen/image`. |
-| `/dsh-image-gen/diagnostics/test` | `GET`, `POST` | Диагностическая проверка связи с провайдером | `isTrustedLocalRequest`: только доверенные локальные/LAN запросы. Предотвращает несанкционированную инициацию внешних запросов со сторонних сайтов. |
-| `/dsh-image-gen/history` | `GET` | Выгрузка списка недавних генераций для вкладки галереи | `isTrustedLocalRequest`: блокировка cross-site запросов. В выдаче JSON локальные абсолютные пути файлов (`path`) строго опускаются (`_discardPath`), предотвращая раскрытие структуры каталогов сервера. |
+| `/dsh-image-gen/diagnostics/test` | `GET`, `POST` | Диагностическая проверка связи с провайдером | `isTrustedLocalRequest` + `getRouteRejectionStatus` / `getRouteWriteRejectionStatus`: только доверенные локальные/LAN запросы. Предотвращает несанкционированную инициацию внешних запросов со сторонних сайтов. |
+| `/dsh-image-gen/history` | `GET` | Выгрузка списка недавних генераций для вкладки галереи | `isTrustedLocalRequest` + `getRouteRejectionStatus`: блокировка cross-site запросов. В выдаче JSON локальные абсолютные пути файлов (`path`) строго опускаются (`_discardPath`), предотвращая раскрытие структуры каталогов сервера. |
+| `/dsh-image-gen/*` (recipes, staging, queue, variants, lineage, offload) | `GET`, `POST` | Studio и Workbench REST эндпоинты (`lib/studio-routes.js`) | `getRouteRejectionStatus` + `getRouteWriteRejectionStatus`: сессионная аутентификация и CSRF-защита всех служебных маршрутов. |
 | `/api/dsh-image-gen/update` | `POST` | One-click обновление плагина хостом DSH | `isTrustedUpdateRequest`: строгая проверка `x-dsh-plugin-update: 1`, loopback/LAN remoteAddress, совпадение `Host` и `Origin`, отклонение `Sec-Fetch-Site != same-origin`. |
+
+### Защита от SSRF и ограничение Base URL (#474)
+- **Валидация адресов провайдеров (`validateProviderBaseUrl`)**:
+  - Блокируются протоколы кроме `http:` и `https:`.
+  - Запрещены встроенные credentials (`username:password@`).
+  - Строго блокируются облачные метаданные (AWS/GCP/Azure link-local: `169.254.169.254`, `metadata.google.internal` и др.).
+  - Допустимые домены по умолчанию:
+    - `baseURL`: `fal.run`, `fal.ai` и их поддомены.
+    - `seedreamBaseURL`: `volces.com`, `volcengine.com` и их поддомены.
+    - `customBaseURL`: официальные API шлюзы (`api.openai.com`, `api.groq.com`, `api.together.xyz`, `api.deepseek.com`, `api.anthropic.com`, `openrouter.ai`, `api.siliconflow.cn`, `api.replicate.com`), а также loopback и локальные адреса.
+  - Настройка **`allowCustomBaseUrl: boolean`** (по умолчанию `false`): явный административный тумблер для разрешения сторонних прокси и кастомных эндпоинтов.
+- **Fail-Closed аутентификация сессии (`getRouteRejectionStatus`, `getRouteWriteRejectionStatus`)**:
+  - При отсутствии `connection` сервиса на удалённых LAN запросах возвращается HTTP 403.
+  - При отсутствии или неизвестном `remoteAddress` возвращается HTTP 403.
+  - Мутирующие запросы (`POST`, `PUT`, `DELETE`) проверяются на `Sec-Fetch-Site: cross-site` и несовпадающие `Origin`/`Referer`.
 
 ### Валидация адресов (Строгая защита от обхода префиксов)
 - Функции `isLoopbackAddress` и `isPrivateLanAddress` используют якорные регулярные выражения (`^...$`) с проверкой числовых диапазонов октетов (0..255).
@@ -360,3 +379,4 @@
   - Pass-through payload propagation across Fal, Replicate, Local (A1111 / ComfyUI), Custom gateways, and Seedream.
   - Automatic natural-language negative prompt fallback adapter for non-negative models (DALL-E, FLUX, Gemini).
   - Full sidecar, PNG metadata, and history persistence.
+
