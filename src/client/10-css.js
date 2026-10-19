@@ -115,6 +115,10 @@
 .ig-prompt{font-size:13px;padding:8px 12px;background:var(--dsw-alias-bg-layer-2);border-radius:6px;border:1px solid var(--dsw-alias-border-l2);margin-bottom:8px;word-break:break-word}
 .ig-meta{font-size:11px;color:var(--dsw-alias-label-secondary);margin-top:6px}
 .ig-err{padding:10px;border-radius:6px;background:var(--dsw-alias-state-error-bg, color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent));color:var(--dsw-alias-state-error-primary);font-size:12px}
+.ig-approval-card{border:1px solid var(--dsw-alias-state-brand-primary, #3b82f6);background:var(--dsw-alias-bg-layer-2);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;margin:8px 0}
+.ig-approval-head{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:13px;color:var(--dsw-alias-label-primary)}
+.ig-approval-body{font-size:12px;line-height:1.5;color:var(--dsw-alias-label-secondary);display:flex;flex-direction:column;gap:4px}
+.ig-approval-actions{display:flex;gap:8px;margin-top:6px}
 `
       document.head.appendChild(style)
     }

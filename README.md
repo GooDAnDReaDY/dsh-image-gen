@@ -1,4 +1,9 @@
 
+## 🚀 Updates v0.12.8: Interactive Generation Approval Gate (#450)
+- **Interactive Approval Gate**: Added interactive confirmation gate before billable image generation calls. Configurable via `requireApproval: boolean` (default `false`) and `approvalTimeoutSec: number` (default `120`, range 5-600) under Settings > Safety.
+- **FalApprovalCard Toolview Card**: Renders interactive chat card with prompt, provider, model, dimensions, and estimated USD cost, offering `[🚀 Confirm Generation]` and `[✏️ Modify / Cancel]` actions.
+- **Fail-Safe Rollback & Coordination Endpoint**: Zero spend leakage on timeout or user cancellation; coordinated via protected `/dsh-image-gen/approval` endpoint. Supports `approved: true` parameter bypass for explicit confirmed runs.
+
 ## 🚀 Updates v0.10.8: Lossless JSON Unification, Dual-Output & Strict Validation (#199)
 - **Lossless JSON & Dual-Output Unification**: `upscale_image`, `remove_background`, `blend_images`, and `vectorize_image` now consistently return `toLosslessJson` and formatted markdown `summary` for text-only LLMs.
 - **Strict Input Image Validation**: `extract_design_tokens`, `image_to_css_gradient`, and `check_image_contrast` explicitly validate source image readability instead of silent fallback.

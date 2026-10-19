@@ -84,6 +84,8 @@
       { field: 'qualityGate', spec: booleanField('qualityGate'), kind: 'select', options: ['true', 'false'], labelKey: 'f.qualityGate', hintKey: 'f.qualityGateHint', tab: 'safety' },
       { field: 'dailyBudgetUsd', spec: numberField('dailyBudgetUsd'), kind: 'number', labelKey: 'f.dailyBudgetUsd', hintKey: 'f.dailyBudgetUsdHint', placeholderKey: 'p.dailyBudgetUsd', tab: 'safety' },
       { field: 'loopGuardLimit', spec: numberField('loopGuardLimit'), kind: 'number', labelKey: 'f.loopGuardLimit', hintKey: 'f.loopGuardLimitHint', placeholderKey: 'p.loopGuardLimit', tab: 'safety' },
+      { field: 'requireApproval', spec: booleanField('requireApproval'), kind: 'select', options: ['true', 'false'], labelKey: 'f.requireApproval', hintKey: 'f.requireApprovalHint', tab: 'safety' },
+      { field: 'approvalTimeoutSec', spec: numberField('approvalTimeoutSec'), kind: 'number', labelKey: 'f.approvalTimeoutSec', hintKey: 'f.approvalTimeoutSecHint', placeholderKey: 'p.approvalTimeoutSec', tab: 'safety' },
 
       // Cache & Storage
       { field: 'diskCache', spec: booleanField('diskCache'), kind: 'select', options: ['true', 'false'], labelKey: 'f.diskCache', hintKey: 'f.diskCacheHint', tab: 'cache' },
