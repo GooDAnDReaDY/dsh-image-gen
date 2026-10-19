@@ -67,6 +67,28 @@
 - **Интерактивный UI**: Полноформатное изображение и интерактивные действия (re-roll, zoom, upscale, remove background) монтируются в веб-интерфейс DSH через системный механизм вложений `ctx.attachments`.
 - **Семантический анализ (#145)**: Перед операциями модификации плагин запрашивает композиционную сводку у `@goodandready/dsh-vision-bridge`, защищая генеративный пайплайн от структурных галлюцинаций.
 
+## Safe Image Offload & Multi-Turn Context Guard (v0.12.5, #456)
+- **Цель и защита контекста**: Предотвращение переполнения контекстного окна LLM и аварийных остановок текстовых моделей при длительных сессиях диалога с многочисленными генерациями.
+- **Хелперы выгрузки (`lib/attachment-helper.js`)**:
+  - `offloadHeavyImageData(input, options)` — перехватывает inline base64 data URIs (`data:image/...`) превышающие порог `DEFAULT_OFFLOAD_THRESHOLD` (1024 символа), декодирует и сохраняет через `saveAttachmentSafe` или на диск, подставляя компактные URL (`/dsh-image-gen/image?id=...` или `file://...`).
+  - `compactSessionPayload(payload, options)` — рекурсивно очищает сырые бинарные буферы из tool results и истории сессии, заменяя их числовым счётчиком байт и сохраняя ключевые метаданные генерации (`attachmentId`, `width`, `height`, `prompt`, `seed`, `mediaType`, `cost`).
+  - `renderToolOutput(value)` — гарантирует, что текстовые блоки вывода инструментов никогда не содержат сырых тяжелых data URI, а графический блок передаёт только компактный дескриптор вложения.
+- **Интеграция с сессиями Cordis (`lib/index.js`)**:
+  - Перехватчик сообщений `ctx.middleware` и события `before-send` / `session/before-send` фильтруют `session.content` и элементы `session.elements` с автоматической выгрузкой тяжелых картинок.
+  - REST-эндпоинт `/dsh-image-gen/offload` для программной компактификации полезной нагрузки сессии.
+
+## Visual Character & Subject Consistency via Reference Image Binding (v0.12.5, #458)
+- **Цель**: Обеспечение сквозной визуальной консистентности персонажей, объектов и стиля сквозь серии генераций.
+- **Параметры инструмента `generate_image`**:
+  - `reference_image` (string): URL, локальный путь, data URI или attachment ID исходного персонажа/объекта.
+  - `reference_strength` (number, 0.1..1.0, default 0.75): сила привязки к визуальным чертам референса (fidelity).
+- **Провайдеры и авто-маршрутизация**:
+  - **FAL**: При передаче `reference_image` со стандартной моделью `fal-ai/flux/dev` плагин автоматически переключается на FLUX Redux (`fal-ai/flux/dev/redux`), передавая `image_url`, `reference_image_url`, `reference_weight` и `redux_weight`.
+  - **Seedream (ByteDance Doubao)**: Проброс multimodal reference data URI через параметры `image`, `image_url`, `reference_image` и `reference_strength`.
+  - **Replicate**: Проброс `face_image`, `reference_image`, `id_weight` и `reference_weight`.
+  - **Custom (Midjourney & OpenAI-compatible)**: Автоматическая трансляция в параметры `--cref <url> --cw <weight>` для Midjourney или проброс полей `reference_image` / `reference_strength` в JSON payload.
+- **Метаданные**: Полная фиксация `reference_image` и `reference_strength` в companion sidecar JSON, PNG tEXt metadata и истории генераций.
+
 ## Visual Direction
 - **Атмосфера:** Нативный минималистичный интерфейс DeepSeek Harness, консистентный с дизайн-системой ядра Cordis/DSH.
 - **Утверждённые референсы:**
