@@ -116,7 +116,7 @@ test('routes (#419): /dsh-image-gen/diagnostics/test supports GET, POST with JSO
     const req = Readable.from(buf.length > 0 ? [buf] : [])
     req.method = method
     req.url = url
-    req.headers = { host: '127.0.0.1', 'content-length': String(buf.length) }
+    req.headers = { host: '127.0.0.1', origin: 'http://127.0.0.1', 'content-length': String(buf.length) }
     req.socket = { remoteAddress }
     const res = {
       writeHead: (status) => { statusCode = status },

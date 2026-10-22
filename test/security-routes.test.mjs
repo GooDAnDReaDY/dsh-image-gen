@@ -49,6 +49,7 @@ function createJsonStream(payload, headers = {}, remoteAddress = '127.0.0.1') {
   stream.method = 'PUT'
   stream.headers = {
     host: 'localhost:3000',
+    origin: 'http://localhost:3000',
     'content-type': 'application/json',
     'content-length': String(Buffer.byteLength(str)),
     ...headers,
@@ -533,3 +534,26 @@ test('security #478: vault and config routes allow loopback requests with dsh-ap
   assert.equal(resConfig.statusCode, 200)
 })
 
+
+test('security #482: write requests without Origin or Referer are rejected with 403 (even on loopback)', async () => {
+  const ctx = createMockCtx()
+  registerSettingsRoutes(ctx, {
+    live: () => ({ enabled: true, provider: 'fal' }),
+    getSettingsApi: () => null,
+    setLiveConfig: () => {},
+  })
+  const handler = ctx.routes.get('/dsh-image-gen/config')
+
+  // Loopback write request without Origin or Referer (e.g. via dsh-lanmode bridge)
+  const reqWithoutOrigin = Readable.from([JSON.stringify({ config: { defaultSize: 'square_1_1' } })])
+  reqWithoutOrigin.method = 'PUT'
+  reqWithoutOrigin.headers = {
+    host: '127.0.0.1:3080',
+    'content-type': 'application/json',
+  }
+  reqWithoutOrigin.socket = { remoteAddress: '127.0.0.1' }
+
+  const res = mockRes()
+  await handler(reqWithoutOrigin, res)
+  assert.equal(res.statusCode, 403, 'Write request lacking Origin/Referer must receive 403 Forbidden')
+})

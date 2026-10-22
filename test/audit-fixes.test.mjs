@@ -553,7 +553,7 @@ test('audit (#306): vault DELETE route responds with 413 on oversized body and h
   })
   req.method = 'DELETE'
   req.url = '/dsh-image-gen/vault'
-  req.headers = { host: '127.0.0.1' }
+  req.headers = { host: '127.0.0.1', origin: 'http://127.0.0.1' }
   req.socket = { remoteAddress: '127.0.0.1' }
 
   let statusCode = 0
@@ -614,8 +614,12 @@ test('audit (#307): repairHistoryPermissions migrates legacy 0755 dir and 0644 f
 })
 
 // ── Issue #266: Canonical sanitized GitHub publish script ──
-test('audit (#266): scripts/publish-github.sh exists, is executable and passes --check', async () => {
+test('audit (#266): scripts/publish-github.sh exists, is executable and passes --check', async (t) => {
   const fs = await import('node:fs')
+  if (!fs.existsSync('.git')) {
+    t.skip('Skipping git repository check: .git directory not found (git-archive release candidate build)')
+    return
+  }
   const { execSync } = await import('node:child_process')
 
   const scriptPath = 'scripts/publish-github.sh'

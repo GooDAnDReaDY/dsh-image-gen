@@ -5,7 +5,6 @@ import assert from 'node:assert/strict'
 import { Readable } from 'node:stream'
 import {
   createApprovalGate,
-  registerApprovalRequest,
   getApprovalRequest,
   approveApprovalRequest,
   rejectApprovalRequest,
@@ -41,6 +40,8 @@ function createJsonStream(payload, headers = {}, remoteAddress = '127.0.0.1') {
     },
   })
   stream.headers = {
+    host: '127.0.0.1:3080',
+    origin: 'http://127.0.0.1:3080',
     'content-type': 'application/json',
     'content-length': String(Buffer.byteLength(json)),
     ...headers,
@@ -363,9 +364,9 @@ test('tool integration: generate_image respects requireApproval gate (#450)', as
   )
   assert.equal(providerCalled, false, 'Provider must not be called when approval required in non-interactive session')
 
-  // Case 2: Explicit approved parameter is declared in schema
+  // Case 2: approved parameter is NOT exposed in schema (#481)
   const params = generateTool.parameters?.properties || generateTool.parameters || {}
-  assert.ok(params.approved, 'generate_image must declare approved parameter')
+  assert.equal(params.approved, undefined, 'generate_image must NOT declare approved parameter')
 
   // Case 3: Interactive execution creates pending gate and waits until approved
   providerCalled = false
@@ -447,3 +448,73 @@ test('approval route #478: POST accepts approve action with dsh-app://app/ refer
   clearAllApprovals()
 })
 
+
+test('approval gate #481: requireApproval cannot be bypassed via approved: true or force: true arguments', async () => {
+  clearAllApprovals()
+  const registeredTools = new Map()
+  const ctx = {
+    effect(fn) { fn() },
+    tools: { register(def) { registeredTools.set(def.name, def) } },
+    logger: { warn() {}, info() {}, debug() {}, error() {} },
+    get() { return null },
+  }
+
+  let providerCalled = false
+  const cfg = {
+    enabled: true,
+    requireApproval: true,
+    approvalTimeoutSec: 10,
+    provider: 'fal',
+    apiKeyEnv: 'TEST_KEY',
+    model: 'fal-ai/flux/dev',
+    outputDir: 'test-gen-out',
+    dailyBudgetUsd: 10,
+    loopGuardLimit: 0,
+    defaultSize: 'square_hd',
+    defaultFormat: 'png',
+  }
+
+  const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg==', 'base64')
+
+  const deps = {
+    config: cfg,
+    live: () => cfg,
+    resolveSource: async () => undefined,
+    slugify: (s) => s.slice(0, 10),
+    resolveApiKey: () => 'fal_mock_key',
+    fetchImpl: async () => {
+      providerCalled = true
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => 'image/png' },
+        arrayBuffer: async () => PNG.buffer.slice(PNG.byteOffset, PNG.byteOffset + PNG.byteLength),
+        json: async () => ({
+          request_id: 'req-mock',
+          images: [{ url: 'https://cdn/img.png', width: 512, height: 512 }],
+          seed: 42,
+        }),
+      }
+    },
+  }
+
+  registerGenerationTools(ctx, deps)
+  const generateTool = registeredTools.get('generate_image')
+  assert.ok(generateTool)
+
+  // 1. Passing approved: true in non-interactive mode MUST NOT bypass
+  await assert.rejects(
+    async () => await generateTool.execute({ prompt: 'bypass attempt', approved: true }, { interactive: false }),
+    /Interactive approval required/i
+  )
+  assert.equal(providerCalled, false, 'approved: true must not bypass approval gate')
+
+  // 2. Passing force: true in non-interactive mode MUST NOT bypass
+  await assert.rejects(
+    async () => await generateTool.execute({ prompt: 'bypass attempt 2', force: true }, { interactive: false }),
+    /Interactive approval required/i
+  )
+  assert.equal(providerCalled, false, 'force: true must not bypass approval gate')
+
+  clearAllApprovals()
+})
