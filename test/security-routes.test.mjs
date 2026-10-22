@@ -4,6 +4,7 @@ import { Readable } from 'node:stream'
 import { registerSettingsRoutes } from '../lib/settings-route.js'
 import { registerVaultRoutes } from '../lib/vault.js'
 import {
+  isTrustedLocalRequest,
   getRouteRejectionStatus,
   getRouteWriteRejectionStatus,
   validateProviderBaseUrl,
@@ -354,5 +355,181 @@ test('security #474: helpers getClientIp and isTrustedHost', () => {
   assert.equal(isTrustedHost('evil.com'), false)
   assert.equal(isTrustedHost('10.evil.com'), false)
   assert.equal(isTrustedHost('127.0.0.1.nip.io'), false)
+})
+
+test('security #478: isTrustedLocalRequest accepts dsh-app://app scheme on loopback', () => {
+  // Loopback with dsh-app://app/ referer (Desktop Electron)
+  const reqDesktopReferer = {
+    method: 'GET',
+    headers: {
+      host: '127.0.0.1:3080',
+      referer: 'dsh-app://app/',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(isTrustedLocalRequest(reqDesktopReferer), true)
+
+  // Loopback with dsh-app://app origin
+  const reqDesktopOrigin = {
+    method: 'POST',
+    headers: {
+      host: '127.0.0.1:3080',
+      origin: 'dsh-app://app',
+    },
+    socket: { remoteAddress: '::1' },
+  }
+  assert.equal(isTrustedLocalRequest(reqDesktopOrigin), true)
+
+  // Synthetic loopback mock (no socket, loopback host)
+  const reqSynthetic = {
+    method: 'GET',
+    headers: {
+      host: 'localhost:3080',
+      referer: 'dsh-app://app/index.html',
+    },
+  }
+  assert.equal(isTrustedLocalRequest(reqSynthetic), true)
+
+  // Forged dsh-app scheme from non-loopback LAN address must be REJECTED
+  const reqForgedLan = {
+    method: 'GET',
+    headers: {
+      host: '192.168.1.111:3080',
+      referer: 'dsh-app://app/',
+    },
+    socket: { remoteAddress: '192.168.1.50' },
+  }
+  assert.equal(isTrustedLocalRequest(reqForgedLan), false)
+
+  // Spoofed host in dsh-app scheme must be REJECTED
+  const reqSpoofedHost = {
+    method: 'GET',
+    headers: {
+      host: '127.0.0.1:3080',
+      referer: 'dsh-app://evil.com/',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(isTrustedLocalRequest(reqSpoofedHost), false)
+
+  // Spoofed origin host in dsh-app scheme must be REJECTED
+  const reqSpoofedOrigin = {
+    method: 'POST',
+    headers: {
+      host: '127.0.0.1:3080',
+      origin: 'dsh-app://malicious.app',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(isTrustedLocalRequest(reqSpoofedOrigin), false)
+
+  // Unknown custom scheme must be REJECTED
+  const reqUnknownScheme = {
+    method: 'GET',
+    headers: {
+      host: '127.0.0.1:3080',
+      referer: 'custom-scheme://app/',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(isTrustedLocalRequest(reqUnknownScheme), false)
+})
+
+test('security #478: route rejection gates pass dsh-app://app on loopback and reject forged requests', () => {
+  // getRouteRejectionStatus on loopback
+  const reqReadDesktop = {
+    method: 'GET',
+    headers: {
+      host: '127.0.0.1:3080',
+      referer: 'dsh-app://app/',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(getRouteRejectionStatus(reqReadDesktop), undefined)
+
+  const reqReadOrigin = {
+    method: 'GET',
+    headers: {
+      host: 'localhost:3080',
+      origin: 'dsh-app://app',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(getRouteRejectionStatus(reqReadOrigin), undefined)
+
+  // getRouteWriteRejectionStatus on loopback
+  const reqWriteDesktop = {
+    method: 'POST',
+    headers: {
+      host: '127.0.0.1:3080',
+      origin: 'dsh-app://app',
+      'sec-fetch-site': 'same-origin',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(getRouteWriteRejectionStatus(reqWriteDesktop), undefined)
+
+  // Spoofed origin or referer gives 403
+  const reqBadOrigin = {
+    method: 'GET',
+    headers: {
+      host: '127.0.0.1:3080',
+      origin: 'dsh-app://untrusted.host',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(getRouteRejectionStatus(reqBadOrigin), 403)
+
+  const reqBadReferer = {
+    method: 'GET',
+    headers: {
+      host: '127.0.0.1:3080',
+      referer: 'dsh-app://untrusted.host/',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  assert.equal(getRouteRejectionStatus(reqBadReferer), 403)
+})
+
+test('security #478: vault and config routes allow loopback requests with dsh-app://app referer', async () => {
+  const ctx = createMockCtx()
+  registerVaultRoutes(ctx, { storageService: null })
+  registerSettingsRoutes(ctx, { live: () => ({}), getSettingsApi: () => ({}), setLiveConfig: () => {} })
+
+  const vaultHandler = ctx.routes.get('/dsh-image-gen/vault')
+  assert.equal(typeof vaultHandler, 'function')
+
+  // Request to vault with dsh-app://app/ referer
+  const reqVault = {
+    method: 'GET',
+    url: '/dsh-image-gen/vault?limit=10',
+    headers: {
+      host: '127.0.0.1:3080',
+      referer: 'dsh-app://app/',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  const resVault = mockRes()
+  await vaultHandler(reqVault, resVault)
+  // Should NOT be 403 Forbidden!
+  assert.notEqual(resVault.statusCode, 403, 'Vault request with dsh-app://app/ must not be rejected with 403')
+  assert.equal(resVault.statusCode, 200)
+
+  // Request to config route with dsh-app://app/ referer
+  const configHandler = ctx.routes.get('/dsh-image-gen/config')
+  assert.equal(typeof configHandler, 'function')
+  const reqConfig = {
+    method: 'GET',
+    url: '/dsh-image-gen/config',
+    headers: {
+      host: '127.0.0.1:3080',
+      referer: 'dsh-app://app/',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }
+  const resConfig = mockRes()
+  await configHandler(reqConfig, resConfig)
+  assert.notEqual(resConfig.statusCode, 403, 'Config request with dsh-app://app/ must not be rejected with 403')
+  assert.equal(resConfig.statusCode, 200)
 })
 

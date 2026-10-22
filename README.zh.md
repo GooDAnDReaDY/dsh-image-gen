@@ -35,6 +35,11 @@
 
 ---
 
+## 🚀 更新 v0.12.9: 完整支持 DSH Desktop Electron 运行时 (#478)
+- **DSH Desktop 自定义协议授权**: 在 `isTrustedLocalRequest`、`getRouteRejectionStatus` 及 `getRouteWriteRejectionStatus` 中增加对本地回环连接下特权协议 `dsh-app://app/` 的安全校验放行。
+- **解除桌面端端点与图片拦截**: 解决了 Electron 环境下访问 `/dsh-image-gen/image`、`/dsh-image-gen/approval`、`/dsh-image-gen/vault` 和 `/dsh-image-gen/config` 时遭遇的 HTTP 403 Forbidden 错误，恢复了桌面端中的缩略图预览、交互式审批闸门操作以及 Studio Vault 资产库。
+- **保持严格的纵深防御**: 针对外部 LAN 发起的伪造请求及非受信自定义协议（如 `evil-scheme://`、`dsh-app://untrusted.host`）继续实施严格的 403 Forbidden 拒绝。
+
 ## 🚀 更新 v0.12.8: 交互式生成审批闸门 (#450)
 - **交互式审批闸门**: 防止自主智能体在后台循环中意外或过量调用计费生成 API。在“安全与预算”设置中支持 `requireApproval: boolean`（默认 `false`）与 `approvalTimeoutSec: number`（默认 `120`，范围 5-600）。
 - **交互式卡片 `FalApprovalCard`**: 在对话工具视图中实时渲染预估任务计划（提示词、提供商、模型、尺寸与预估 USD 费用），提供 `[🚀 确认生成]` 与 `[✏️ 修改提示词]` 操作按钮。
