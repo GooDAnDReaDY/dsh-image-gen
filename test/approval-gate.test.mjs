@@ -409,3 +409,41 @@ test('tool integration: generate_image respects requireApproval gate (#450)', as
   clearAllApprovals()
 })
 
+test('approval route #478: POST accepts approve action with dsh-app://app/ referer in DSH Desktop', async () => {
+  clearAllApprovals()
+  const routes = new Map()
+  const ctx = {
+    effect(fn) { fn() },
+    webServer: {
+      register(opts) { routes.set(opts.path, opts.handler) },
+    },
+  }
+  registerApprovalRoutes(ctx)
+  const handler = routes.get('/dsh-image-gen/approval')
+
+  const gateDesktop = createApprovalGate({ callId: 'desktop_approve_call', plan: { prompt: 'futuristic city' } })
+  const waitDesktop = gateDesktop.wait()
+
+  const reqDesktop = createJsonStream(
+    { callId: 'desktop_approve_call', action: 'approve' },
+    {
+      host: '127.0.0.1:3080',
+      referer: 'dsh-app://app/',
+      'sec-fetch-site': 'same-origin',
+    },
+    '127.0.0.1'
+  )
+  reqDesktop.method = 'POST'
+  reqDesktop.url = '/dsh-image-gen/approval?callId=desktop_approve_call&action=approve'
+  const resDesktop = mockRes()
+  await handler(reqDesktop, resDesktop)
+  assert.equal(resDesktop.statusCode, 200, 'Desktop approval request must succeed with 200')
+  const data = JSON.parse(resDesktop.body)
+  assert.equal(data.ok, true)
+  assert.equal(data.status, 'approved')
+
+  const resolved = await waitDesktop
+  assert.equal(resolved.approved, true)
+  clearAllApprovals()
+})
+

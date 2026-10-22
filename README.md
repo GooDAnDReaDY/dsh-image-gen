@@ -1,4 +1,9 @@
 
+## 🚀 Updates v0.12.9: Full DSH Desktop Electron Compatibility (#478)
+- **DSH Desktop Scheme Authorization**: Extended `isTrustedLocalRequest`, `getRouteRejectionStatus`, and `getRouteWriteRejectionStatus` to authorize the privileged `dsh-app://app/` custom scheme from local loopback connections.
+- **Desktop Endpoint & Image Unblocking**: Unblocks `/dsh-image-gen/image`, `/dsh-image-gen/approval`, `/dsh-image-gen/vault`, and `/dsh-image-gen/config` from HTTP 403 Forbidden under Electron, restoring thumbnail rendering, Interactive Approval Gate actions, and Studio Vault functionality in DSH Desktop.
+- **Fail-Closed Security Invariant**: Untrusted non-loopback LAN origins and spoofed custom schemes (`evil-scheme://`, `dsh-app://untrusted.host`) remain strictly rejected with HTTP 403 Forbidden.
+
 ## 🚀 Updates v0.12.8: Interactive Generation Approval Gate (#450)
 - **Interactive Approval Gate**: Added interactive confirmation gate before billable image generation calls. Configurable via `requireApproval: boolean` (default `false`) and `approvalTimeoutSec: number` (default `120`, range 5-600) under Settings > Safety.
 - **FalApprovalCard Toolview Card**: Renders interactive chat card with prompt, provider, model, dimensions, and estimated USD cost, offering `[🚀 Confirm Generation]` and `[✏️ Modify / Cancel]` actions.
