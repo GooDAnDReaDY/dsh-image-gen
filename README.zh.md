@@ -35,6 +35,16 @@
 
 ---
 
+## 🚀 更新 v0.12.9: 完整支持 DSH Desktop Electron 运行时 (#478)
+- **DSH Desktop 自定义协议授权**: 在 `isTrustedLocalRequest`、`getRouteRejectionStatus` 及 `getRouteWriteRejectionStatus` 中增加对本地回环连接下特权协议 `dsh-app://app/` 的安全校验放行。
+- **解除桌面端端点与图片拦截**: 解决了 Electron 环境下访问 `/dsh-image-gen/image`、`/dsh-image-gen/approval`、`/dsh-image-gen/vault` 和 `/dsh-image-gen/config` 时遭遇的 HTTP 403 Forbidden 错误，恢复了桌面端中的缩略图预览、交互式审批闸门操作以及 Studio Vault 资产库。
+- **保持严格的纵深防御**: 针对外部 LAN 发起的伪造请求及非受信自定义协议（如 `evil-scheme://`、`dsh-app://untrusted.host`）继续实施严格的 403 Forbidden 拒绝。
+
+## 🚀 更新 v0.12.8: 交互式生成审批闸门 (#450)
+- **交互式审批闸门**: 防止自主智能体在后台循环中意外或过量调用计费生成 API。在“安全与预算”设置中支持 `requireApproval: boolean`（默认 `false`）与 `approvalTimeoutSec: number`（默认 `120`，范围 5-600）。
+- **交互式卡片 `FalApprovalCard`**: 在对话工具视图中实时渲染预估任务计划（提示词、提供商、模型、尺寸与预估 USD 费用），提供 `[🚀 确认生成]` 与 `[✏️ 修改提示词]` 操作按钮。
+- **安全回滚与审批接口**: 超时或用户取消时完全不消耗预算，通过受保护的 `/dsh-image-gen/approval` 接口进行状态协调。支持 `approved: true` 参数直接放行已确认任务。
+
 ## ⚡ 核心功能与架构提升 (v0.10.0)
 
 **`@goodandready/dsh-image-gen`** 为 DeepSeek Harness 提供工业级高可用的图像生成与视觉处理工具链：
@@ -126,7 +136,9 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 * **`智能服务商自动故障转移链` (#282)**: 主服务商 429、5xx、超时或额度耗尽时自动无缝切换备选渠道。
 
 ## 🛡️ 安全性
+* **内部端点会话鉴权与 SSRF 防护 (#474)**：所有 HTTP 路由接入 DSH 会话鉴权 (`ctx.connection?.requestRejection`)，阻断未认证局域网客户端与伪造来源；对提供商 Base URL 执行严格协议与域名白名单校验，新增 `allowCustomBaseUrl` 配置项。
 * **配置请求大小限制 (#313)**：`PUT /dsh-image-gen/config` 限制请求体最大 64 KB，超出返回 HTTP 413，防止内存耗尽 DoS。
 * **客户端构建校验 (#316)**：`scripts/build-client.mjs` 支持 `--check` 模式，确保构建一致性。
-* **架构解耦优化 (#317)**：`lib/index.js` 精简为轻量级门面（<400 行），拆分 `config-schema.js` 与 `resolve-source.js`。
+* **架构解耦优化 (#317)**：`lib/index.js` 精简为轻量级门面，拆分 `config-schema.js`、`resolve-source.js` 与 `studio-routes.js`。
 * **启动与运行时清理 (#318, #319)**：优化历史记录权限修复，移除废弃的 `loc.get` 调用。
+

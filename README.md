@@ -1,4 +1,14 @@
 
+## 🚀 Updates v0.12.9: Full DSH Desktop Electron Compatibility (#478)
+- **DSH Desktop Scheme Authorization**: Extended `isTrustedLocalRequest`, `getRouteRejectionStatus`, and `getRouteWriteRejectionStatus` to authorize the privileged `dsh-app://app/` custom scheme from local loopback connections.
+- **Desktop Endpoint & Image Unblocking**: Unblocks `/dsh-image-gen/image`, `/dsh-image-gen/approval`, `/dsh-image-gen/vault`, and `/dsh-image-gen/config` from HTTP 403 Forbidden under Electron, restoring thumbnail rendering, Interactive Approval Gate actions, and Studio Vault functionality in DSH Desktop.
+- **Fail-Closed Security Invariant**: Untrusted non-loopback LAN origins and spoofed custom schemes (`evil-scheme://`, `dsh-app://untrusted.host`) remain strictly rejected with HTTP 403 Forbidden.
+
+## 🚀 Updates v0.12.8: Interactive Generation Approval Gate (#450)
+- **Interactive Approval Gate**: Added interactive confirmation gate before billable image generation calls. Configurable via `requireApproval: boolean` (default `false`) and `approvalTimeoutSec: number` (default `120`, range 5-600) under Settings > Safety.
+- **FalApprovalCard Toolview Card**: Renders interactive chat card with prompt, provider, model, dimensions, and estimated USD cost, offering `[🚀 Confirm Generation]` and `[✏️ Modify / Cancel]` actions.
+- **Fail-Safe Rollback & Coordination Endpoint**: Zero spend leakage on timeout or user cancellation; coordinated via protected `/dsh-image-gen/approval` endpoint. Supports `approved: true` parameter bypass for explicit confirmed runs.
+
 ## 🚀 Updates v0.10.8: Lossless JSON Unification, Dual-Output & Strict Validation (#199)
 - **Lossless JSON & Dual-Output Unification**: `upscale_image`, `remove_background`, `blend_images`, and `vectorize_image` now consistently return `toLosslessJson` and formatted markdown `summary` for text-only LLMs.
 - **Strict Input Image Validation**: `extract_design_tokens`, `image_to_css_gradient`, and `check_image_contrast` explicitly validate source image readability instead of silent fallback.
@@ -202,6 +212,12 @@
 * **Complete Toolview Registration**: Registered `tool.call.toolview` for all 8 visual tools (`generate_image`, `edit_image`, `vary_image`, `blend_images`, `generate_image_pack`, `remove_background`, `upscale_image`, `vectorize_image`).
 * **Safety, Budget & Loop Guard Hardening**: Extended `trackAndAssertLoopGuard`, `assertBudgetAvailable`, and `sanitizeErrorAndLogs` error masking across `edit_image`, `vary_image`, `blend_images`, `remove_background`, and `upscale_image`. Added `seedreamBaseURL` support.
 
+### 🚀 What's New in v0.12.10 (#480, #481, #482, #483)
+* **Route Reliability & WebServer Hardening (#480)**: Resolved empty 400 Bad Request responses on REST endpoints caused by Cordis context proxy evaluation of uninjected properties. Introduced `safeJsonHandler` and `getConnection` wrappers across all registered routes for structured JSON error reporting.
+* **Interactive Approval Gate Hardening (#481)**: Eliminated model self-bypass of `requireApproval`. Removed `approved` parameter from tool schema, sanitized non-interactive error directives, and blocked bypass via `approved: true` or `force: true`.
+* **Strict Write Origin & CSRF Defense (#482)**: Enforced mandatory `Origin` / `Referer` validation matching `Host` for all mutating endpoints (POST, PUT, DELETE), preventing reverse proxy bypass via loopback tunnels (e.g., `dsh-lanmode`).
+* **Test Isolation & Hygiene (#483)**: Replaced fixed test artifact paths with workspace-confined temporary directories to prevent race conditions during parallel test runs, added release candidate archive guards, and pruned unused exports.
+
 ### 🚀 What's New in v0.10.13
 * **Plugin Settings Location (#208)**: Moved settings card exclusively into the standard `Settings → Plugins → Plugin settings` section (`settings.plugin.item` slot). Removed the legacy fallback to `settings.section` that previously caused duplicate entries in the top-level sidebar navigation.
 * **Deferred Slot Injection (`registerSlotWhenReady`)**: Implemented robust deferred injection via `ctx.slots.inject` ensuring the settings card safely mounts when the parent settings container is rendered, eliminating timing collisions at startup.
@@ -233,6 +249,9 @@
 * **`local`**: Local ComfyUI workflow execution or Automatic1111 web API.
 * **`seedream`**: ByteDance SeaDream generative API.
 * **`gemini`**: Google Imagen 3 via GenAI API.
+
+> [!NOTE]
+> **SSRF Protection & Base URLs**: By default, provider endpoints (`baseURL`, `customBaseURL`, `seedreamBaseURL`, `localBaseURL`) are validated against an allowlist of official provider domains and loopback/LAN addresses. To configure custom reverse proxies or third-party gateways, enable **Allow Custom Base URLs** (`allowCustomBaseUrl: true`) in the Provider settings tab.
 
 ---
 

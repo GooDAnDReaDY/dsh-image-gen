@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.12.8
+
+### Added
+- **Interactive Generation Approval Gate (#450)**: Added interactive approval gate protecting against unintended or autonomous billable generation calls.
+  - Added `requireApproval: boolean` (default: `false`) and `approvalTimeoutSec: number` (default: `120`, range: 5-600) to config schema and UI settings card under the `safety` tab.
+  - When `requireApproval === true`, `generate_image` calculates preliminary task plan (prompt, provider, model, size, aspect ratio, image count, and estimated cost in USD) before calling billable APIs.
+  - Renders interactive `FalApprovalCard` in chat toolview with `[🚀 Confirm Generation]` and `[✏️ Modify / Cancel]` actions.
+  - Integrated HTTP coordination endpoint `/dsh-image-gen/approval` supporting `approve` and `reject` actions with full local host security validation.
+  - Supported `approved: boolean` parameter to explicitly bypass approval gate when user confirmation is already established.
+  - Added fail-fast error for non-interactive execution sessions and automated timeout with complete rollback and zero spend leakage.
+  - 100% bilingual dictionary parity across English and Chinese locale fragments.
+
+## 0.12.7
+
+### Security
+- **Enforce Session Authentication on Internal Routes (#474)**: Protect all internal HTTP endpoints (`/dsh-image-gen/config`, `/dsh-image-gen/vault`, `/dsh-image-gen/status`, `/dsh-image-gen/image`, `/dsh-image-gen/diagnostics/test`, `/dsh-image-gen/history`, `/dsh-image-gen/recipes`, `/dsh-image-gen/comfy/templates`, `/dsh-image-gen/capabilities`, `/dsh-image-gen/profiles`, `/dsh-image-gen/staging`, `/dsh-image-gen/queue`, `/dsh-image-gen/variants`, `/dsh-image-gen/lineage`, `/dsh-image-gen/offload`, `/dsh-image-gen/design/export`) via `ctx.connection?.requestRejection(req)`. Unauthenticated LAN requests and requests with unknown/missing remote addresses fail closed with 401/403.
+- **CSRF Protection on Mutating Routes (#474)**: Implement `getRouteWriteRejectionStatus` to reject cross-site mutating requests (POST, PUT, DELETE) by validating `Sec-Fetch-Site`, `Origin`, and `Referer` headers.
+- **SSRF Prevention & Base URL Restriction (#474)**: Enforce strict URL format validation (blocking credentials in URLs and cloud metadata endpoints such as 169.254.169.254) and allowlist check for provider endpoints (`baseURL`, `seedreamBaseURL`, `customBaseURL`, `localBaseURL`). Added explicit administrator toggle `allowCustomBaseUrl` (default `false`) required to point providers at custom or third-party gateways.
+- **Thin Host Architectural Refactor (#216, #474)**: Extracted studio and workbench REST endpoints into modular `lib/studio-routes.js`, keeping `lib/index.js` thin and maintainable at ~560 lines (strictly <800 lines).
+
 ## 0.12.2
 
 ### Fixed
@@ -211,3 +231,4 @@ Notable changes to `@goodandready/dsh-image-gen`.
 
 ### Added
 - This changelog.
+
