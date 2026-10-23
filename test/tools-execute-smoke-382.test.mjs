@@ -3,8 +3,9 @@
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { writeFile, rm } from 'node:fs/promises'
+import { writeFile, rm, mkdtemp } from 'node:fs/promises'
 import path from 'node:path'
+import os from 'node:os'
 import { registerAllTools } from '../lib/register-tools.js'
 import { resetLoopGuard } from '../lib/loop-guard.js'
 import { clearAllAnchors } from '../lib/anchor-helpers.js'
@@ -127,7 +128,8 @@ test('tools-execute-smoke-382: all 30 tools have functional execute smoke checks
     agent: { session: { header: { cwd: process.cwd() } } },
   }
 
-  const testPngPath = path.join(process.cwd(), 'test-smoke-mock.png')
+  const tempDir = await mkdtemp(path.join(process.cwd(), '.tmp-smoke-'))
+  const testPngPath = path.join(tempDir, 'test-smoke-mock.png')
   await writeFile(testPngPath, PNG)
 
   try {
@@ -177,7 +179,7 @@ test('tools-execute-smoke-382: all 30 tools have functional execute smoke checks
 
     assert.equal(executedNames.length, 30, 'All 30 tools must execute successfully')
   } finally {
-    await rm(testPngPath, { force: true })
+    await rm(tempDir, { recursive: true, force: true })
     globalThis.fetch = originalFetch
     env.controller.dispose()
   }

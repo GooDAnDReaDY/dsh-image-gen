@@ -212,6 +212,12 @@
 * **Complete Toolview Registration**: Registered `tool.call.toolview` for all 8 visual tools (`generate_image`, `edit_image`, `vary_image`, `blend_images`, `generate_image_pack`, `remove_background`, `upscale_image`, `vectorize_image`).
 * **Safety, Budget & Loop Guard Hardening**: Extended `trackAndAssertLoopGuard`, `assertBudgetAvailable`, and `sanitizeErrorAndLogs` error masking across `edit_image`, `vary_image`, `blend_images`, `remove_background`, and `upscale_image`. Added `seedreamBaseURL` support.
 
+### 🚀 What's New in v0.12.10 (#480, #481, #482, #483)
+* **Route Reliability & WebServer Hardening (#480)**: Resolved empty 400 Bad Request responses on REST endpoints caused by Cordis context proxy evaluation of uninjected properties. Introduced `safeJsonHandler` and `getConnection` wrappers across all registered routes for structured JSON error reporting.
+* **Interactive Approval Gate Hardening (#481)**: Eliminated model self-bypass of `requireApproval`. Removed `approved` parameter from tool schema, sanitized non-interactive error directives, and blocked bypass via `approved: true` or `force: true`.
+* **Strict Write Origin & CSRF Defense (#482)**: Enforced mandatory `Origin` / `Referer` validation matching `Host` for all mutating endpoints (POST, PUT, DELETE), preventing reverse proxy bypass via loopback tunnels (e.g., `dsh-lanmode`).
+* **Test Isolation & Hygiene (#483)**: Replaced fixed test artifact paths with workspace-confined temporary directories to prevent race conditions during parallel test runs, added release candidate archive guards, and pruned unused exports.
+
 ### 🚀 What's New in v0.10.13
 * **Plugin Settings Location (#208)**: Moved settings card exclusively into the standard `Settings → Plugins → Plugin settings` section (`settings.plugin.item` slot). Removed the legacy fallback to `settings.section` that previously caused duplicate entries in the top-level sidebar navigation.
 * **Deferred Slot Injection (`registerSlotWhenReady`)**: Implemented robust deferred injection via `ctx.slots.inject` ensuring the settings card safely mounts when the parent settings container is rendered, eliminating timing collisions at startup.

@@ -74,7 +74,7 @@ test('settings-route: PUT /dsh-image-gen/config rejects oversized body with 413'
   const bigChunk = 'x'.repeat(70 * 1024)
   const stream = Readable.from([bigChunk])
   stream.method = 'PUT'
-  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(bigChunk.length) }
+  stream.headers = { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'content-length': String(bigChunk.length) }
   stream.socket = { remoteAddress: '127.0.0.1' }
 
   const res = mockRes()
@@ -99,7 +99,7 @@ test('settings-route: PUT /dsh-image-gen/config updates valid settings', async (
   const payload = JSON.stringify({ config: { defaultSize: 'square_1_1' } })
   const stream = Readable.from([payload])
   stream.method = 'PUT'
-  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.headers = { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'content-length': String(payload.length) }
   stream.socket = { remoteAddress: '127.0.0.1' }
 
   const res = mockRes()
@@ -187,7 +187,7 @@ test('settings-route: PUT failure does not mutate live config or trigger setLive
   const payload = JSON.stringify({ config: { provider: 'local' } })
   const stream = Readable.from([payload])
   stream.method = 'PUT'
-  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.headers = { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'content-length': String(payload.length) }
   stream.socket = { remoteAddress: '127.0.0.1' }
 
   const res = mockRes()
@@ -214,7 +214,7 @@ test('settings-route: PUT with resetFields removes override and restores schema 
   const payload = JSON.stringify({ resetFields: ['stylePreset'] })
   const stream = Readable.from([payload])
   stream.method = 'PUT'
-  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.headers = { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'content-length': String(payload.length) }
   stream.socket = { remoteAddress: '127.0.0.1' }
 
   const res = mockRes()
@@ -240,7 +240,7 @@ test('settings-route: PUT with null field resets it to schema default (#367)', a
   const payload = JSON.stringify({ stylePreset: null })
   const stream = Readable.from([payload])
   stream.method = 'PUT'
-  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.headers = { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'content-length': String(payload.length) }
   stream.socket = { remoteAddress: '127.0.0.1' }
 
   const res = mockRes()
@@ -286,7 +286,7 @@ test('settings-route: PUT with fallbackProviders as comma string parses to array
   const payload = JSON.stringify({ config: { fallbackProviders: 'custom, local' } })
   const stream = Readable.from([payload])
   stream.method = 'PUT'
-  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.headers = { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'content-length': String(payload.length) }
   stream.socket = { remoteAddress: '127.0.0.1' }
 
   const res = mockRes()
@@ -317,7 +317,7 @@ test('settings-route: PUT with valid comfyWorkflowJson persists to live config (
   const payload = JSON.stringify({ config: { comfyWorkflowJson: validWorkflow } })
   const stream = Readable.from([payload])
   stream.method = 'PUT'
-  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.headers = { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'content-length': String(payload.length) }
   stream.socket = { remoteAddress: '127.0.0.1' }
 
   const res = mockRes()
@@ -343,7 +343,7 @@ test('settings-route: PUT with invalid comfyWorkflowJson returns 400 (#369)', as
   const payload = JSON.stringify({ config: { comfyWorkflowJson: 'invalid json without nodes' } })
   const stream = Readable.from([payload])
   stream.method = 'PUT'
-  stream.headers = { host: '127.0.0.1:3000', 'content-length': String(payload.length) }
+  stream.headers = { host: '127.0.0.1:3000', origin: 'http://127.0.0.1:3000', 'content-length': String(payload.length) }
   stream.socket = { remoteAddress: '127.0.0.1' }
 
   const res = mockRes()
