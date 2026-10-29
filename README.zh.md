@@ -132,6 +132,7 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
 ## 🛠️ 新增核心功能 (v0.10.32)
 
+* **`generate_seamless_texture` (#468)**: 无缝平铺纹理与重复图案生成，适用于 3D 材质、游戏开发与网页背景，集成环形偏移接缝平滑与 3×3 预览网格。
 * **`reverse_prompt_and_recreate` (#465)**: 基于视觉反向工程与美学风格提取，将任意图像逆向解析为结构化提示词，并可一键重新合成风格化副本。
 * **`restore_face_and_details` (#467)**: 局部面部与高频细节修复管线（Hi-Res 细节修复），自动定位面部与焦点区域，并采用羽化边缘无缝融合。
 * **`generate_with_control` (#463)**: ControlNet 结构引导生成，支持边缘、深度和姿势控制 (`canny` / `depth` / `pose` / `sketch`)。
