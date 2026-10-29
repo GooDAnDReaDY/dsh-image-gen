@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.16
+
+### Added
+- **ControlNet Structural Guidance (`generate_with_control`) (#463)**: Edge, depth, and pose-guided image generation using input control images. Includes Sharp-powered edge convolution with Laplacian filters, sketch thresholding, contrast/depth mapping, and pose bounding box normalization (`mode: "canny" | "depth" | "pose" | "sketch"`). Formats structured Markdown with control mode diagnostics and reference linkages.
+- **Multi-Angle Turnaround Sheet Generator (`generate_turnaround_sheet`) (#464)**: Panoramic model sheet generation for 3D modeling, game development, and character/product asset pipelines. Synthesizes synchronized perspective sequences (`front`, `side`, `back`, `three_quarter`), automatically extracts individual camera views into cropped asset slices via Sharp, and generates a structured JSON model sheet manifest with aspect ratios and coordinate bounds.
+
 ## 0.12.15
 
 ### Added
