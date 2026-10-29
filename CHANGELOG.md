@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.12.12
+
+### Added
+- **Standalone Image Studio Workspace Panel in DSH Right Sidebar (`dsh-image-studio`, #452)**:
+  - Registered native DSH right sidebar extension slot `sidebarRightTabs` and `sidebar.right.pane.tab` with icon 🎨 and identifier `dsh-image-studio` (with `betterSidebar` fallback).
+  - Implemented `SidebarImageStudio` component with:
+    - Prompt drafting with 8 quick style auto-completion chips (Photorealistic, Anime, Cyberpunk, Vector, 3D Render, Minimalist, Pixel Art, Watercolor).
+    - Negative prompt input with quick exclusion tags (blurry, low quality, watermark, deformed).
+    - Provider, dynamic model, aspect ratio (1:1, 16:9, 9:16, 4:3, 3:4, 21:9), and transparent background toggle controls.
+    - Compact recent generation gallery grid with live selection.
+    - Quick action bar: Copy file path (`copyPath`), Insert markdown snippet into chat (`insertChat`), download, and command generator.
+    - Reactive configuration synchronization with server `/dsh-image-gen/config` and `/dsh-image-gen/vault`.
+- **Session-Scoped Asset Cataloging & Semantic File Naming (`organizeBySession`, #453)**:
+  - Added `organizeBySession: boolean` (default: `true`) configuration option.
+  - Automatically isolates generated session files into dedicated directory `<sessionCwd>/assets/images/<sessionSlug>/` while preserving flat legacy path fallback.
+  - Implemented `buildSemanticSlug(prompt, tool, index)` domain entity extractor filtering boilerplate stop words in English and Russian (e.g. `futuristic-hero-banner-cyberpunk-v1.png`).
+  - Implemented robust `resolveSessionSlug(session)` and `resolveAssetOutputDir(options)`.
+  - Maintained full backward compatibility with Asset Vault scanning and deletion across both flat and session-scoped directories.
+
 ## 0.12.11
 
 ### Added

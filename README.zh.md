@@ -35,6 +35,10 @@
 
 ---
 
+## 🚀 更新 v0.12.12: 右侧边栏 Image Studio 工作台与会话资源归档 (#452, #453)
+- **原生右侧边栏图像工作室面板 (#452)**: 注册持久化扩展槽 `sidebarRightTabs` 与 `sidebar.right.pane.tab`（标识符 `dsh-image-studio`）。提供提示词风格自动补全、反向提示词排除标签、服务商/模型/比例选择、透明背景开关、紧凑型最近生成缩略图网格以及一键复制文件路径与插入对话。
+- **会话级资源归档与语义化命名 (#453)**: 新增配置项 `organizeBySession: boolean`（默认 `true`），将生成资源归档至 `<sessionCwd>/assets/images/<sessionSlug>/`。内置 `buildSemanticSlug` 实体提取器生成规范语义化文件名（例如 `futuristic-hero-banner-cyberpunk-v1.png`），完全向后兼容 Asset Vault。
+
 ## 🚀 更新 v0.12.9: 完整支持 DSH Desktop Electron 运行时 (#478)
 - **DSH Desktop 自定义协议授权**: 在 `isTrustedLocalRequest`、`getRouteRejectionStatus` 及 `getRouteWriteRejectionStatus` 中增加对本地回环连接下特权协议 `dsh-app://app/` 的安全校验放行。
 - **解除桌面端端点与图片拦截**: 解决了 Electron 环境下访问 `/dsh-image-gen/image`、`/dsh-image-gen/approval`、`/dsh-image-gen/vault` 和 `/dsh-image-gen/config` 时遭遇的 HTTP 403 Forbidden 错误，恢复了桌面端中的缩略图预览、交互式审批闸门操作以及 Studio Vault 资产库。
