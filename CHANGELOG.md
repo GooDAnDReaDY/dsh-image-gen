@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.17
+
+### Added
+- **Vision-Driven Reverse Prompt Engineering & Style Recreation (`reverse_prompt_and_recreate`) (#465)**: Deconstructs visual aesthetics of any reference image (lighting profile, camera optics, color palette mood, artistic medium, and compositional layout) using Sharp-based perceptual statistics, synthesizes structured prompts with recommended negative prompts, and optionally renders immediate stylized recreations (`recreate: true`).
+- **Localized Face and High-Frequency Detail Restoration (`restore_face_and_details`) (#467)**: Automated high-resolution restoration for facial features, eyes, and fine textures. Employs localized quadrant zone extraction, multi-stage unsharp masking with micro-contrast clarity modulation, and seamless feathered alpha edge blending to integrate enhanced patches into original canvases without visible seams.
+
 ## 0.12.16
 
 ### Added

@@ -48,6 +48,8 @@ const EXPECTED_TOOLS = [
   'generate_image_matrix',
   'generate_with_control',
   'generate_turnaround_sheet',
+  'reverse_prompt_and_recreate',
+  'restore_face_and_details',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -97,6 +99,8 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerImageMatrixTools',
     'registerControlNetTools',
     'registerTurnaroundTools',
+    'registerReversePromptTools',
+    'registerRestoreFaceTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }
