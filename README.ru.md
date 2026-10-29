@@ -185,6 +185,7 @@ graph LR
 
 | Инструмент | Назначение | Ключевые параметры |
 |---|---|---|
+| **`generate_drawio_diagram`** | Генерация редактируемых XML-схем Draw.io / diagrams.net (`.drawio`) с чистым векторным SVG-превью (#451) | `title`, `nodes`, `edges`, `layout` (`horizontal`/`vertical`/`grid`/`tree`), `theme` (`light`/`dark`/`blueprint`/`corporate`/`nord`), `output_format` |
 | **`generate_image`** | Генерация изображения по тексту | `prompt`, `image_size`, `seed`, `style_preset`, `negative_prompt`, `guidance_scale`, `steps`, `sampler_name`, `count` |
 | **`set_style_anchor`** | Фиксация визуального стиля и персонажа сессии (объект, костюм, палитра, свет) (#283) | `mode` (`character`/`style`), `image`, `description`, `strength`, `clear` |
 | **`generate_ui_asset`** | Генерация интерфейсных ассетов с контролем свободного пространства и авто-прозрачностью (#284) | `prompt`, `asset_type`, `layout_composition`, `transparent`, `output_format` |

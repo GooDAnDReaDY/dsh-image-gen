@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.12.11
+
+### Added
+- **Editable Draw.io / diagrams.net & Interactive Vector Diagrams (`generate_drawio_diagram`, #451)**:
+  - Generates valid XML format `mxfile` / `mxGraphModel` (`application/vnd.jgraph.mxfile` / `.drawio`) fully editable in diagrams.net and Draw.io.
+  - Supports standard shape libraries: rounded rectangles, sharp boxes, ellipses/circles, decision diamonds, storage/database cylinders, cloud services, UML actors/users, hexagons, parallelograms, and process steps.
+  - Implements 5 curated themes: `light`, `dark`, `blueprint`, `corporate`, `nord` with harmonious palettes, strokes, and background styling.
+  - Implements automatic topological layout engine (`horizontal`, `vertical`, `grid`, `tree`) with level-based coordinate assignment and collision prevention.
+  - Generates standalone, responsive vector SVG preview alongside `.drawio` file for instant rendering in chat cards and right-sidebar canvas.
+  - Integrated design clipboard exports (Figma HTML snippet, Penpot SVG snippet, CSS background Data-URL) and direct push into OpenDesign projects.
+  - Registered toolview in DSH UI client and wired into the `design` toolset profile (profile `all` now has 31 tools).
+
+### Fixed
+- **Duplicate Issue #477 Closed**: Formally verified and closed duplicate issue #477 regarding DSH Desktop `dsh-app://app/` scheme support already resolved in v0.12.9 (#478).
+
 ## 0.12.8
 
 ### Added
