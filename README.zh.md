@@ -132,6 +132,8 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
 ## 🛠️ 新增核心功能 (v0.10.32)
 
+* **`reverse_prompt_and_recreate` (#465)**: 基于视觉反向工程与美学风格提取，将任意图像逆向解析为结构化提示词，并可一键重新合成风格化副本。
+* **`restore_face_and_details` (#467)**: 局部面部与高频细节修复管线（Hi-Res 细节修复），自动定位面部与焦点区域，并采用羽化边缘无缝融合。
 * **`generate_with_control` (#463)**: ControlNet 结构引导生成，支持边缘、深度和姿势控制 (`canny` / `depth` / `pose` / `sketch`)。
 * **`generate_turnaround_sheet` (#464)**: 多角度角色与 3D 资产三视图/多角度模型表生成，自动切片为独立透视图像并输出 JSON 清单。
 * **`outpaint_image` (#459)**: 图像边界外扩与定向补全（支持上下左右任意方向），结合 Sharp 透明画布扩展与 SVG 扩展蒙版生成，实现大场景无缝外绘。

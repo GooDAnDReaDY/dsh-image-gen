@@ -291,13 +291,13 @@
 ### 1. Toolsets Profiles & Lightweight Agent Context (#337)
 - **`toolsetProfile` Configuration**:
   - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `inspect_image_quality`) with schema size <= 5k chars, preserving agent context window.
-  - `all`: registers all 38 tools across all suites (#337, #451, #454, #455, #459, #460, #461, #462, #463, #464).
+  - `all`: registers all 40 tools across all suites (#337, #451, #454, #455, #459, #460, #461, #462, #463, #464, #465, #467).
   - `custom`: enables fine-grained selection per suite (`toolsets.creative`, `toolsets.studio`, etc.) or individual flat boolean toggles.
-- **Suite Architecture (38 tools total, #337, #451, #454, #455, #459, #460, #461, #462, #463, #464)**:
+- **Suite Architecture (40 tools total, #337, #451, #454, #455, #459, #460, #461, #462, #463, #464, #465, #467)**:
   - **Core Generation (4 tools)**: `generate_image`, `generate_image_pack`, `vary_image`, `remix_image`.
   - **Processing Processing & Enhancement (10 tools) Enhancement (11 tools)**: `edit_image`, `upscale_image`, `remove_background`, `compare_images`, `blend_images`, `vectorize_image`, `smart_crop_image`, `assemble_image_grid`, `outpaint_image`, `async_generate_image`, `generate_with_control`.
   - **Creative & Web Assets (6 tools)**: `generate_ui_asset`, `generate_theme_pair`, `generate_spritesheet`, `generate_pwa_icons`, `generate_color_palette`, `generate_seamless_pattern`.
-  - **Studio Studio & Continuity (9 tools) Continuity (10 tools)**: `set_style_anchor`, `render_wireframe_asset`, `generate_character_sheet`, `generate_style_matrix`, `generate_image_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`, `generate_turnaround_sheet`.
+  - **Studio Studio & Continuity (9 tools) Continuity (10 tools)**: `set_style_anchor`, `render_wireframe_asset`, `generate_character_sheet`, `generate_style_matrix`, `generate_image_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`, `generate_turnaround_sheet`, `reverse_prompt_and_recreate`.
   - **Vision & Localization (5 tools)**: `inspect_image`, `describe_image_style`, `replace_image_text`, `translate_image_text`, `beautify_diagram`, `generate_drawio_diagram`.
 
 ### 2. Generation Vault & Media Archive (#339)
