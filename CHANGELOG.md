@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.15
+
+### Added
+- **Batch Image Variation Matrix & Unified Contact Sheet (`generate_image_matrix`) (#461)**: Parallel synthesis of 4 (2×2) or 9 (3×3) variations with deterministic seed exploration (`vary: "seed"`) or CFG guidance progression (`vary: "cfg"`). Automatically stitches variations into a Sharp-rendered Contact Sheet preview grid with individual tile badges, generates session manifest JSON, and presents instant seed-selection markdown table.
+- **Smart Prompt-to-Model Semantic Router (`semanticRouter`, #462)**: Domain-specific prompt intent classifier (`classifyPromptIntent`) detecting typography/lettering, photorealism, vector icons, technical schematics/diagrams, and rapid draft intentions. Automated model/provider selection in `generate_image` via `model: "auto"` and `provider: "auto"`, with detailed routing reasoning and confidence diagnostics included in tool response.
+
 ## 0.12.14
 
 ### Added

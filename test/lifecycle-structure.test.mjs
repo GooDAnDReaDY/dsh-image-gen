@@ -45,6 +45,7 @@ const EXPECTED_TOOLS = [
   'render_wireframe_asset',
   'outpaint_image',
   'async_generate_image',
+  'generate_image_matrix',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -91,6 +92,7 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerWireframeDesignTools',
     'registerOutpaintTools',
     'registerAsyncGenerationTools',
+    'registerImageMatrixTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }
