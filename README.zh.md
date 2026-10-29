@@ -132,6 +132,8 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
 ## 🛠️ 新增核心功能 (v0.10.32)
 
+* **`outpaint_image` (#459)**: 图像边界外扩与定向补全（支持上下左右任意方向），结合 Sharp 透明画布扩展与 SVG 扩展蒙版生成，实现大场景无缝外绘。
+* **`async_generate_image` (#460)**: 异步任务生成管线，支持立即返回 `task_id`（`wait: false`）、状态轮询与队列防护，支持指数退避自动等待完成。
 * **`translate_image_text` (#454)**: 图像内文字翻译与视觉本地化（支持中、英、俄），结合 OCR 文本检测、自动生成 Inpaint 擦除蒙版及保留原图排版与坐标的高质量文字重绘。
 * **`render_wireframe_asset` (#455)**: 线框图与原型草图转高保真 UI 设计资产，支持精细几何保留（fidelity 0.2–0.85）与四种设计系统预设（`modern_saas`、`dark_glassmorphism`、`brutalist`、`apple_minimal`）。
 * **`generate_drawio_diagram` (#451)**: 生成可在 Draw.io / diagrams.net 中完全编辑的架构图和流程图（`.drawio` / `mxfile` XML），并附带清晰的矢量 SVG 预览。支持 5 种精选主题风格（`light`、`dark`、`blueprint`、`corporate`、`nord`）、10 种节点形状（圆角矩形、椭圆、菱形、圆柱/数据库、云朵、参与者/用户等）、连接线样式（正交、直线、曲线、虚线、双向）以及自动拓扑布局算法（`horizontal`、`vertical`、`grid`、`tree`）。集成 Figma 与 Penpot 剪贴板代码片段导出。

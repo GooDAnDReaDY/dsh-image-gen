@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.14
+
+### Added
+- **Outpainting and Directional Canvas Expansion (`outpaint_image`) (#459)**: Intelligent canvas expansion across any directional borders (`top`, `bottom`, `left`, `right`) with Sharp-powered transparent composition, SVG outpaint mask generation, and seamless background continuation synthesis.
+- **Async Image Generation Pipeline and Task Polling (`async_generate_image`) (#460)**: Non-blocking asynchronous task execution with immediate `task_id` dispatch (`wait: false`), in-memory background worker management, stage/progress tracking (`queued` -> `processing X%` -> `completed`), and exponential backoff polling guard.
+
 ## 0.12.13
 
 ### Added
