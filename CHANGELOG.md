@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.18
+
+### Added
+- **Seamless Tiling Texture and Repetitive Pattern Generator (`generate_seamless_texture`) (#468)**: Generates production-ready seamless repeating textures, architectural materials, game development surfaces, and web backgrounds. Implements Sharp-powered toroidal 50% coordinate wrapping (`shiftImageToroidal`), localized seam-cross edge boundary smoothing (`blendSeamCross`), 3x3 repetition grid preview rendering (`render3x3TiledPreview`), and ready-to-use CSS `background-repeat: repeat` styling snippets.
+
 ## 0.12.17
 
 ### Added
