@@ -136,6 +136,8 @@
 
 ## 🛠️ Complete Tools Reference
 
+* **`outpaint_image` (#459)**: Intelligent canvas expansion across directional borders (`top`, `bottom`, `left`, `right`) with Sharp-powered transparent compositing, automated SVG outpaint mask generation, and seamless background scenery continuation.
+* **`async_generate_image` (#460)**: Asynchronous generation pipeline with immediate `task_id` dispatch (`wait: false`), live progress updates (`queued` -> `processing X%` -> `completed`), and configurable exponential backoff polling guard.
 * **`translate_image_text` (#454)**: Translate in-image typography into Russian, English, or Chinese with grounding/OCR text detection, automated background inpainting mask generation to cleanly erase source text, and typography re-rendering with matching coordinates, color, and font metrics.
 * **`render_wireframe_asset` (#455)**: Transform rough wireframes, whiteboard sketches, or UI mockups into high-fidelity design assets using curated design system presets (`modern_saas`, `dark_glassmorphism`, `brutalist`, `apple_minimal`) and calibrated layout preservation fidelity.
 * **`generate_drawio_diagram` (#451)**: Generate editable Draw.io / diagrams.net (`.drawio` / `mxfile` XML) architectural schemes and workflows with clean standalone SVG vector preview. Supports 5 aesthetic themes (`light`, `dark`, `blueprint`, `corporate`, `nord`), 10 node shapes (rounded, rectangle, ellipse, diamond, cylinder, cloud, actor, hexagon, parallelogram, step), connector routing (orthogonal, straight, curved, dashed, bidirectional), and automatic topological layout (`horizontal`, `vertical`, `grid`, `tree`). Includes clipboard snippets for Figma and Penpot.

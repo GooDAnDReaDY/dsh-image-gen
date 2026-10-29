@@ -189,6 +189,8 @@ graph LR
 
 | Инструмент | Назначение | Ключевые параметры |
 |---|---|---|
+| **`outpaint_image`** | Интеллектуальное расширение холста в любых направлениях (`top`/`bottom`/`left`/`right`) с бесшовным синтезом продолжения сцены и генерацией масок (#459) | `image`, `prompt`, `directions` (`top`/`bottom`/`left`/`right`), `feather`, `provider`, `seed` |
+| **`async_generate_image`** | Асинхронный пайплайн генерации с мгновенной выдачей `task_id`, отслеживанием прогресса и экспоненциальным бэкоффом (#460) | `prompt`, `task_id`, `wait` (`true`/`false`), `timeout_seconds`, `image_size`, `provider` |
 | **`translate_image_text`** | Перевод и визуальная локализация текста на изображениях (RU, EN, ZH) с OCR, inpaint-очисткой фона и рендерингом типографики (#454) | `image`, `target_lang`, `source_lang`, `regions`, `font_color`, `font_family`, `inpaint_prompt` |
 | **`render_wireframe_asset`** | Синтез чистовых дизайн-ассетов из каркасов и UI-макетов с пресетами дизайн-систем и калиброванным fidelity (#455) | `wireframe_image`, `design_system` (`modern_saas`/`dark_glassmorphism`/`brutalist`/`apple_minimal`), `fidelity`, `style`, `prompt` |
 | **`generate_drawio_diagram`** | Генерация редактируемых XML-схем Draw.io / diagrams.net (`.drawio`) с чистым векторным SVG-превью (#451) | `title`, `nodes`, `edges`, `layout` (`horizontal`/`vertical`/`grid`/`tree`), `theme` (`light`/`dark`/`blueprint`/`corporate`/`nord`), `output_format` |

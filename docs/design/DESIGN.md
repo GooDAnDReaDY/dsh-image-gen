@@ -291,11 +291,11 @@
 ### 1. Toolsets Profiles & Lightweight Agent Context (#337)
 - **`toolsetProfile` Configuration**:
   - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `inspect_image_quality`) with schema size <= 5k chars, preserving agent context window.
-  - `all`: registers all 33 tools across all suites (#337, #451, #454, #455).
+  - `all`: registers all 35 tools across all suites (#337, #451, #454, #455, #459, #460).
   - `custom`: enables fine-grained selection per suite (`toolsets.creative`, `toolsets.studio`, etc.) or individual flat boolean toggles.
-- **Suite Architecture (33 tools total, #337, #451, #454, #455)**:
+- **Suite Architecture (35 tools total, #337, #451, #454, #455, #459, #460)**:
   - **Core Generation (4 tools)**: `generate_image`, `generate_image_pack`, `vary_image`, `remix_image`.
-  - **Processing & Enhancement (8 tools)**: `edit_image`, `upscale_image`, `remove_background`, `compare_images`, `blend_images`, `vectorize_image`, `smart_crop_image`, `assemble_image_grid`.
+  - **Processing & Enhancement (10 tools)**: `edit_image`, `upscale_image`, `remove_background`, `compare_images`, `blend_images`, `vectorize_image`, `smart_crop_image`, `assemble_image_grid`, `outpaint_image`, `async_generate_image`.
   - **Creative & Web Assets (6 tools)**: `generate_ui_asset`, `generate_theme_pair`, `generate_spritesheet`, `generate_pwa_icons`, `generate_color_palette`, `generate_seamless_pattern`.
   - **Studio & Continuity (9 tools)**: `set_style_anchor`, `render_wireframe_asset`, `generate_character_sheet`, `generate_style_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`.
   - **Vision & Localization (5 tools)**: `inspect_image`, `describe_image_style`, `replace_image_text`, `translate_image_text`, `beautify_diagram`, `generate_drawio_diagram`.
