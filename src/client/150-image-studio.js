@@ -1,333 +1,486 @@
-    // -------------------------------------------------------------- Fullscreen Image Studio (#158, #304)
-    function ImageStudioView(props) {
+    // -------------------------------------------------------------- Standalone Image Studio & Sidebar Pane (#158, #304, #452)
+
+    /**
+     * Dedicated DSH Right Sidebar Image Studio component (#452).
+     * Provides persistent prompt drafting, style auto-completion, parameter selectors,
+     * compact recent generations grid, and copy path / insert into chat buttons.
+     */
+    function SidebarImageStudio(props) {
       const { ctx } = props
       const t = resolveTranslator(props, ctx)
       const [viewMode, setViewMode] = react.useState('studio') // 'studio' | 'vault'
-      const [isFullscreen, setIsFullscreen] = react.useState(false)
-      const [layoutGrid, setLayoutGrid] = react.useState('1x1') // '1x1' | '2x2' | '1x4'
       const [prompt, setPrompt] = react.useState(() => {
         try { return window.localStorage.getItem('dsh_studio_prompt') || '' } catch (_) { return '' }
       })
-      const [stylePreset, setStylePreset] = react.useState('none')
-      const [aspectRatio, setAspectRatio] = react.useState('1:1')
+      const [negativePrompt, setNegativePrompt] = react.useState(() => {
+        try { return window.localStorage.getItem('dsh_studio_neg_prompt') || '' } catch (_) { return '' }
+      })
       const [provider, setProvider] = react.useState('fal')
+      const [model, setModel] = react.useState('fal-ai/flux-2/klein/9b')
+      const [aspectRatio, setAspectRatio] = react.useState('1:1')
+      const [transparentBg, setTransparentBg] = react.useState(false)
       const [seed, setSeed] = react.useState('')
-      const [activeImages, setActiveImages] = react.useState([])
-      const [recentStrip, setRecentStrip] = react.useState([])
-      const [status, setStatus] = react.useState('')
+      const [recentList, setRecentList] = react.useState([])
+      const [activeItem, setActiveItem] = react.useState(null)
+      const [statusMsg, setStatusMsg] = react.useState('')
+      const [isLoading, setIsLoading] = react.useState(false)
 
-      const presets = [
-        { id: 'none', label: 'Default' },
-        { id: 'photorealistic', label: 'Photo' },
-        { id: 'anime', label: 'Anime' },
-        { id: 'cyberpunk', label: 'Cyberpunk' },
-        { id: 'flat_vector', label: 'Vector' },
-        { id: '3d_render', label: '3D Render' },
+      const styleTags = [
+        'Photorealistic',
+        'Anime',
+        'Cyberpunk',
+        'Vector',
+        '3D Render',
+        'Minimalist',
+        'Pixel Art',
+        'Watercolor',
       ]
 
+      const exclusionTags = [
+        'blurry',
+        'low quality',
+        'watermark',
+        'deformed',
+      ]
+
+      const providerModels = {
+        fal: [
+          { id: 'fal-ai/flux-2/klein/9b', label: 'Flux 2 Klein 9B' },
+          { id: 'fal-ai/flux-pro/v1.1-ultra', label: 'Flux Pro Ultra' },
+          { id: 'fal-ai/stable-diffusion-v35-large', label: 'SD 3.5 Large' },
+        ],
+        openai: [
+          { id: 'gpt-image-1', label: 'GPT Image 1' },
+          { id: 'dall-e-3', label: 'DALL-E 3' },
+        ],
+        comfy: [
+          { id: 'sdxl-base-1.0', label: 'Comfy SDXL' },
+          { id: 'flux-schnell', label: 'Comfy Flux Schnell' },
+        ],
+        codex: [
+          { id: 'default', label: 'Codex Image' },
+        ],
+        grok: [
+          { id: 'grok-2-image', label: 'Grok 2 Image' },
+        ],
+      }
+
+      const showNotification = (msg) => {
+        setStatusMsg(msg)
+        setTimeout(() => setStatusMsg(''), 2500)
+      }
+
       const refreshRecent = () => {
+        setIsLoading(true)
         fetchJson('/dsh-image-gen/vault?limit=12')
           .then((r) => r.json())
           .then((data) => {
+            setIsLoading(false)
             if (data && data.ok && Array.isArray(data.items)) {
-              setRecentStrip(data.items)
-              if (activeImages.length === 0 && data.items.length > 0) {
-                setActiveImages([data.items[0]])
+              setRecentList(data.items)
+              if (!activeItem && data.items.length > 0) {
+                setActiveItem(data.items[0])
               }
             }
           })
-          .catch(() => {})
+          .catch(() => {
+            setIsLoading(false)
+          })
       }
 
       react.useEffect(() => {
         refreshRecent()
+        // Sync default configuration from server if available
+        fetchJson('/dsh-image-gen/config')
+          .then((r) => r.json())
+          .then((data) => {
+            if (data && data.ok && data.config) {
+              if (data.config.provider) setProvider(data.config.provider)
+              if (data.config.model) setModel(data.config.model)
+              if (data.config.defaultAspectRatio) setAspectRatio(data.config.defaultAspectRatio)
+            }
+          })
+          .catch(() => {})
       }, [])
 
       const updatePrompt = (val) => {
         setPrompt(val)
-        try { window.localStorage.setItem('dsh_studio_prompt', val) } catch (_) { /* ignore storage quota or private mode error */ }
+        try { window.localStorage.setItem('dsh_studio_prompt', val) } catch (_) {}
       }
 
-      const handleSelectFromVault = (item) => {
-        if (!item) return
-        setActiveImages([item])
-        setViewMode('studio')
-        if (item.prompt) updatePrompt(item.prompt)
-        if (item.provider) setProvider(item.provider)
-        if (item.seed !== undefined) setSeed(String(item.seed))
+      const updateNegativePrompt = (val) => {
+        setNegativePrompt(val)
+        try { window.localStorage.setItem('dsh_studio_neg_prompt', val) } catch (_) {}
       }
 
-      const handleCopySnippet = (format) => {
-        const first = activeImages[0]
-        if (!first) return
-        const url = first.url || first.thumbnailUrl
-        let snippet = ''
-        if (format === 'markdown') snippet = '![' + (first.prompt || 'Artwork') + '](' + url + ')'
-        if (format === 'html') snippet = '<img src="' + url + '" alt="' + (first.prompt || 'Artwork') + '" />'
-        if (typeof navigator !== 'undefined' && navigator.clipboard) {
-          navigator.clipboard.writeText(snippet)
-          setStatus(t('studio.copiedSnippet') || ('Copied ' + format.toUpperCase() + ' snippet!'))
-          setTimeout(() => setStatus(''), 2000)
+      const handleAddStyleTag = (tag) => {
+        if (!prompt) {
+          updatePrompt(tag)
+        } else if (!prompt.toLowerCase().includes(tag.toLowerCase())) {
+          updatePrompt(prompt + ', ' + tag)
         }
       }
 
-      const containerStyle = isFullscreen
-        ? { position: 'fixed', inset: 0, zIndex: 99999, background: 'var(--dsw-alias-bg-layer-1)', padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }
-        : { display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }
+      const handleAddExclusionTag = (tag) => {
+        if (!negativePrompt) {
+          updateNegativePrompt(tag)
+        } else if (!negativePrompt.toLowerCase().includes(tag.toLowerCase())) {
+          updateNegativePrompt(negativePrompt + ', ' + tag)
+        }
+      }
+
+      const handleProviderChange = (p) => {
+        setProvider(p)
+        const models = providerModels[p]
+        if (models && models.length > 0) {
+          setModel(models[0].id)
+        }
+      }
+
+      const handleSelectAsset = (item) => {
+        if (!item) return
+        setActiveItem(item)
+        if (item.prompt) updatePrompt(item.prompt)
+        if (item.provider) handleProviderChange(item.provider)
+        if (item.seed !== undefined) setSeed(String(item.seed))
+      }
+
+      const handleCopyPath = () => {
+        if (!activeItem) return
+        const filePath = activeItem.path || activeItem.url || activeItem.thumbnailUrl || ''
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+          navigator.clipboard.writeText(filePath)
+          showNotification(t('studio.copiedPath') || 'Copied file path to clipboard!')
+        }
+      }
+
+      const handleInsertToChat = () => {
+        if (!activeItem) return
+        const targetUrl = activeItem.url || activeItem.thumbnailUrl || activeItem.path || ''
+        const altText = activeItem.prompt ? activeItem.prompt.slice(0, 48) : 'Generated Image'
+        const snippet = '![' + altText + '](' + targetUrl + ')'
+
+        let inserted = false
+        // Try direct chat input insertion if available in DSH host
+        try {
+          const chatInput = document.querySelector('.dsh-chat-input textarea, [data-chat-input] textarea, #chat-input')
+          if (chatInput) {
+            const current = chatInput.value || ''
+            chatInput.value = current ? current + '\n' + snippet : snippet
+            if (typeof window !== 'undefined' && typeof window.Event === 'function') chatInput.dispatchEvent(new window.Event('input', { bubbles: true }))
+            inserted = true
+          }
+        } catch (_) {}
+
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+          navigator.clipboard.writeText(snippet)
+          showNotification(inserted ? (t('studio.insertedChat') || 'Inserted snippet into chat!') : (t('studio.copiedSnippet') || 'Copied Markdown snippet to clipboard!'))
+        }
+      }
+
+      const handleGenerateCommand = () => {
+        let cmd = '/image ' + (prompt || 'Artwork')
+        if (negativePrompt) cmd += ' --negative "' + negativePrompt + '"'
+        if (aspectRatio) cmd += ' --aspect ' + aspectRatio
+        if (provider) cmd += ' --provider ' + provider
+        if (model) cmd += ' --model ' + model
+        if (transparentBg) cmd += ' --nobg'
+        if (seed) cmd += ' --seed ' + seed
+
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+          navigator.clipboard.writeText(cmd)
+          showNotification(t('studio.copiedCommand') || 'Copied generation command to clipboard!')
+        }
+      }
 
       return react.createElement(
         'div',
-        { className: 'ig-studio-container', style: containerStyle },
+        { className: 'ig-sidebar-studio' },
+        // Header
         react.createElement(
           'div',
-          { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', borderBottom: '1px solid var(--dsw-alias-border-l2)', paddingBottom: '10px' } },
+          { className: 'ig-sidebar-header' },
           react.createElement(
             'div',
-            { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
-            react.createElement('span', { style: { fontWeight: '700', fontSize: '15px', color: 'var(--dsw-alias-label-primary)' } }, '🎨 ' + (t('studio.title') || 'Image Studio')),
+            { className: 'ig-sidebar-title' },
+            react.createElement('span', null, '🎨'),
+            react.createElement('span', null, t('studio.title') || 'Image Studio')
+          ),
+          react.createElement(
+            'div',
+            { style: { display: 'flex', gap: '4px' } },
             react.createElement(
               'button',
               {
                 type: 'button',
                 className: 'ig-tab-btn ' + (viewMode === 'studio' ? 'active' : ''),
+                style: { padding: '3px 8px', fontSize: '11px' },
                 onClick: () => setViewMode('studio'),
               },
-              t('studio.canvas') || 'Studio Canvas'
+              t('studio.canvas') || 'Studio'
             ),
             react.createElement(
               'button',
               {
                 type: 'button',
                 className: 'ig-tab-btn ' + (viewMode === 'vault' ? 'active' : ''),
+                style: { padding: '3px 8px', fontSize: '11px' },
                 onClick: () => setViewMode('vault'),
               },
-              '🗃️ ' + (t('studio.vault') || 'Asset Vault')
-            )
-          ),
-          react.createElement(
-            'div',
-            { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
-            viewMode === 'studio' &&
-              react.createElement(
-                'div',
-                { style: { display: 'flex', gap: '4px' } },
-                ['1x1', '2x2', '1x4'].map((grid) =>
-                  react.createElement(
-                    'button',
-                    {
-                      key: grid,
-                      type: 'button',
-                      className: 'ig-tab-btn ' + (layoutGrid === grid ? 'active' : ''),
-                      onClick: () => setLayoutGrid(grid),
-                      title: 'Grid layout: ' + grid,
-                    },
-                    grid
-                  )
-                )
-              ),
+              '🗃️ ' + (t('studio.vault') || 'Vault')
+            ),
             react.createElement(
               'button',
               {
                 type: 'button',
                 className: 'ig-tab-btn',
-                onClick: () => setIsFullscreen(!isFullscreen),
-                style: { border: '1px solid var(--dsw-alias-border-l2)' },
+                style: { padding: '3px 6px', fontSize: '11px' },
+                title: 'Refresh',
+                onClick: refreshRecent,
               },
-              isFullscreen ? ('✕ ' + (t('studio.exitFullscreen') || 'Exit Fullscreen')) : ('⛶ ' + (t('studio.fullscreen') || 'Fullscreen'))
+              isLoading ? '⌛' : '🔄'
             )
           )
         ),
+
         viewMode === 'vault'
-          ? react.createElement(AssetVaultView, { ctx, t, onSelectAsset: handleSelectFromVault })
+          ? react.createElement(AssetVaultView, { ctx, t, onSelectAsset: (item) => { handleSelectAsset(item); setViewMode('studio') } })
           : react.createElement(
               react.Fragment,
               null,
+              // Prompt Input & Autocomplete Tags
               react.createElement(
                 'div',
-                { className: 'ig-studio-layout' },
+                null,
+                react.createElement('label', { style: { fontSize: '11px', fontWeight: '600', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.prompt') || 'Prompt:'),
+                react.createElement('textarea', {
+                  className: 'ig-input',
+                  rows: 3,
+                  style: { width: '100%', resize: 'vertical', borderRadius: '6px', padding: '6px 8px', fontSize: '12px' },
+                  placeholder: t('studio.promptPlaceholder') || 'Describe your vision...',
+                  value: prompt,
+                  onChange: (e) => updatePrompt(e.target.value),
+                }),
                 react.createElement(
                   'div',
-                  { className: 'ig-studio-sidebar' },
-                  react.createElement('span', { style: { fontWeight: '600', fontSize: '13px', color: 'var(--dsw-alias-label-primary)' } }, t('studio.parameters') || 'Generation Parameters'),
-                  react.createElement(
-                    'div',
-                    null,
-                    react.createElement('label', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.prompt') || 'Prompt:'),
-                    react.createElement('textarea', {
-                      className: 'ig-input',
-                      rows: 4,
-                      style: { width: '100%', resize: 'vertical', borderRadius: '6px', padding: '8px', fontSize: '12px' },
-                      placeholder: t('studio.promptPlaceholder') || 'Describe your vision...',
-                      value: prompt,
-                      onChange: (e) => updatePrompt(e.target.value),
-                    })
-                  ),
-                  react.createElement(
-                    'div',
-                    null,
-                    react.createElement('label', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.stylePreset') || 'Style Preset:'),
+                  { className: 'ig-chip-group' },
+                  styleTags.map((tag) =>
                     react.createElement(
-                      'div',
-                      { style: { display: 'flex', flexWrap: 'wrap', gap: '4px' } },
-                      presets.map((p) =>
-                        react.createElement(
-                          'button',
-                          {
-                            key: p.id,
-                            type: 'button',
-                            className: 'ig-tab-btn ' + (stylePreset === p.id ? 'active' : ''),
-                            style: { fontSize: '11px', padding: '3px 8px' },
-                            onClick: () => setStylePreset(p.id),
-                          },
-                          p.label
-                        )
-                      )
+                      'span',
+                      {
+                        key: tag,
+                        className: 'ig-chip ' + (prompt.toLowerCase().includes(tag.toLowerCase()) ? 'active' : ''),
+                        onClick: () => handleAddStyleTag(tag),
+                      },
+                      tag
                     )
-                  ),
-                  react.createElement(
-                    'div',
-                    { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' } },
+                  )
+                )
+              ),
+
+              // Negative Prompt Input & Exclusion Tags
+              react.createElement(
+                'div',
+                null,
+                react.createElement('label', { style: { fontSize: '11px', fontWeight: '600', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.negativePrompt') || 'Negative Prompt:'),
+                react.createElement('input', {
+                  type: 'text',
+                  className: 'ig-input',
+                  style: { width: '100%', borderRadius: '6px', padding: '6px 8px', fontSize: '12px' },
+                  placeholder: t('studio.negativePlaceholder') || 'Elements to avoid...',
+                  value: negativePrompt,
+                  onChange: (e) => updateNegativePrompt(e.target.value),
+                }),
+                react.createElement(
+                  'div',
+                  { className: 'ig-chip-group' },
+                  exclusionTags.map((tag) =>
                     react.createElement(
-                      'div',
-                      null,
-                      react.createElement('label', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.aspectRatio') || 'Aspect Ratio:'),
-                      react.createElement(
-                        'select',
-                        {
-                          className: 'ig-select',
-                          style: { width: '100%', padding: '6px', fontSize: '12px' },
-                          value: aspectRatio,
-                          onChange: (e) => setAspectRatio(e.target.value),
-                        },
-                        react.createElement('option', { value: '1:1' }, '1:1 Square'),
-                        react.createElement('option', { value: '16:9' }, '16:9 Landscape'),
-                        react.createElement('option', { value: '9:16' }, '9:16 Portrait'),
-                        react.createElement('option', { value: '4:3' }, '4:3 Standard'),
-                        react.createElement('option', { value: '21:9' }, '21:9 Ultrawide')
-                      )
-                    ),
-                    react.createElement(
-                      'div',
-                      null,
-                      react.createElement('label', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.provider') || 'Provider:'),
-                      react.createElement(
-                        'select',
-                        {
-                          className: 'ig-select',
-                          style: { width: '100%', padding: '6px', fontSize: '12px' },
-                          value: provider,
-                          onChange: (e) => setProvider(e.target.value),
-                        },
-                        react.createElement('option', { value: 'fal' }, 'FAL.ai'),
-                        react.createElement('option', { value: 'openai' }, 'OpenAI'),
-                        react.createElement('option', { value: 'local' }, 'Local (ComfyUI)')
-                      )
+                      'span',
+                      {
+                        key: tag,
+                        className: 'ig-chip ' + (negativePrompt.toLowerCase().includes(tag.toLowerCase()) ? 'active' : ''),
+                        onClick: () => handleAddExclusionTag(tag),
+                      },
+                      tag
                     )
-                  ),
+                  )
+                )
+              ),
+
+              // Provider & Model Selectors
+              react.createElement(
+                'div',
+                { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' } },
+                react.createElement(
+                  'div',
+                  null,
+                  react.createElement('label', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.provider') || 'Provider:'),
                   react.createElement(
-                    'div',
-                    null,
-                    react.createElement('label', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.seed') || 'Seed (optional):'),
-                    react.createElement(
-                      'div',
-                      { style: { display: 'flex', gap: '6px' } },
-                      react.createElement('input', {
-                        type: 'number',
-                        className: 'ig-input',
-                        style: { flex: 1, padding: '6px', fontSize: '12px' },
-                        placeholder: t('studio.random') || 'Random',
-                        value: seed,
-                        onChange: (e) => setSeed(e.target.value),
-                      }),
-                      react.createElement(
-                        'button',
-                        {
-                          type: 'button',
-                          className: 'ig-tab-btn',
-                          onClick: () => setSeed(String(Math.floor(Math.random() * 2147483647))),
-                          title: t('studio.randomizeSeed') || 'Randomize seed',
-                        },
-                        '🎲'
-                      )
+                    'select',
+                    {
+                      className: 'ig-select',
+                      style: { width: '100%', padding: '5px', fontSize: '11px' },
+                      value: provider,
+                      onChange: (e) => handleProviderChange(e.target.value),
+                    },
+                    react.createElement('option', { value: 'fal' }, 'FAL.ai'),
+                    react.createElement('option', { value: 'openai' }, 'OpenAI'),
+                    react.createElement('option', { value: 'comfy' }, 'ComfyUI'),
+                    react.createElement('option', { value: 'codex' }, 'Codex'),
+                    react.createElement('option', { value: 'grok' }, 'Grok')
+                  )
+                ),
+                react.createElement(
+                  'div',
+                  null,
+                  react.createElement('label', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.model') || 'Model:'),
+                  react.createElement(
+                    'select',
+                    {
+                      className: 'ig-select',
+                      style: { width: '100%', padding: '5px', fontSize: '11px' },
+                      value: model,
+                      onChange: (e) => setModel(e.target.value),
+                    },
+                    (providerModels[provider] || [{ id: model, label: model }]).map((m) =>
+                      react.createElement('option', { key: m.id, value: m.id }, m.label)
                     )
+                  )
+                )
+              ),
+
+              // Aspect Ratio & Transparent Background
+              react.createElement(
+                'div',
+                { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'center' } },
+                react.createElement(
+                  'div',
+                  null,
+                  react.createElement('label', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', display: 'block', marginBottom: '4px' } }, t('studio.aspectRatio') || 'Aspect Ratio:'),
+                  react.createElement(
+                    'select',
+                    {
+                      className: 'ig-select',
+                      style: { width: '100%', padding: '5px', fontSize: '11px' },
+                      value: aspectRatio,
+                      onChange: (e) => setAspectRatio(e.target.value),
+                    },
+                    react.createElement('option', { value: '1:1' }, '1:1 Square'),
+                    react.createElement('option', { value: '16:9' }, '16:9 Landscape'),
+                    react.createElement('option', { value: '9:16' }, '9:16 Portrait'),
+                    react.createElement('option', { value: '4:3' }, '4:3 Standard'),
+                    react.createElement('option', { value: '3:4' }, '3:4 Portrait'),
+                    react.createElement('option', { value: '21:9' }, '21:9 Ultrawide')
+                  )
+                ),
+                react.createElement(
+                  'label',
+                  { style: { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--dsw-alias-label-primary)', cursor: 'pointer', marginTop: '16px' } },
+                  react.createElement('input', {
+                    type: 'checkbox',
+                    checked: transparentBg,
+                    onChange: (e) => setTransparentBg(e.target.checked),
+                  }),
+                  t('studio.transparentBg') || 'Transparent background'
+                )
+              ),
+
+              // Generate Command Button
+              react.createElement(
+                'button',
+                {
+                  type: 'button',
+                  className: 'ig-save-btn',
+                  style: { padding: '8px', fontSize: '12px', marginTop: '2px' },
+                  onClick: handleGenerateCommand,
+                },
+                '🎨 ' + (t('studio.generate') || 'Generate in Chat')
+              ),
+
+              statusMsg && react.createElement(
+                'div',
+                { style: { fontSize: '11px', color: 'var(--dsw-alias-state-brand-primary)', textAlign: 'center', fontWeight: '500' } },
+                statusMsg
+              ),
+
+              // Active Item Preview Card & Action Bar
+              activeItem && react.createElement(
+                'div',
+                { className: 'ig-sidebar-active-card' },
+                react.createElement('img', {
+                  src: activeItem.url || activeItem.thumbnailUrl,
+                  className: 'ig-sidebar-preview-img',
+                  alt: activeItem.prompt || 'Artwork',
+                }),
+                react.createElement(
+                  'div',
+                  { className: 'ig-sidebar-actions' },
+                  react.createElement(
+                    'button',
+                    {
+                      type: 'button',
+                      className: 'ig-tab-btn',
+                      style: { flex: 1, padding: '4px 6px', fontSize: '11px' },
+                      onClick: handleCopyPath,
+                    },
+                    '📋 ' + (t('studio.copyPath') || 'Copy Path')
                   ),
                   react.createElement(
                     'button',
                     {
                       type: 'button',
-                      className: 'ig-save-btn',
-                      style: { marginTop: '8px', padding: '10px' },
-                      onClick: () => {
-                        const cmd = '/image ' + (prompt || 'Artwork') + (stylePreset !== 'none' ? ' --style ' + stylePreset : '') + ' --aspect ' + aspectRatio + ' --provider ' + provider + (seed ? ' --seed ' + seed : '')
-                        if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                          navigator.clipboard.writeText(cmd)
-                          setStatus(t('studio.copiedCommand') || 'Copied generation command to clipboard!')
-                          setTimeout(() => setStatus(''), 2500)
-                        }
-                      },
+                      className: 'ig-tab-btn',
+                      style: { flex: 1, padding: '4px 6px', fontSize: '11px' },
+                      onClick: handleInsertToChat,
                     },
-                    '🎨 ' + (t('studio.generate') || 'Generate in Chat')
+                    '💬 ' + (t('studio.insertChat') || 'Insert to Chat')
                   ),
-                  status && react.createElement('div', { style: { fontSize: '11px', color: 'var(--dsw-alias-state-brand-primary)', textAlign: 'center' } }, status)
-                ),
-                react.createElement(
-                  'div',
-                  { className: 'ig-studio-canvas' },
-                  activeImages.length === 0
-                    ? react.createElement('div', { style: { color: 'var(--dsw-alias-label-secondary)', fontSize: '13px' } }, t('studio.emptyCanvas') || 'Select an image from the recent strip below or click Generate.')
-                    : react.createElement(
-                        'div',
-                        {
-                          style: {
-                            display: 'grid',
-                            gridTemplateColumns: layoutGrid === '2x2' ? 'repeat(2, 1fr)' : layoutGrid === '1x4' ? 'repeat(4, 1fr)' : '1fr',
-                            gap: '12px',
-                            width: '100%',
-                            maxHeight: '440px',
-                            overflowY: 'auto',
-                          },
-                        },
-                        (layoutGrid === '1x1' ? activeImages.slice(0, 1) : activeImages.slice(0, layoutGrid === '2x2' ? 4 : 4)).map((img, i) =>
-                          react.createElement('img', {
-                            key: img.id || i,
-                            src: img.url || img.thumbnailUrl,
-                            style: { width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', borderRadius: '8px', background: 'var(--dsw-alias-bg-layer-3)' },
-                          })
-                        )
-                      ),
-                  activeImages.length > 0 &&
-                    react.createElement(
-                      'div',
-                      { style: { display: 'flex', gap: '8px', marginTop: '10px' } },
-                      react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleCopySnippet('markdown') }, t('studio.copyMarkdown') || 'Copy Markdown'),
-                      react.createElement('button', { type: 'button', className: 'ig-tab-btn', onClick: () => handleCopySnippet('html') }, t('studio.copyHtml') || 'Copy HTML'),
-                      react.createElement(
-                        'a',
-                        { href: activeImages[0].url || activeImages[0].thumbnailUrl, download: 'studio-image.png', className: 'ig-tab-btn', style: { textDecoration: 'none' } },
-                        '⬇ ' + (t('studio.download') || 'Download')
-                      )
-                    )
-                )
-              ),
-              react.createElement(
-                'div',
-                { style: { display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' } },
-                react.createElement('span', { style: { fontSize: '12px', fontWeight: '600', color: 'var(--dsw-alias-label-secondary)' } }, (t('studio.recent') || 'Recent Generations') + ':'),
-                react.createElement(
-                  'div',
-                  { className: 'ig-studio-strip', style: { display: 'flex', gap: '8px', overflowX: 'auto', padding: '4px 0' } },
-                  recentStrip.map((item) =>
-                    react.createElement('img', {
-                      key: item.id || item.attachmentId,
-                      src: item.thumbnailUrl || item.url,
-                      className: 'ig-studio-strip-thumb',
-                      style: { width: '64px', height: '64px', borderRadius: '6px', objectFit: 'cover', cursor: 'pointer', border: '1px solid var(--dsw-alias-border-l2)', flexShrink: 0 },
-                      title: item.prompt || 'Artwork',
-                      onClick: () => handleSelectFromVault(item),
-                    })
+                  react.createElement(
+                    'a',
+                    {
+                      href: activeItem.url || activeItem.thumbnailUrl,
+                      download: (activeItem.id || 'studio-asset') + '.png',
+                      className: 'ig-tab-btn',
+                      style: { textDecoration: 'none', padding: '4px 8px', fontSize: '11px', textAlign: 'center' },
+                    },
+                    '⬇'
                   )
                 )
+              ),
+
+              // Recent Generations Compact Grid
+              react.createElement(
+                'div',
+                { style: { display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' } },
+                react.createElement(
+                  'div',
+                  { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+                  react.createElement('span', { style: { fontSize: '11px', fontWeight: '600', color: 'var(--dsw-alias-label-secondary)' } }, t('studio.recent') || 'Recent Generations'),
+                  react.createElement('span', { style: { fontSize: '10px', color: 'var(--dsw-alias-label-secondary)' } }, String(recentList.length) + ' items')
+                ),
+                recentList.length === 0
+                  ? react.createElement('div', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-secondary)', textAlign: 'center', padding: '12px' } }, t('studio.noRecent') || 'No recent generations found in vault.')
+                  : react.createElement(
+                      'div',
+                      { className: 'ig-sidebar-grid' },
+                      recentList.map((item) =>
+                        react.createElement('img', {
+                          key: item.id || item.attachmentId,
+                          src: item.thumbnailUrl || item.url,
+                          className: 'ig-sidebar-thumb ' + (activeItem && activeItem.id === item.id ? 'selected' : ''),
+                          title: item.prompt || 'Artwork',
+                          onClick: () => handleSelectAsset(item),
+                        })
+                      )
+                    )
               )
             )
       )
     }
+
+    // Fullscreen / Modal Studio Canvas View
+    function ImageStudioView(props) {
+      return react.createElement(SidebarImageStudio, props)
+    }
+

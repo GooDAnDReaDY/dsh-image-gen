@@ -33,6 +33,8 @@
   - `export_asset_pack` — генерация полного набора веб/PWA ассетов (`favicon.svg`, `icon-192.svg`, `icon-512.svg`, `manifest.webmanifest`, `og-card.svg`, `catalog.json`).
   - `Variations & Remix Workbench` — интерактивный верстак вариаций прямо в карточке генерации (`FalImageCard`) и галерее с ползунком креативности (0.05–0.95) и быстрыми пресетами.
   - `assemble_image_grid` — компоновка 2–4 изображений в единую компактную сетку/сравнение (side-by-side, 2x2, vertical) на чистом SVG.
+  - `Sidebar Image Studio Workspace Panel` (#452) — нативная боковая панель генерации DSH в правом сайдбаре (`sidebarRightTabs`, `sidebar.right.pane.tab` с ID `dsh-image-studio` и `betterSidebar`) с автодополнением стилей, негативным промптом, фильтрацией моделей, селектором прозрачности, компактной сеткой недавних изображений и кнопками копирования пути / вставки в чат.
+  - `Session-Scoped Asset Cataloging & Semantic Naming` (#453) — организация сгенерированных ассетов по сессионным папкам `<sessionCwd>/assets/images/<sessionSlug>/` (`organizeBySession: true`) и семантическое именование файлов на базе ключевых сущностей промпта (`buildSemanticSlug`).
   - `Sidebar Gallery & History Drawer` — нативный правый сайдбар DSH (`sidebarRightTabs`, `sidebar.right.pane.tab`, `betterSidebar`) и кнопка вызова в шапке чата (`conversation.session.header.utilities`).
   - `Interactive Connection Diagnostics` — проверка статуса и сетевой задержки провайдеров в GUI (`/dsh-image-gen/diagnostics/test`).
   - `Prompt Polisher & Style Presets` — каталог 10 пресетов стилей, авто-обогащение промптов и цветовые ограничения (`palette_colors`).

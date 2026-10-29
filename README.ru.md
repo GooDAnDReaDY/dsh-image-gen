@@ -34,6 +34,10 @@
 </div>
 
 ---
+## 🚀 Обновления v0.12.12: Панель Image Studio в правом сайдбаре и сессионная каталогизация (#452, #453)
+- **Нативная панель Image Studio в правом сайдбаре (#452)**: Постоянный рабочий слот `sidebarRightTabs` и `sidebar.right.pane.tab` с идентификатором `dsh-image-studio`. Включает автодополнение стилей, чипы исключений для негативного промпта, селекторы провайдера, модели, aspect ratio, чекбокс прозрачного фона, компактную сетку недавних генераций и быстрые действия: копирование пути к файлу и вставка Markdown-ссылки в чат.
+- **Сессионная каталогизация и семантическое именование (#453)**: Настройка `organizeBySession: boolean` (по умолчанию `true`) сохраняет ассеты в `<sessionCwd>/assets/images/<sessionSlug>/`. Генератор `buildSemanticSlug` формирует чистые человекочитаемые имена файлов на основе сущностей промпта (например, `futuristic-hero-banner-cyberpunk-v1.png`) с полной обратной совместимостью в Asset Vault.
+
 ## 🚀 Обновления v0.12.9: Полная совместимость с DSH Desktop Electron (#478)
 - **Авторизация кастомной схемы DSH Desktop**: Расширены функции `isTrustedLocalRequest`, `getRouteRejectionStatus` и `getRouteWriteRejectionStatus` для доверенной обработки схемы `dsh-app://app/` при loopback-соединениях.
 - **Разблокировка эндпоинтов и превью**: Устранена ошибка HTTP 403 Forbidden в DSH Desktop для маршрутов `/dsh-image-gen/image`, `/dsh-image-gen/approval`, `/dsh-image-gen/vault` и `/dsh-image-gen/config`, восстанавливая показ картинок, работу интерактивного Approval Gate и Studio Vault в десктопном клиенте.
