@@ -247,7 +247,7 @@
 - **Direct Dispatch**: Automatically renders a black-and-white binary PNG mask data URL and assembles `edit_image` instructions with targeted prompt guidance.
 
 ### 5. Style Matrix Explorer & Blind Compare (#286)
-- **`generate_style_matrix` Tool (`lib/tools/style-matrix.js`, `lib/style-matrix-helpers.js`, `src/client/106-style-matrix-view.js`)**: Concurrently generates a 2×2 grid benchmarking 4 distinct artistic styles (e.g. editorial photograph, flat vector, 3D clay, cyberpunk) for a single concept.
+- **`generate_style_matrix`, `generate_image_matrix` Tool (`lib/tools/style-matrix.js`, `lib/style-matrix-helpers.js`, `src/client/106-style-matrix-view.js`)**: Concurrently generates a 2×2 grid benchmarking 4 distinct artistic styles (e.g. editorial photograph, flat vector, 3D clay, cyberpunk) for a single concept.
 - **Blind A/B Compare**: Optional `blind_mode` masks style labels as "Option A..D" to enable unbiased visual evaluation before revealing preset names.
 - **Interactive Selection**: Interactive "⭐ Use Style" action allows users to adopt the chosen style preset for all subsequent session generations in one click.
 
@@ -291,13 +291,13 @@
 ### 1. Toolsets Profiles & Lightweight Agent Context (#337)
 - **`toolsetProfile` Configuration**:
   - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `inspect_image_quality`) with schema size <= 5k chars, preserving agent context window.
-  - `all`: registers all 35 tools across all suites (#337, #451, #454, #455, #459, #460).
+  - `all`: registers all 36 tools across all suites (#337, #451, #454, #455, #459, #460, #461, #462).
   - `custom`: enables fine-grained selection per suite (`toolsets.creative`, `toolsets.studio`, etc.) or individual flat boolean toggles.
-- **Suite Architecture (35 tools total, #337, #451, #454, #455, #459, #460)**:
+- **Suite Architecture (36 tools total, #337, #451, #454, #455, #459, #460, #461, #462)**:
   - **Core Generation (4 tools)**: `generate_image`, `generate_image_pack`, `vary_image`, `remix_image`.
   - **Processing & Enhancement (10 tools)**: `edit_image`, `upscale_image`, `remove_background`, `compare_images`, `blend_images`, `vectorize_image`, `smart_crop_image`, `assemble_image_grid`, `outpaint_image`, `async_generate_image`.
   - **Creative & Web Assets (6 tools)**: `generate_ui_asset`, `generate_theme_pair`, `generate_spritesheet`, `generate_pwa_icons`, `generate_color_palette`, `generate_seamless_pattern`.
-  - **Studio & Continuity (9 tools)**: `set_style_anchor`, `render_wireframe_asset`, `generate_character_sheet`, `generate_style_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`.
+  - **Studio & Continuity (9 tools)**: `set_style_anchor`, `render_wireframe_asset`, `generate_character_sheet`, `generate_style_matrix`, `generate_image_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`.
   - **Vision & Localization (5 tools)**: `inspect_image`, `describe_image_style`, `replace_image_text`, `translate_image_text`, `beautify_diagram`, `generate_drawio_diagram`.
 
 ### 2. Generation Vault & Media Archive (#339)
@@ -413,3 +413,12 @@
   - Automatic natural-language negative prompt fallback adapter for non-negative models (DALL-E, FLUX, Gemini).
   - Full sidecar, PNG metadata, and history persistence.
 
+
+
+### 5. Smart Prompt-to-Model Semantic Router (#462)
+- **Heuristic & Intent Classification (`classifyPromptIntent`)**:
+  - Classifies user prompt into domain intents: `typography` (text/lettering/signs), `photorealism` (portrait, bokeh, 35mm), `vector_icon` (flat svg icons, pictograms), `diagram_schematic` (blueprints, flowcharts), `fast_draft` (rough sketches), or `general_art`.
+  - Analyzes quoted string tokens and intent-specific keyword weights with confidence scoring.
+- **Provider Recommendation Engine (`resolveOptimalProvider`)**:
+  - Dynamically routes prompts to optimal providers (e.g. FLUX/Ideogram for typography, Recraft for vector iconography, FLUX Pro for photorealism, local/Schnell for fast drafts).
+  - Supports `model: "auto"` and `provider: "auto"` with full diagnostic rationale logged in tool responses.
