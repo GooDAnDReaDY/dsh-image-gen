@@ -136,6 +136,7 @@
 
 ## 🛠️ Complete Tools Reference
 
+* **`generate_seamless_texture` (#468)**: Production-ready seamless repeating textures and materials for 3D surfaces, games, and web patterns with toroidal wrapping and 3×3 inspection grid.
 * **`reverse_prompt_and_recreate` (#465)**: Deconstruct visual aesthetics, lighting, optics, medium, and palette mood of any image into a structured reverse-engineered prompt, with optional instant style recreation.
 * **`restore_face_and_details` (#467)**: Localized face, eyes, and high-frequency detail restoration (Hi-Res detail fix) with automatic zone targeting and seamless feathered edge alpha blending.
 * **`generate_with_control` (#463)**: Structural conditioning and geometry-guided generation using reference input controls (`mode: "canny" | "depth" | "pose" | "sketch"`). Provides edge feature extraction, depth gradients, and pose bounding box normalization.
