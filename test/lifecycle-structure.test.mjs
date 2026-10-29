@@ -40,6 +40,7 @@ const EXPECTED_TOOLS = [
   'generate_character_sheet',
   'replace_image_text',
   'beautify_diagram',
+  'generate_drawio_diagram',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -81,6 +82,7 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerCharacterSheetTools',
     'registerVisionOcrTools',
     'registerDiagramTools',
+    'registerDrawioDiagramTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }

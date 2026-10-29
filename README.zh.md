@@ -128,6 +128,7 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
 ## 🛠️ 新增核心功能 (v0.10.32)
 
+* **`generate_drawio_diagram` (#451)**: 生成可在 Draw.io / diagrams.net 中完全编辑的架构图和流程图（`.drawio` / `mxfile` XML），并附带清晰的矢量 SVG 预览。支持 5 种精选主题风格（`light`、`dark`、`blueprint`、`corporate`、`nord`）、10 种节点形状（圆角矩形、椭圆、菱形、圆柱/数据库、云朵、参与者/用户等）、连接线样式（正交、直线、曲线、虚线、双向）以及自动拓扑布局算法（`horizontal`、`vertical`、`grid`、`tree`）。集成 Figma 与 Penpot 剪贴板代码片段导出。
 * **`generate_image`**: 图像生成工具，支持角色与主体视觉一致性绑定 (`reference_image`, `reference_strength`)、多轮长会话上下文压缩守卫 (#456)、 支持多服务商热插拔、确定性 Seed 复现、多种长宽比、精选风格预设（`photorealistic`、`anime`、`isometric_3d`、`pixel_art`、`cinematic`、`minimalist_vector`、`claymation`、`cyberpunk`、`analog_film`、`oil_painting`）、反向提示词智能过滤与自然语言回退（DALL-E、FLUX），以及细粒度推理参数调优（`steps`: 1–150、`guidance_scale`: 1–30、`sampler_name`: `euler`、`dpmpp_2m` 等）。
 * **`set_style_anchor` (#283)**: 会话级角色与风格参考锚点，在连续对话中锁定主体、配色、光照与渲染媒介。
 * **`generate_ui_asset` (#284)**: 布局感知与留白控制 UI 资产生成器，支持精准留白（`isolated`、`centered`、`left_empty`、`right_empty`、`top_empty`、`bottom_empty`）与自动透明通道。

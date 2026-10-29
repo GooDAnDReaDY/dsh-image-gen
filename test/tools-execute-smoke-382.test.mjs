@@ -116,9 +116,9 @@ function createMockEnvironment() {
   return { ctx, deps, registeredTools, mockFetch, controller }
 }
 
-test('tools-execute-smoke-382: all 30 tools have functional execute smoke checks', async () => {
+test('tools-execute-smoke-382: all 31 tools have functional execute smoke checks', async () => {
   const env = createMockEnvironment()
-  assert.equal(env.registeredTools.size, 30, 'Profile all must register all 30 tools')
+  assert.equal(env.registeredTools.size, 31, 'Profile all must register all 31 tools')
 
   const originalFetch = globalThis.fetch
   globalThis.fetch = env.mockFetch
@@ -155,6 +155,7 @@ test('tools-execute-smoke-382: all 30 tools have functional execute smoke checks
       generate_theme_pair: { prompt: 'smoke dashboard', style: 'minimalist' },
       generate_character_sheet: { prompt: 'smoke hero', layout: 'turnaround' },
       beautify_diagram: { diagram: 'graph TD; A-->B', style: 'isometric_3d' },
+      generate_drawio_diagram: { title: 'Smoke Drawio', nodes: [{ id: 'n1', label: 'Node 1' }] },
       extract_design_tokens: {},
       image_to_css_gradient: {},
       check_image_contrast: {},
@@ -177,7 +178,7 @@ test('tools-execute-smoke-382: all 30 tools have functional execute smoke checks
       executedNames.push(name)
     }
 
-    assert.equal(executedNames.length, 30, 'All 30 tools must execute successfully')
+    assert.equal(executedNames.length, 31, 'All 31 tools must execute successfully')
   } finally {
     await rm(tempDir, { recursive: true, force: true })
     globalThis.fetch = originalFetch
@@ -204,6 +205,15 @@ test('tools-execute-smoke-382: 4 runtime regression cases (TypeError protection)
       async () => { await charTool.execute({ prompt: '' }, {}) },
       /Character description prompt is required/i,
       'character-sheet must reject empty prompt with clean validation error',
+    )
+
+    // 2.5 Drawio called with empty nodes
+    const drawioTool = env.registeredTools.get('generate_drawio_diagram')
+    assert.ok(drawioTool)
+    await assert.rejects(
+      async () => { await drawioTool.execute({ nodes: [] }, {}) },
+      /At least one node is required/i,
+      'generate_drawio_diagram must reject empty nodes with clean validation error',
     )
 
     // 3. Beautify-diagram called with empty diagram

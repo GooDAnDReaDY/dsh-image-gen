@@ -52,9 +52,9 @@ test('toolsets profile: default minimal mode registers <= 3 core tools with sche
   )
 })
 
-test('toolsets profile: "all" profile registers all 30 tools (#337)', () => {
+test('toolsets profile: "all" profile registers all 31 tools (#337, #451)', () => {
   const tools = getRegisteredTools({ toolsetProfile: 'all' })
-  assert.equal(tools.length, 30, '"all" profile must register all 30 tools')
+  assert.equal(tools.length, 31, '"all" profile must register all 31 tools')
 })
 
 test('toolsets profile: custom mode with nested toolsets toggles individual categories (#337)', () => {
@@ -62,8 +62,8 @@ test('toolsets profile: custom mode with nested toolsets toggles individual cate
     toolsetProfile: 'custom',
     toolsets: { design: true },
   })
-  // 3 core + 6 design (set_style_anchor, generate_ui_asset, generate_style_matrix, generate_theme_pair, generate_character_sheet, beautify_diagram) = 9
-  assert.equal(designOnly.length, 9)
+  // 3 core + 7 design (set_style_anchor, generate_ui_asset, generate_style_matrix, generate_theme_pair, generate_character_sheet, beautify_diagram, generate_drawio_diagram) = 10
+  assert.equal(designOnly.length, 10)
   const names = designOnly.map((t) => t.name)
   assert.ok(names.includes('set_style_anchor'))
   assert.ok(names.includes('generate_ui_asset'))
@@ -71,6 +71,7 @@ test('toolsets profile: custom mode with nested toolsets toggles individual cate
   assert.ok(names.includes('generate_theme_pair'))
   assert.ok(names.includes('generate_character_sheet'))
   assert.ok(names.includes('beautify_diagram'))
+  assert.ok(names.includes('generate_drawio_diagram'))
   assert.ok(!names.includes('sketch_to_image'))
   assert.ok(!names.includes('remove_background'))
 })
@@ -88,7 +89,7 @@ test('toolsets profile: custom mode with flat boolean keys (#337)', () => {
   assert.ok(!names.includes('generate_spritesheet'))
 })
 
-test('master switch: all 30 tools reject with disabled error when cfg.enabled is false (#356)', async () => {
+test('master switch: all 31 tools reject with disabled error when cfg.enabled is false (#356)', async () => {
   let liveConfig = {
     enabled: false,
     toolsetProfile: 'all',
@@ -111,7 +112,7 @@ test('master switch: all 30 tools reject with disabled error when cfg.enabled is
     resolveApiKey: () => {},
   })
 
-  assert.equal(tools.length, 30, 'Profile all must register 30 tools')
+  assert.equal(tools.length, 31, 'Profile all must register 31 tools')
 
   // When enabled is false, executing any tool must reject with disabled message
   for (const t of tools) {
@@ -212,16 +213,16 @@ test('toolsets profile: reactive update on profile change (minimal -> all -> cus
   // 2. Switch to "all" without restart
   liveCfg = { toolsetProfile: 'all' }
   controller.sync()
-  assert.equal(registeredTools.size, 30, 'Profile all must register exactly 30 tools without restart')
+  assert.equal(registeredTools.size, 31, 'Profile all must register exactly 31 tools without restart')
   // Verify no duplicates
   const namesAll = Array.from(registeredTools.keys())
   const uniqueNamesAll = new Set(namesAll)
-  assert.equal(uniqueNamesAll.size, 30, 'Must have 30 unique tool names')
+  assert.equal(uniqueNamesAll.size, 31, 'Must have 31 unique tool names')
 
   // 3. Switch to custom with design toolset only
   liveCfg = { toolsetProfile: 'custom', toolsets: { design: true } }
   controller.sync()
-  assert.equal(registeredTools.size, 9, 'Custom design toolset must have 3 core + 6 design = 9 tools')
+  assert.equal(registeredTools.size, 10, 'Custom design toolset must have 3 core + 7 design = 10 tools')
   assert.ok(registeredTools.has('set_style_anchor'))
   assert.ok(registeredTools.has('generate_ui_asset'))
   assert.ok(!registeredTools.has('sketch_to_image'), 'Non-design tools must be unregistered')

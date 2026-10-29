@@ -268,6 +268,15 @@
 - **Topological Parsing**: Parses raw Mermaid flowchart or Graphviz architecture code, identifying service nodes and data flow connectors.
 - **High-End 3D Aesthetics**: Synthesizes 3D isometric visualizations (isometric_3d, cyber_blueprint, clay_minimal, glossy_dark) for documentation headers and hero banners.
 
+### 5. Editable Draw.io & Interactive Vector Diagrams (generate_drawio_diagram, #451)
+- **Standard mxfile Format**: Generates valid XML format `mxfile` / `mxGraphModel` (`application/vnd.jgraph.mxfile` / `.drawio`) fully compatible with diagrams.net / Draw.io desktop and web editors.
+- **Node & Edge Topology**: Supports custom node geometries, standard shape libraries (rounded rectangles, ellipses, diamonds, cylinders/databases, clouds, actors/users, hexagons, steps), customizable styling and directional connectors (orthogonal, straight, curved, dashed, bidirectional).
+- **Auto-Layout & Theming**: Integrated topological auto-layout engine (`horizontal`, `vertical`, `grid`, `tree`) and 5 curated aesthetic themes (`light`, `dark`, `blueprint`, `corporate`, `nord`).
+- **Dual Vector Artifacts**: Generates both the editable `.drawio` file and a clean, high-fidelity standalone SVG preview for instant display in DSH chat cards and right-sidebar canvas.
+- **Design Stencil Integration**: Formatted clipboard snippets (Figma HTML, Penpot SVG, CSS background) and optional direct push into OpenDesign workspace projects.
+- **Topological Parsing**: Parses raw Mermaid flowchart or Graphviz architecture code, identifying service nodes and data flow connectors.
+- **High-End 3D Aesthetics**: Synthesizes 3D isometric visualizations (isometric_3d, cyber_blueprint, clay_minimal, glossy_dark) for documentation headers and hero banners.
+
 ### 5. Interactive Inpainting Canvas (src/client/105-inpaint-canvas.js, #328)
 - **Dynamic Aspect Ratio & Dimensions**: Canvas automatically measures the natural dimensions of the source image and scales the viewport cleanly.
 - **Dual Dispatch**: Copies standard edit_image command and automatically inserts prompt instruction into chat message inputs.
@@ -282,12 +291,12 @@
   - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `inspect_image_quality`) with schema size <= 5k chars, preserving agent context window.
   - `all`: registers all 30 tools across all suites.
   - `custom`: enables fine-grained selection per suite (`toolsets.creative`, `toolsets.studio`, etc.) or individual flat boolean toggles.
-- **Suite Architecture (30 tools total)**:
+- **Suite Architecture (31 tools total)**:
   - **Core Generation (4 tools)**: `generate_image`, `generate_image_pack`, `vary_image`, `remix_image`.
   - **Processing & Enhancement (8 tools)**: `edit_image`, `upscale_image`, `remove_background`, `compare_images`, `blend_images`, `vectorize_image`, `smart_crop_image`, `assemble_image_grid`.
   - **Creative & Web Assets (6 tools)**: `generate_ui_asset`, `generate_theme_pair`, `generate_spritesheet`, `generate_pwa_icons`, `generate_color_palette`, `generate_seamless_pattern`.
   - **Studio & Continuity (8 tools)**: `set_style_anchor`, `generate_character_sheet`, `generate_style_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`.
-  - **Vision & Analysis (4 tools)**: `inspect_image`, `describe_image_style`, `replace_image_text`, `beautify_diagram`.
+  - **Vision & Analysis (4 tools)**: `inspect_image`, `describe_image_style`, `replace_image_text`, `beautify_diagram`, `generate_drawio_diagram`.
 
 ### 2. Generation Vault & Media Archive (#339)
 - **Endpoint `/dsh-image-gen/vault`**: Comprehensive media vault for browsing, searching, and filtering past generations with rich sidecar metadata.
