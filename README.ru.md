@@ -189,6 +189,8 @@ graph LR
 
 | Инструмент | Назначение | Ключевые параметры |
 |---|---|---|
+| **`translate_image_text`** | Перевод и визуальная локализация текста на изображениях (RU, EN, ZH) с OCR, inpaint-очисткой фона и рендерингом типографики (#454) | `image`, `target_lang`, `source_lang`, `regions`, `font_color`, `font_family`, `inpaint_prompt` |
+| **`render_wireframe_asset`** | Синтез чистовых дизайн-ассетов из каркасов и UI-макетов с пресетами дизайн-систем и калиброванным fidelity (#455) | `wireframe_image`, `design_system` (`modern_saas`/`dark_glassmorphism`/`brutalist`/`apple_minimal`), `fidelity`, `style`, `prompt` |
 | **`generate_drawio_diagram`** | Генерация редактируемых XML-схем Draw.io / diagrams.net (`.drawio`) с чистым векторным SVG-превью (#451) | `title`, `nodes`, `edges`, `layout` (`horizontal`/`vertical`/`grid`/`tree`), `theme` (`light`/`dark`/`blueprint`/`corporate`/`nord`), `output_format` |
 | **`generate_image`** | Генерация изображения по тексту | `prompt`, `image_size`, `seed`, `style_preset`, `negative_prompt`, `guidance_scale`, `steps`, `sampler_name`, `count` |
 | **`set_style_anchor`** | Фиксация визуального стиля и персонажа сессии (объект, костюм, палитра, свет) (#283) | `mode` (`character`/`style`), `image`, `description`, `strength`, `clear` |
