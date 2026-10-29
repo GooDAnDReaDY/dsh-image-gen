@@ -136,6 +136,8 @@
 
 ## 🛠️ Complete Tools Reference
 
+* **`reverse_prompt_and_recreate` (#465)**: Deconstruct visual aesthetics, lighting, optics, medium, and palette mood of any image into a structured reverse-engineered prompt, with optional instant style recreation.
+* **`restore_face_and_details` (#467)**: Localized face, eyes, and high-frequency detail restoration (Hi-Res detail fix) with automatic zone targeting and seamless feathered edge alpha blending.
 * **`generate_with_control` (#463)**: Structural conditioning and geometry-guided generation using reference input controls (`mode: "canny" | "depth" | "pose" | "sketch"`). Provides edge feature extraction, depth gradients, and pose bounding box normalization.
 * **`generate_turnaround_sheet` (#464)**: Coherent multi-angle turnaround model sheets for 3D asset modeling and concept sheets (`front`, `side`, `back`, `three_quarter`), with automated Sharp slicing into individual camera angle assets and JSON manifest.
 * **`outpaint_image` (#459)**: Intelligent canvas expansion across directional borders (`top`, `bottom`, `left`, `right`) with Sharp-powered transparent compositing, automated SVG outpaint mask generation, and seamless background scenery continuation.
