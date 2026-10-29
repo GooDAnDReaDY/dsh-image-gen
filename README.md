@@ -1,4 +1,8 @@
 
+## 🚀 Updates v0.12.12: Right Sidebar Image Studio & Session Asset Cataloging (#452, #453)
+- **Native Image Studio Workspace Panel (#452)**: Registered persistent right sidebar extension slot `sidebarRightTabs` and `sidebar.right.pane.tab` with identifier `dsh-image-studio`. Includes prompt style tag auto-completion, negative prompt exclusion chips, provider/model/aspect ratio selectors, transparent background toggle, compact recent thumbnail grid, and one-click Copy File Path / Insert into Chat actions.
+- **Session-Scoped Asset Cataloging & Semantic Naming (#453)**: Introduced `organizeBySession: boolean` (default: `true`) to organize assets into `<sessionCwd>/assets/images/<sessionSlug>/`. Integrated `buildSemanticSlug` prompt entity extractor for clean filenames (e.g. `futuristic-hero-banner-cyberpunk-v1.png`) with full backward compatibility in Asset Vault.
+
 ## 🚀 Updates v0.12.9: Full DSH Desktop Electron Compatibility (#478)
 - **DSH Desktop Scheme Authorization**: Extended `isTrustedLocalRequest`, `getRouteRejectionStatus`, and `getRouteWriteRejectionStatus` to authorize the privileged `dsh-app://app/` custom scheme from local loopback connections.
 - **Desktop Endpoint & Image Unblocking**: Unblocks `/dsh-image-gen/image`, `/dsh-image-gen/approval`, `/dsh-image-gen/vault`, and `/dsh-image-gen/config` from HTTP 403 Forbidden under Electron, restoring thumbnail rendering, Interactive Approval Gate actions, and Studio Vault functionality in DSH Desktop.

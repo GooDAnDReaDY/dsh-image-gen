@@ -119,6 +119,22 @@
 .ig-approval-head{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:13px;color:var(--dsw-alias-label-primary)}
 .ig-approval-body{font-size:12px;line-height:1.5;color:var(--dsw-alias-label-secondary);display:flex;flex-direction:column;gap:4px}
 .ig-approval-actions{display:flex;gap:8px;margin-top:6px}
+
+/* Sidebar Image Studio (#452) */
+.ig-sidebar-studio{display:flex;flex-direction:column;gap:12px;padding:12px;height:100%;box-sizing:border-box;overflow-y:auto;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}
+.ig-sidebar-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--dsw-alias-border-l2)}
+.ig-sidebar-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.ig-chip-group{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.ig-chip{padding:2px 7px;border-radius:12px;font-size:11px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary);cursor:pointer;user-select:none;transition:background .12s, border-color .12s}
+.ig-chip:hover{background:var(--dsw-alias-bg-layer-3);border-color:var(--dsw-alias-state-brand-primary);color:var(--dsw-alias-label-primary)}
+.ig-chip.active{background:color-mix(in srgb, var(--dsw-alias-state-brand-primary) 15%, var(--dsw-alias-bg-layer-2));border-color:var(--dsw-alias-state-brand-primary);color:var(--dsw-alias-state-brand-primary);font-weight:600}
+.ig-sidebar-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;max-height:220px;overflow-y:auto;padding:2px}
+.ig-sidebar-thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:6px;border:1px solid var(--dsw-alias-border-l2);cursor:pointer;background:var(--dsw-alias-bg-layer-3);transition:transform .12s, border-color .12s}
+.ig-sidebar-thumb:hover{transform:scale(1.03);border-color:var(--dsw-alias-state-brand-primary)}
+.ig-sidebar-thumb.selected{border-color:var(--dsw-alias-state-brand-primary);box-shadow:0 0 0 2px var(--dsw-alias-state-brand-primary)}
+.ig-sidebar-active-card{display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-layer-2)}
+.ig-sidebar-preview-img{width:100%;max-height:180px;object-fit:contain;border-radius:6px;background:var(--dsw-alias-bg-layer-3)}
+.ig-sidebar-actions{display:flex;flex-wrap:wrap;gap:6px}
 `
       document.head.appendChild(style)
     }

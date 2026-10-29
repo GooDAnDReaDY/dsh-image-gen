@@ -276,10 +276,11 @@
             if (!tabs || typeof tabs.register !== 'function') return
             try {
               const def = {
-                id: '@goodandready/dsh-image-gen:studio',
+                id: 'dsh-image-studio',
                 kind: 'image-studio',
                 priority: 'extension',
                 title: () => 'Image Studio',
+                icon: () => react.createElement('span', null, '🎨'),
                 guide: [
                   {
                     order: 45,
@@ -301,11 +302,11 @@
                     return ctx.slots.register(
                       {
                         name: 'sidebar.right.pane.tab',
-                        key: '@goodandready/dsh-image-gen:gallery',
+                        key: 'dsh-image-studio',
                         locale: NS,
                         inject: () => ({ ctx }),
                       },
-                      (props) => react.createElement(ErrorBoundary, null, react.createElement(ImageStudioView, { ...props, ctx }))
+                      (props) => react.createElement(ErrorBoundary, null, react.createElement(SidebarImageStudio, { ...props, ctx }))
                     )
                   } catch (e) {
                     console.warn('[dsh-image-gen] native sidebar pane tab register failed', e)
@@ -329,11 +330,11 @@
             if (!svc || typeof svc.registerTab !== 'function') return
             try {
               svc.registerTab({
-                id: 'dsh-image-gen:gallery',
-                title: () => 'Gallery',
-                icon: () => react.createElement('span', null, '🖼️'),
+                id: 'dsh-image-studio',
+                title: () => 'Image Studio',
+                icon: () => react.createElement('span', null, '🎨'),
                 order: 45,
-                component: ({ scope }) => react.createElement(ErrorBoundary, null, react.createElement(ImageStudioView, { ctx, scope })),
+                component: ({ scope }) => react.createElement(ErrorBoundary, null, react.createElement(SidebarImageStudio, { ctx, scope })),
               })
             } catch (e) {
               console.warn('[dsh-image-gen] betterSidebar registerTab failed', e)
