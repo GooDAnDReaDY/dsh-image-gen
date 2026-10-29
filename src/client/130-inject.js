@@ -224,6 +224,7 @@
         'generate_character_sheet',
         'replace_image_text',
         'beautify_diagram',
+        'generate_drawio_diagram',
         'generate_seamless_pattern',
         'generate_spritesheet',
         'sketch_to_image',
