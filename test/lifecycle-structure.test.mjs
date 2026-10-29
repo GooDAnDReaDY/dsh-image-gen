@@ -41,6 +41,8 @@ const EXPECTED_TOOLS = [
   'replace_image_text',
   'beautify_diagram',
   'generate_drawio_diagram',
+  'translate_image_text',
+  'render_wireframe_asset',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -83,6 +85,8 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerVisionOcrTools',
     'registerDiagramTools',
     'registerDrawioDiagramTools',
+    'registerTranslateImageTextTools',
+    'registerWireframeDesignTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }

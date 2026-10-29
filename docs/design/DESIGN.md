@@ -291,14 +291,14 @@
 ### 1. Toolsets Profiles & Lightweight Agent Context (#337)
 - **`toolsetProfile` Configuration**:
   - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `inspect_image_quality`) with schema size <= 5k chars, preserving agent context window.
-  - `all`: registers all 30 tools across all suites.
+  - `all`: registers all 33 tools across all suites (#337, #451, #454, #455).
   - `custom`: enables fine-grained selection per suite (`toolsets.creative`, `toolsets.studio`, etc.) or individual flat boolean toggles.
-- **Suite Architecture (31 tools total)**:
+- **Suite Architecture (33 tools total, #337, #451, #454, #455)**:
   - **Core Generation (4 tools)**: `generate_image`, `generate_image_pack`, `vary_image`, `remix_image`.
   - **Processing & Enhancement (8 tools)**: `edit_image`, `upscale_image`, `remove_background`, `compare_images`, `blend_images`, `vectorize_image`, `smart_crop_image`, `assemble_image_grid`.
   - **Creative & Web Assets (6 tools)**: `generate_ui_asset`, `generate_theme_pair`, `generate_spritesheet`, `generate_pwa_icons`, `generate_color_palette`, `generate_seamless_pattern`.
-  - **Studio & Continuity (8 tools)**: `set_style_anchor`, `generate_character_sheet`, `generate_style_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`.
-  - **Vision & Analysis (4 tools)**: `inspect_image`, `describe_image_style`, `replace_image_text`, `beautify_diagram`, `generate_drawio_diagram`.
+  - **Studio & Continuity (9 tools)**: `set_style_anchor`, `render_wireframe_asset`, `generate_character_sheet`, `generate_style_matrix`, `generate_storyboard`, `generate_moodboard`, `generate_cinematic_shot`, `generate_sticker_pack`, `generate_isometric_scene`.
+  - **Vision & Localization (5 tools)**: `inspect_image`, `describe_image_style`, `replace_image_text`, `translate_image_text`, `beautify_diagram`, `generate_drawio_diagram`.
 
 ### 2. Generation Vault & Media Archive (#339)
 - **Endpoint `/dsh-image-gen/vault`**: Comprehensive media vault for browsing, searching, and filtering past generations with rich sidecar metadata.

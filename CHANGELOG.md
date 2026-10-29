@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.13
+
+### Added
+- **In-Image Text Translation and Localization (`translate_image_text`) (#454)**: Grounding/OCR text area detection, dictionary and vision localization into RU, EN, and ZH, automatic background inpaint mask generation, and typography re-rendering with matching coordinates, color, and font metrics.
+- **Wireframe-to-Design Asset Synthesis (`render_wireframe_asset`) (#455)**: Direct synthesis from UI sketches, whiteboard diagrams, and wireframes into finished design assets using curated design system presets (`modern_saas`, `dark_glassmorphism`, `brutalist`, `apple_minimal`) with calibrated layout fidelity.
+
 ## 0.12.12
 
 ### Added
