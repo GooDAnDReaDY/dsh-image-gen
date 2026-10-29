@@ -136,6 +136,8 @@
 
 ## 🛠️ Complete Tools Reference
 
+* **`generate_with_control` (#463)**: Structural conditioning and geometry-guided generation using reference input controls (`mode: "canny" | "depth" | "pose" | "sketch"`). Provides edge feature extraction, depth gradients, and pose bounding box normalization.
+* **`generate_turnaround_sheet` (#464)**: Coherent multi-angle turnaround model sheets for 3D asset modeling and concept sheets (`front`, `side`, `back`, `three_quarter`), with automated Sharp slicing into individual camera angle assets and JSON manifest.
 * **`outpaint_image` (#459)**: Intelligent canvas expansion across directional borders (`top`, `bottom`, `left`, `right`) with Sharp-powered transparent compositing, automated SVG outpaint mask generation, and seamless background scenery continuation.
 * **`async_generate_image` (#460)**: Asynchronous generation pipeline with immediate `task_id` dispatch (`wait: false`), live progress updates (`queued` -> `processing X%` -> `completed`), and configurable exponential backoff polling guard.
 * **`translate_image_text` (#454)**: Translate in-image typography into Russian, English, or Chinese with grounding/OCR text detection, automated background inpainting mask generation to cleanly erase source text, and typography re-rendering with matching coordinates, color, and font metrics.

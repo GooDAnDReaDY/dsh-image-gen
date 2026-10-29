@@ -132,6 +132,8 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
 ## 🛠️ 新增核心功能 (v0.10.32)
 
+* **`generate_with_control` (#463)**: ControlNet 结构引导生成，支持边缘、深度和姿势控制 (`canny` / `depth` / `pose` / `sketch`)。
+* **`generate_turnaround_sheet` (#464)**: 多角度角色与 3D 资产三视图/多角度模型表生成，自动切片为独立透视图像并输出 JSON 清单。
 * **`outpaint_image` (#459)**: 图像边界外扩与定向补全（支持上下左右任意方向），结合 Sharp 透明画布扩展与 SVG 扩展蒙版生成，实现大场景无缝外绘。
 * **`async_generate_image` (#460)**: 异步任务生成管线，支持立即返回 `task_id`（`wait: false`）、状态轮询与队列防护，支持指数退避自动等待完成。
 * **`translate_image_text` (#454)**: 图像内文字翻译与视觉本地化（支持中、英、俄），结合 OCR 文本检测、自动生成 Inpaint 擦除蒙版及保留原图排版与坐标的高质量文字重绘。
