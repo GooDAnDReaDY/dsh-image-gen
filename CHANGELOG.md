@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.19
+
+### Fixed
+- **Tailscale Mesh Private LAN Trust (#493, upstream korverbot)**: Extended `isPrivateLanAddress()` in `lib/security.js` with RFC 6598 CGNAT subnet `100.64.0.0/10` (`100.64.0.0 - 100.127.255.255`), unblocking Vault, Settings, and Approval Gate routes when accessing DSH over Tailscale VPN networks.
+- **FAL Custom Image Size 422 Rejection (#493, upstream devastrar)**: Added fallback mapping from `aspect_ratio` (`16:9`, `9:16`, `4:3`, `3:4`, `1:1`, etc.) to named FAL-recognized sizes (`landscape_16_9`, `portrait_16_9`, `square_hd`, etc.) when `size === 'custom'`.
+- **Replicate Model Override & Aspect Ratio String (#493, upstream devastrar)**: Ensure per-call `args.model` and semantic router model selection cleanly override `cfg.replicateModel` in `lib/tools/generation.js`, and format aspect ratio into clean standard ratio strings (`16:9`, `1:1`, etc.) for Replicate predictions.
+
 ## 0.12.18
 
 ### Added

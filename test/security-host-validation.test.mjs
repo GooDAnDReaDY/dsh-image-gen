@@ -46,6 +46,11 @@ test('security: isPrivateLanAddress validates RFC 1918 / ULA and rejects rebindi
   assert.equal(isPrivateLanAddress('192.168.0.1'), true)
   assert.equal(isPrivateLanAddress('192.168.1.100'), true)
   assert.equal(isPrivateLanAddress('169.254.1.1'), true)
+  assert.equal(isPrivateLanAddress('100.64.0.1'), true) // Tailscale / RFC 6598 start
+  assert.equal(isPrivateLanAddress('100.100.100.100'), true) // Tailscale DNS / node
+  assert.equal(isPrivateLanAddress('100.127.255.254'), true) // Tailscale / RFC 6598 end
+  assert.equal(isPrivateLanAddress('100.63.255.255'), false) // outside 100.64.0.0/10
+  assert.equal(isPrivateLanAddress('100.128.0.1'), false) // outside 100.64.0.0/10
   assert.equal(isPrivateLanAddress('::ffff:192.168.1.1'), true)
   assert.equal(isPrivateLanAddress('fc00::1'), true)
   assert.equal(isPrivateLanAddress('fd12:3456:789a::1'), true)
