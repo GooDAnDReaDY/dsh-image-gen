@@ -87,6 +87,22 @@
 .ig-ab-badge-before{left:8px}
 .ig-ab-badge-after{right:8px}
 
+/* Composer Provider Pill (#501) */
+.ig-pill-wrap{position:relative;display:inline-flex;align-items:center;height:28px}
+.ig-pill-btn{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:13px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s ease}
+.ig-pill-btn:hover{background:var(--dsw-alias-bg-layer-3);border-color:var(--dsw-alias-state-brand)}
+.ig-pill-btn-active{border-color:var(--dsw-alias-state-brand);background:var(--dsw-alias-bg-layer-3)}
+.ig-pill-icon{font-size:13px}
+.ig-pill-label{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ig-pill-caret{font-size:10px;opacity:0.6;transition:transform 0.15s ease}
+.ig-pill-caret-up{transform:rotate(180deg)}
+.ig-pill-dropdown{position:fixed;z-index:9999;min-width:220px;max-width:300px;padding:6px;border-radius:10px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1, #1e1e24);box-shadow:0 8px 24px rgba(0,0,0,0.3);display:flex;flex-direction:column;gap:4px;user-select:none}
+.ig-pill-dropdown-title{font-size:11px;font-weight:700;color:var(--dsw-alias-label-secondary);padding:4px 8px;text-transform:uppercase;letter-spacing:0.5px}
+.ig-pill-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border-radius:6px;border:none;background:transparent;color:var(--dsw-alias-label-primary);font-size:12px;cursor:pointer;text-align:left;transition:background 0.12s ease}
+.ig-pill-item:hover{background:var(--dsw-alias-bg-layer-2)}
+.ig-pill-item-selected{background:var(--dsw-alias-state-brand-soft, rgba(99,102,241,0.15));color:var(--dsw-alias-state-brand);font-weight:600}
+.ig-pill-check{font-size:12px;font-weight:bold}
+
 /* Progressive Draft Preview (#147) */
 .ig-progressive-wrap{position:relative;width:100%;overflow:hidden;border-radius:8px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);min-height:160px;display:flex;align-items:center;justify-content:center}
 .ig-draft-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:blur(6px);opacity:0.75;transform:scale(1.02);transition:opacity 0.4s ease}

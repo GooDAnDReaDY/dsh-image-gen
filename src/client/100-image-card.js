@@ -224,6 +224,9 @@
       const [responsiveTab, setResponsiveTab] = react.useState(0)
       const [copied, setCopied] = react.useState(false)
       const [compareActive, setCompareActive] = react.useState(false)
+      const [regenerateOpen, setRegenerateOpen] = react.useState(false)
+      const [regeneratePrompt, setRegeneratePrompt] = react.useState('')
+      const [regenerateSeed, setRegenerateSeed] = react.useState('random')
 
       let args = {}
       let prompt = ''
@@ -415,6 +418,15 @@
           )
         }
         actions.push(
+          react.createElement('button', {
+            key: 'regenerate',
+            type: 'button',
+            className: regenerateOpen ? 'ig-btn ig-btn-primary' : 'ig-btn',
+            onClick: () => {
+              setRegeneratePrompt(prompt || '')
+              setRegenerateOpen(!regenerateOpen)
+            },
+          }, '🔄 ' + (t('card.actionRegenerate') || 'Regenerate…')),
           react.createElement('button', { key: 'inpaint', type: 'button', className: 'ig-btn', onClick: () => setInpaintOpen(!inpaintOpen) }, '🖌️ ' + (t('card.inpaint') || 'Inpaint')),
           react.createElement('button', { key: 'remix', type: 'button', className: 'ig-btn', onClick: () => setRemixOpen(!remixOpen) }, '⚡ ' + (t('card.remix') || 'Remix')),
           react.createElement('button', { key: 'reroll', type: 'button', className: 'ig-btn', onClick: onReroll }, '🎲 ' + t('card.reroll')),
@@ -505,6 +517,103 @@
         )
       ) : null
 
+      const regenerateDrawer = regenerateOpen ? react.createElement(
+        'div',
+        {
+          style: {
+            marginTop: '10px',
+            padding: '12px 14px',
+            borderRadius: '8px',
+            border: '1px solid var(--dsw-alias-border-l2)',
+            background: 'var(--dsw-alias-bg-layer-2)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          },
+        },
+        react.createElement(
+          'div',
+          { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+          react.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: 'var(--dsw-alias-label-primary)' } }, '🔄 ' + (t('card.regenerateTitle') || 'Regenerate with Edited Prompt')),
+          react.createElement('button', {
+            type: 'button',
+            className: 'ig-btn',
+            style: { padding: '2px 6px', fontSize: '11px' },
+            onClick: () => setRegenerateOpen(false),
+          }, '✕')
+        ),
+        react.createElement('textarea', {
+          rows: 3,
+          value: regeneratePrompt,
+          onChange: (e) => setRegeneratePrompt(e.target.value),
+          placeholder: t('card.regeneratePlaceholder') || 'Enter updated prompt…',
+          className: 'ig-field-input',
+          style: { fontSize: '12px', padding: '6px 10px', resize: 'vertical' },
+        }),
+        react.createElement(
+          'div',
+          { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' } },
+          react.createElement(
+            'div',
+            { style: { display: 'flex', gap: '6px', alignItems: 'center' } },
+            react.createElement(
+              'button',
+              {
+                type: 'button',
+                className: regenerateSeed === 'random' ? 'ig-tab-btn ig-tab-btn-active' : 'ig-tab-btn',
+                style: { padding: '3px 8px', fontSize: '11px' },
+                onClick: () => setRegenerateSeed('random'),
+              },
+              '🎲 ' + (t('card.seedRandom') || 'New Seed')
+            ),
+            react.createElement(
+              'button',
+              {
+                type: 'button',
+                className: regenerateSeed === 'keep' ? 'ig-tab-btn ig-tab-btn-active' : 'ig-tab-btn',
+                style: { padding: '3px 8px', fontSize: '11px' },
+                onClick: () => setRegenerateSeed('keep'),
+              },
+              '🔒 ' + (t('card.seedKeep') || 'Same Seed')
+            )
+          ),
+          react.createElement(
+            'div',
+            { style: { display: 'flex', gap: '6px' } },
+            react.createElement(
+              'button',
+              {
+                type: 'button',
+                className: 'ig-btn',
+                style: { padding: '4px 10px', fontSize: '11px' },
+                onClick: () => setRegenerateOpen(false),
+              },
+              t('card.cancel') || 'Cancel'
+            ),
+            react.createElement(
+              'button',
+              {
+                type: 'button',
+                className: 'ig-save-btn',
+                style: { padding: '4px 12px', fontSize: '11px', fontWeight: '600' },
+                disabled: !regeneratePrompt.trim(),
+                onClick: () => {
+                  const seedArg = regenerateSeed === 'keep' && typeof args.seed === 'number' ? args.seed : Math.floor(Math.random() * 100000)
+                  const aspectArg = args.aspect_ratio || args.aspectRatio || ''
+                  let cmd = `generate_image(prompt: "${regeneratePrompt.trim()}"`
+                  if (seedArg !== undefined) cmd += `, seed: ${seedArg}`
+                  if (aspectArg) cmd += `, aspect_ratio: "${aspectArg}"`
+                  cmd += ')'
+                  sendActionPrompt(cmd)
+                  setRegenerateOpen(false)
+                },
+              },
+              '🚀 ' + (t('card.regenerateRun') || 'Run')
+            )
+          )
+        )
+      ) : null
+
       const inpaintDrawer = inpaintOpen ? react.createElement(InpaintCanvasOverlay, {
         react,
         t,
@@ -522,6 +631,7 @@
         body,
         actions.length > 0 ? react.createElement('div', { className: 'ig-row', style: { marginTop: '8px' } }, actions) : null,
         remixDrawer,
+        regenerateDrawer,
         inpaintDrawer
       )
     }

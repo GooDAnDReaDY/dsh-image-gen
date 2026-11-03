@@ -343,6 +343,20 @@
         } catch (_) { /* betterSidebar unavailable */ }
       }
 
+      // Composer quick provider/model switcher pill (#501)
+      registerSlotWhenReady('conversation.input.right', () =>
+        ctx.slots.register(
+          {
+            name: 'conversation.input.right',
+            id: 'dsh-image-gen-provider-pill',
+            order: 15,
+            locale: NS,
+            inject: () => ({ ctx, dynamicScope: createDynamicSettingsScope(ctx) }),
+          },
+          (props) => react.createElement(ErrorBoundary, null, react.createElement(ProviderPill, { ...props, ctx }))
+        )
+      )
+
       // Conversation header utilities chip (quick-access gallery button in chat header)
       registerSlotWhenReady('conversation.session.header.utilities', () =>
         ctx.slots.register(
