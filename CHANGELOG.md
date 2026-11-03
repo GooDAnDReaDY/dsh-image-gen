@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.23
+
+### Added
+- **5-Dimension Baoyu Style & Composition Prompt Assembler (`compose_baoyu_prompt`) (#505)**: Orthogonal visual design prompt synthesizer based on the battle-tested Baoyu framework. Deconstructs creative briefs across 5 independent axes: Composition Type (hero, split, metaphor, process, minimal, editorial), Color Palette (warm, cool, neon, earth, monochrome, pastel, brutalist, cyber, retro, luxury, duotone), Rendering Medium (flat-vector, 3d-clay, isometric, digital, watercolor, risograph, vintage-engraving), Text Layout (title-subtitle, single-word, multi-stat, none), and Mood Atmosphere (playful, calm, balanced). Generates rigorous Markdown specifications with strict hex/name rendering constraints and bracketed placeholder injection (`list_options: true` for taxonomy discovery).
+- **Workbench Infinite Canvas State Inspection Tool (`canvas_state`) (#506)**: Model-facing tool providing real-time awareness of what shapes, generated images (with model and prompt provenance), hand-drawn strokes, and text annotations are currently placed on the image-gen workbench canvas, along with active user selection metrics. Backed by `CanvasMirror` singleton and HTTP receiver endpoints (`/dsh-image-gen/canvas/state`, `/dsh-image-gen/canvas/clear`).
+- **Workbench Canvas Selection Screenshot Materialization Tool (`view_canvas`) (#507)**: Captures and materializes the current canvas selection as a durable DSH conversation image attachment (`saveAttachmentSafe`). Unlocks true sketch-to-image workflows and interactive multimodal reasoning on live workbench drawings and annotated crops.
+
 ## 0.12.22
 
 ### Added

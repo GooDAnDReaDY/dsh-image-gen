@@ -293,9 +293,9 @@
 ### 1. Toolsets Profiles & Lightweight Agent Context (#337)
 - **`toolsetProfile` Configuration**:
   - `minimal` (default): registers <= 3 essential core tools (`generate_image`, `edit_image`, `inspect_image_quality`) with schema size <= 5k chars, preserving agent context window.
-  - `all`: registers all 43 tools across all suites (#337, #451, #454, #455, #459, #460, #461, #462, #463, #464, #465, #467, #468, #503, #504).
+  - `all`: registers all 46 tools across all suites (#337, #451, #454, #455, #459, #460, #461, #462, #463, #464, #465, #467, #468, #503, #504).
   - `custom`: enables fine-grained selection per suite (`toolsets.creative`, `toolsets.studio`, etc.) or individual flat boolean toggles.
-- **Suite Architecture (43 tools total, #337, #451, #454, #455, #459, #460, #461, #462, #463, #464, #465, #467, #468, #503, #504)**:
+- **Suite Architecture (46 tools total, #337, #451, #454, #455, #459, #460, #461, #462, #463, #464, #465, #467, #468, #503, #504)**:
   - **Core Generation (4 tools)**: `generate_image`, `generate_image_pack`, `vary_image`, `remix_image`.
   - **Processing Processing & Enhancement (10 tools) Enhancement (11 tools)**: `edit_image`, `upscale_image`, `remove_background`, `compare_images`, `blend_images`, `vectorize_image`, `smart_crop_image`, `assemble_image_grid`, `outpaint_image`, `async_generate_image`, `generate_with_control`.
   - **Creative & Web Assets (6 tools)**: `generate_ui_asset`, `generate_theme_pair`, `generate_spritesheet`, `generate_pwa_icons`, `generate_color_palette`, `generate_seamless_pattern`, `search_inspiration_prompts`.

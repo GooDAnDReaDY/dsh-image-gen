@@ -144,6 +144,9 @@
 
 ## 🛠️ Complete Tools Reference
 
+* **`compose_baoyu_prompt` (#505)**: 5-dimension style & composition prompt assembler. Synthesizes orthogonal design specifications across Composition Type, Palette, Rendering Medium, Text Layout, and Mood with rendering constraints and taxonomy discovery.
+* **`canvas_state` (#506)**: Inspect the image-gen workbench infinite canvas: shapes, image provenance, hand-drawn sketches, notes, and active selection metrics.
+* **`view_canvas` (#507)**: Materialize current workbench canvas selection as a durable conversation image attachment for sketch-to-image and multimodal visual reasoning.
 * **`compare_models_matrix` (#503)**: Multi-model shootout benchmarking tool. Concurrently generates a prompt across multiple models (Gemini Imagen 3, FAL FLUX Dev, Replicate FLUX Schnell, Seedream 3, DALL-E 3) with target aspect ratio adapters, latency/cost metering, and Sharp contact sheet grid preview.
 * **`search_inspiration_prompts` (#504)**: Curated offline inspiration catalog of 970+ battle-tested prompts from `awesome-gpt-image-2` and `handraw-style`. Filterable by style, category, scene, and keywords with zero token/network overhead.
 * **`generate_seamless_texture` (#468)**: Production-ready seamless repeating textures and materials for 3D surfaces, games, and web patterns with toroidal wrapping and 3×3 inspection grid.
