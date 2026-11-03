@@ -144,6 +144,8 @@
 
 ## 🛠️ Complete Tools Reference
 
+* **`compare_models_matrix` (#503)**: Multi-model shootout benchmarking tool. Concurrently generates a prompt across multiple models (Gemini Imagen 3, FAL FLUX Dev, Replicate FLUX Schnell, Seedream 3, DALL-E 3) with target aspect ratio adapters, latency/cost metering, and Sharp contact sheet grid preview.
+* **`search_inspiration_prompts` (#504)**: Curated offline inspiration catalog of 970+ battle-tested prompts from `awesome-gpt-image-2` and `handraw-style`. Filterable by style, category, scene, and keywords with zero token/network overhead.
 * **`generate_seamless_texture` (#468)**: Production-ready seamless repeating textures and materials for 3D surfaces, games, and web patterns with toroidal wrapping and 3×3 inspection grid.
 * **`reverse_prompt_and_recreate` (#465)**: Deconstruct visual aesthetics, lighting, optics, medium, and palette mood of any image into a structured reverse-engineered prompt, with optional instant style recreation.
 * **`restore_face_and_details` (#467)**: Localized face, eyes, and high-frequency detail restoration (Hi-Res detail fix) with automatic zone targeting and seamless feathered edge alpha blending.
