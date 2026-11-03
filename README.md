@@ -1,3 +1,7 @@
+## 🚀 Updates v0.12.20: Interactive A/B Comparison Slider & Persistent Revision Carousel (#499, #500)
+- **Interactive In-Chat A/B Comparison Slider (#499)**: Touch- and mouse-friendly Before/After split comparison slider with draggable vertical divider handle and translucent badges. Seamlessly reveals original vs enhanced versions in chat cards for face restoration, inpainting, remix variations, and multi-version revisions.
+- **Persistent Revision Switcher Carousel in Chat Cards (#500)**: In-card revision history switcher with `< v1 / N >` navigation buttons, seed / timestamp metadata badges, and client-side `localStorage` caching (`dsh_image_gen_revisions:`) capped at 20 revisions across page reloads.
+
 
 ## 🚀 Updates v0.12.12: Right Sidebar Image Studio & Session Asset Cataloging (#452, #453)
 - **Native Image Studio Workspace Panel (#452)**: Registered persistent right sidebar extension slot `sidebarRightTabs` and `sidebar.right.pane.tab` with identifier `dsh-image-studio`. Includes prompt style tag auto-completion, negative prompt exclusion chips, provider/model/aspect ratio selectors, transparent background toggle, compact recent thumbnail grid, and one-click Copy File Path / Insert into Chat actions.
