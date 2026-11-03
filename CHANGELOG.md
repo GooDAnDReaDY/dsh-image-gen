@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.20
+
+### Added
+- **Interactive In-Chat A/B Comparison Slider (`ImageCompareSlider`) (#499)**: Touch- and mouse-friendly Before/After split comparison slider with draggable vertical divider handle and translucent badges. Seamlessly reveals original vs enhanced versions in chat cards for face restoration, inpainting, remix variations, and multi-version revisions.
+- **Persistent Revision Switcher Carousel in Chat Cards (`ImageRevisionBar`) (#500)**: In-card revision history switcher with `< v1 / N >` navigation buttons, seed / timestamp metadata badges, and client-side `localStorage` caching (`dsh_image_gen_revisions:`) capped at 20 revisions across page reloads.
+
 ## 0.12.19
 
 ### Fixed
