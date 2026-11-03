@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.24
+
+### Added
+- **Deterministic Content-Addressed Workspace Disk Export (`save_image_to_workspace`) (#510)**: Safely exports generated images directly to the session workspace disk with deterministic content-addressed naming (`image-<digest-prefix>.<ext>`) derived from sha256 attachment ID. Implements dual lexical and realpath containment checks defending against directory traversal and symlink escapes, staged atomic rename preventing half-written files, and idempotent overwriting. Includes safe deletion helper `deleteImageFromWorkspace` strictly guarded by filename regex, lstat regular file verification, and canonical path checks.
+- **Watermark Policy Controller (`watermark: default | off | on`) (#509)**: Cross-provider visible watermark capability contract and parameter injection. Provides explicit control for supported cloud providers (Seedream, DashScope Qwen-Image, SenseNova, OpenAI-compatible relays) across generation and editing pipelines, configurable globally via `watermark` setting and per-tool invocations.
+- **Native ComfyUI Image-to-Image Upload with LoadImage Subfolder Resolution (#511)**: Implements multipart image upload to ComfyUI `/upload/image` (`uploadSourceImageToComfyUI`) with subfolder tracking. Dynamically injects uploaded server-side image paths (`${subfolder}/${name}`) directly into ComfyUI `LoadImage` nodes and `{{image}}` workflow placeholders, unlocking robust local img2img and inpainting pipelines.
+- **IndexedDB Workspace Gallery Store with Tags, Favorites, and Tombstones (`gallery_history`) (#508)**: Lightweight client persistence layer (`lib/gallery-store.js`) indexing generation metadata, seeds, tags, and favorites in IndexedDB while binary image data stays managed by DSH Attachment service. Integrates permanent tombstones (`gallery_tombstones`) ensuring user-deleted images are never resurrected when revisiting historical conversations.
+
 ## 0.12.23
 
 ### Added

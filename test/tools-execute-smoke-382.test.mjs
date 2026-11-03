@@ -47,6 +47,10 @@ function createMockEnvironment() {
       if (name === 'subscriptionImages') return null
       return null
     },
+    attachments: {
+      async get(id) { return { data: PNG, mediaType: 'image/png' } },
+      async read(id) { return { data: PNG, mediaType: 'image/png' } },
+    },
   }
 
   const mockFetch = async (url) => {
@@ -118,7 +122,7 @@ function createMockEnvironment() {
 
 test('tools-execute-smoke-382: all 35 tools have functional execute smoke checks', async () => {
   const env = createMockEnvironment()
-  assert.equal(env.registeredTools.size, 46, 'Profile all must register all 46 tools')
+  assert.equal(env.registeredTools.size, 47, 'Profile all must register all 46 tools')
 
   const originalFetch = globalThis.fetch
   globalThis.fetch = env.mockFetch
@@ -148,6 +152,7 @@ test('tools-execute-smoke-382: all 35 tools have functional execute smoke checks
       assemble_image_grid: { images: [testPngPath, testPngPath], columns: 2 },
       smart_crop_image: { image: testPngPath, aspect_ratio: '16:9' },
       export_asset_pack: { project_name: 'SmokeBrand' },
+      save_image_to_workspace: { attachment_id: 'att-mock' },
       replace_image_text: { image: testPngPath, replacements: [{ find: 'Alpha', replace: 'Beta' }] },
       set_style_anchor: { image: testPngPath, mode: 'face' },
       generate_ui_asset: { prompt: 'smoke icon', asset_type: 'icon' },
@@ -193,7 +198,7 @@ test('tools-execute-smoke-382: all 35 tools have functional execute smoke checks
       executedNames.push(name)
     }
 
-    assert.equal(executedNames.length, 46, 'All 46 tools must execute successfully')
+    assert.equal(executedNames.length, 47, 'All 46 tools must execute successfully')
   } finally {
     await rm(tempDir, { recursive: true, force: true })
     globalThis.fetch = originalFetch

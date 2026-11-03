@@ -52,9 +52,9 @@ test('toolsets profile: default minimal mode registers <= 3 core tools with sche
   )
 })
 
-test('toolsets profile: "all" profile registers all 46 tools (#337, #451, #454, #455, #459, #460, #461, #463, #464, #465, #467, #468, #503, #504)', () => {
+test('toolsets profile: "all" profile registers all 47 tools (#337, #451, #454, #455, #459, #460, #461, #463, #464, #465, #467, #468, #503, #504)', () => {
   const tools = getRegisteredTools({ toolsetProfile: 'all' })
-  assert.equal(tools.length, 46, '"all" profile must register all 46 tools')
+  assert.equal(tools.length, 47, '"all" profile must register all 46 tools')
 })
 
 test('toolsets profile: custom mode with nested toolsets toggles individual categories (#337)', () => {
@@ -97,7 +97,7 @@ test('toolsets profile: custom mode with flat boolean keys (#337)', () => {
   assert.ok(!names.includes('generate_spritesheet'))
 })
 
-test('master switch: all 46 tools reject with disabled error when cfg.enabled is false (#356)', async () => {
+test('master switch: all 47 tools reject with disabled error when cfg.enabled is false (#356)', async () => {
   let liveConfig = {
     enabled: false,
     toolsetProfile: 'all',
@@ -120,7 +120,7 @@ test('master switch: all 46 tools reject with disabled error when cfg.enabled is
     resolveApiKey: () => {},
   })
 
-  assert.equal(tools.length, 46, 'Profile all must register 46 tools')
+  assert.equal(tools.length, 47, 'Profile all must register 46 tools')
 
   // When enabled is false, executing any tool must reject with disabled message
   for (const t of tools) {
@@ -221,11 +221,11 @@ test('toolsets profile: reactive update on profile change (minimal -> all -> cus
   // 2. Switch to "all" without restart
   liveCfg = { toolsetProfile: 'all' }
   controller.sync()
-  assert.equal(registeredTools.size, 46, 'Profile all must register exactly 46 tools without restart')
+  assert.equal(registeredTools.size, 47, 'Profile all must register exactly 47 tools without restart')
   // Verify no duplicates
   const namesAll = Array.from(registeredTools.keys())
   const uniqueNamesAll = new Set(namesAll)
-  assert.equal(uniqueNamesAll.size, 46, 'Must have 46 unique tool names')
+  assert.equal(uniqueNamesAll.size, 47, 'Must have 47 unique tool names')
 
   // 3. Switch to custom with design toolset only
   liveCfg = { toolsetProfile: 'custom', toolsets: { design: true } }
