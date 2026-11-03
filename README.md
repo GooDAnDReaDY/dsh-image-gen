@@ -144,6 +144,7 @@
 
 ## 🛠️ Complete Tools Reference
 
+* **`save_image_to_workspace` (#510)**: Deterministic content-addressed export of generated images to the workspace disk (`image-<digest-prefix>.<ext>`) with dual lexical/realpath containment checks and staged atomic rename.
 * **`compose_baoyu_prompt` (#505)**: 5-dimension style & composition prompt assembler. Synthesizes orthogonal design specifications across Composition Type, Palette, Rendering Medium, Text Layout, and Mood with rendering constraints and taxonomy discovery.
 * **`canvas_state` (#506)**: Inspect the image-gen workbench infinite canvas: shapes, image provenance, hand-drawn sketches, notes, and active selection metrics.
 * **`view_canvas` (#507)**: Materialize current workbench canvas selection as a durable conversation image attachment for sketch-to-image and multimodal visual reasoning.

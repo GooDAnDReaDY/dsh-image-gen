@@ -56,6 +56,7 @@ const EXPECTED_TOOLS = [
   'compose_baoyu_prompt',
   'canvas_state',
   'view_canvas',
+  'save_image_to_workspace',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
