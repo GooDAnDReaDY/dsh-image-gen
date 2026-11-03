@@ -19,6 +19,14 @@
         url = attachmentImageUrl(attachment)
       }
 
+      let beforeUrl = meta?.beforeUrl || meta?.before_url || meta?.before_image || block.beforeUrl || block.before_url || ''
+      if (!beforeUrl && meta?.sourceUrl) beforeUrl = meta.sourceUrl
+      if (beforeUrl && typeof beforeUrl === 'object') {
+        beforeUrl = attachmentImageUrl(beforeUrl)
+      } else if (beforeUrl && typeof beforeUrl === 'string' && !beforeUrl.startsWith('http') && !beforeUrl.startsWith('/') && !beforeUrl.startsWith('data:')) {
+        beforeUrl = '/dsh-image-gen/image?id=' + encodeURIComponent(beforeUrl)
+      }
+
       let cleanText = text
       if (!url && text) {
         const mdImg = text.match(MARKDOWN_IMAGE_RE)
@@ -44,6 +52,7 @@
       return {
         attachment,
         url,
+        beforeUrl,
         text: cleanText,
       }
     }
@@ -214,6 +223,7 @@
       const [copiedRemix, setCopiedRemix] = react.useState(false)
       const [responsiveTab, setResponsiveTab] = react.useState(0)
       const [copied, setCopied] = react.useState(false)
+      const [compareActive, setCompareActive] = react.useState(false)
 
       let args = {}
       let prompt = ''
@@ -225,9 +235,17 @@
         }
       } catch (_) { /* malformed tool args */ }
 
+      const cardId = (block && (block.id || block.callId || block.toolCallId)) || (parsed.attachment && (parsed.attachment.attachmentId || parsed.attachment.id)) || (prompt ? ('p_' + prompt.slice(0, 32)) : '')
       const initialUrl = parsed.attachment ? attachmentImageUrl(parsed.attachment) : parsed.url
-      const [revisions, setRevisions] = react.useState(() => initialUrl ? [{ url: initialUrl, attachment: parsed.attachment, seed: args.seed, timestamp: Date.now() }] : [])
-      const [activeRev, setActiveRev] = react.useState(0)
+      const [revisions, setRevisions] = react.useState(() => {
+        const stored = cardId ? loadStoredRevisions(cardId) : []
+        if (stored.length > 0) return stored
+        return initialUrl ? [{ url: initialUrl, attachment: parsed.attachment, seed: args.seed, timestamp: Date.now() }] : []
+      })
+      const [activeRev, setActiveRev] = react.useState(() => {
+        const stored = cardId ? loadStoredRevisions(cardId) : []
+        return stored.length > 0 ? stored.length - 1 : 0
+      })
 
       react.useEffect(() => {
         ensureCss()
@@ -238,10 +256,11 @@
         setRevisions((prev) => {
           if (prev.some((r) => r.url === initialUrl)) return prev
           const next = [...prev, { url: initialUrl, attachment: parsed.attachment, seed: args.seed, timestamp: Date.now() }]
+          if (cardId) saveStoredRevisions(cardId, next)
           setActiveRev(next.length - 1)
           return next
         })
-      }, [initialUrl, args.seed])
+      }, [initialUrl, args.seed, cardId])
 
       const sendActionPrompt = async (text) => {
         try {
@@ -334,28 +353,67 @@
             t,
           }))
         }
-        // Progressive preview (#147)
+        // Progressive preview (#147) & A/B Slider (#499)
         const currentRev = revisions[activeRev] || {}
         const displaySrc = currentRev.url || initialUrl
-        const draftSrc = block && (block.draftUrl || block.previewUrl || '')
-        body.push(react.createElement(ProgressiveImagePreview, {
-          key: 'prog-img',
-          callId: block && (block.id || block.callId || block.toolCallId || ''),
-          src: displaySrc,
-          draftSrc,
-          isRunning: running,
-          progress: typeof parsed?.progress === 'number' ? parsed.progress : (typeof block?.progress === 'number' ? block.progress : undefined),
-          step: parsed?.step || block?.step,
-          stage: parsed?.stage || block?.stage,
-          approval: block?.approval || block?.plan || parsed?.approval || parsed?.plan,
-          alt: prompt || 'generated image',
-          t,
-          sendActionPrompt,
-        }))
+
+        let resolvedBeforeUrl = parsed.beforeUrl || block?.beforeUrl || ''
+        if (!resolvedBeforeUrl && args.before_image && typeof args.before_image === 'string') {
+          resolvedBeforeUrl = args.before_image.startsWith('http') || args.before_image.startsWith('/') ? args.before_image : '/dsh-image-gen/image?id=' + encodeURIComponent(args.before_image)
+        }
+        if (!resolvedBeforeUrl && args.image && typeof args.image === 'string') {
+          resolvedBeforeUrl = args.image.startsWith('http') || args.image.startsWith('/') ? args.image : '/dsh-image-gen/image?id=' + encodeURIComponent(args.image)
+        }
+        if (!resolvedBeforeUrl && revisions.length > 1 && activeRev > 0) {
+          resolvedBeforeUrl = revisions[0].url
+        }
+
+        if (compareActive && resolvedBeforeUrl && displaySrc) {
+          body.push(react.createElement(ImageCompareSlider, {
+            key: 'ab-compare',
+            beforeUrl: resolvedBeforeUrl,
+            afterUrl: displaySrc,
+            alt: prompt || 'Comparison',
+            t,
+          }))
+        } else {
+          const draftSrc = block && (block.draftUrl || block.previewUrl || '')
+          body.push(react.createElement(ProgressiveImagePreview, {
+            key: 'prog-img',
+            callId: block && (block.id || block.callId || block.toolCallId || ''),
+            src: displaySrc,
+            draftSrc,
+            isRunning: running,
+            progress: typeof parsed?.progress === 'number' ? parsed.progress : (typeof block?.progress === 'number' ? block.progress : undefined),
+            step: parsed?.step || block?.step,
+            stage: parsed?.stage || block?.stage,
+            approval: block?.approval || block?.plan || parsed?.approval || parsed?.plan,
+            alt: prompt || 'generated image',
+            t,
+            sendActionPrompt,
+          }))
+        }
       }
 
       const actions = []
       if (!running && !failed && (parsed.url || parsed.attachment || responsiveImages.length)) {
+        let hasCompareSource = Boolean(
+          parsed.beforeUrl || block?.beforeUrl || args.before_image || (args.image && typeof args.image === 'string') || (revisions.length > 1 && activeRev > 0)
+        )
+        if (hasCompareSource) {
+          actions.push(
+            react.createElement(
+              'button',
+              {
+                key: 'compare',
+                type: 'button',
+                className: compareActive ? 'ig-btn ig-btn-primary' : 'ig-btn',
+                onClick: () => setCompareActive(!compareActive),
+              },
+              '↔ ' + (compareActive ? (t('card.hideCompare') || 'Hide Compare') : (t('card.compare') || 'Compare'))
+            )
+          )
+        }
         actions.push(
           react.createElement('button', { key: 'inpaint', type: 'button', className: 'ig-btn', onClick: () => setInpaintOpen(!inpaintOpen) }, '🖌️ ' + (t('card.inpaint') || 'Inpaint')),
           react.createElement('button', { key: 'remix', type: 'button', className: 'ig-btn', onClick: () => setRemixOpen(!remixOpen) }, '⚡ ' + (t('card.remix') || 'Remix')),
