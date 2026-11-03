@@ -140,6 +140,9 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
 ## 🛠️ 新增核心功能 (v0.10.32)
 
+* **`compose_baoyu_prompt` (#505)**: 宝玉 5 维风格与构图 Prompt 组合器。沿构图类型、调色盘、渲染媒介、文字排版、情绪氛围 5 个正交维度合成专业设计规范，自带严格色彩渲染限制与分类检索。
+* **`canvas_state` (#506)**: 画布工作台状态实时探测。检查无限画布上的形状、生成图溯源（模型/提示词）、手绘画笔、文本便签及当前选中元素度量。
+* **`view_canvas` (#507)**: 画布选区截图固化与对话附件物化。将手绘草图或选中形状导出为耐用图片附件，解锁草图成图（sketch-to-image）与多模态交互式重绘。
 * **`compare_models_matrix` (#503)**: 多模型横向对比评测工具。单个 Prompt 一键同时调度 Gemini Imagen 3、FAL FLUX Dev、Replicate FLUX Schnell、Seedream 3、DALL-E 3 并发生成，自动适配画幅比例，测算延迟与成本，并通过 Sharp 合成并排对比图。
 * **`search_inspiration_prompts` (#504)**: 内置离线精选灵感提示词库（收录 awesome-gpt-image-2 与 handraw-style 970+ 案例），支持分类、画风、场景与关键词筛选，零 Token/网络开销。
 * **`generate_seamless_texture` (#468)**: 无缝平铺纹理与重复图案生成，适用于 3D 材质、游戏开发与网页背景，集成环形偏移接缝平滑与 3×3 预览网格。
