@@ -51,6 +51,8 @@ const EXPECTED_TOOLS = [
   'reverse_prompt_and_recreate',
   'restore_face_and_details',
   'generate_seamless_texture',
+  'compare_models_matrix',
+  'search_inspiration_prompts',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -103,6 +105,8 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerReversePromptTools',
     'registerRestoreFaceTools',
     'registerTextureTools',
+    'registerModelMatrixTools',
+    'registerInspirationTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }

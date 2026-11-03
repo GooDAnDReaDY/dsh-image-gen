@@ -140,6 +140,8 @@ MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
 ## 🛠️ 新增核心功能 (v0.10.32)
 
+* **`compare_models_matrix` (#503)**: 多模型横向对比评测工具。单个 Prompt 一键同时调度 Gemini Imagen 3、FAL FLUX Dev、Replicate FLUX Schnell、Seedream 3、DALL-E 3 并发生成，自动适配画幅比例，测算延迟与成本，并通过 Sharp 合成并排对比图。
+* **`search_inspiration_prompts` (#504)**: 内置离线精选灵感提示词库（收录 awesome-gpt-image-2 与 handraw-style 970+ 案例），支持分类、画风、场景与关键词筛选，零 Token/网络开销。
 * **`generate_seamless_texture` (#468)**: 无缝平铺纹理与重复图案生成，适用于 3D 材质、游戏开发与网页背景，集成环形偏移接缝平滑与 3×3 预览网格。
 * **`reverse_prompt_and_recreate` (#465)**: 基于视觉反向工程与美学风格提取，将任意图像逆向解析为结构化提示词，并可一键重新合成风格化副本。
 * **`restore_face_and_details` (#467)**: 局部面部与高频细节修复管线（Hi-Res 细节修复），自动定位面部与焦点区域，并采用羽化边缘无缝融合。

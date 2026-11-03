@@ -1,0 +1,843 @@
+{
+  "source": "JimLiu/baoyu-skills baoyu-cover-image skill (MIT)",
+  "types": [
+    {
+      "id": "hero",
+      "description": "Large visual impact, title overlay",
+      "composition": "Large focal visual (60-70% area), title overlay on visual, dramatic composition"
+    },
+    {
+      "id": "conceptual",
+      "description": "Concept visualization, abstract core ideas",
+      "composition": "Abstract shapes representing core concepts, information hierarchy, clean zones"
+    },
+    {
+      "id": "typography",
+      "description": "Text-focused layout, prominent title",
+      "composition": "Title as primary element (40%+ area), minimal supporting visuals, strong hierarchy"
+    },
+    {
+      "id": "metaphor",
+      "description": "Visual metaphor, concrete expressing abstract",
+      "composition": "Concrete object/scene representing abstract idea, symbolic elements, emotional resonance"
+    },
+    {
+      "id": "scene",
+      "description": "Atmospheric scene, narrative feel",
+      "composition": "Atmospheric environment, narrative elements, mood-setting lighting and colors"
+    },
+    {
+      "id": "minimal",
+      "description": "Minimalist composition, generous whitespace",
+      "composition": "Single focal element, generous whitespace (60%+), essential shapes only"
+    }
+  ],
+  "palettes": [
+    {
+      "id": "warm",
+      "tagline": "Friendly, approachable, human-centered",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Warm Orange",
+          "hex": "#ed8936"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Golden Yellow",
+          "hex": "#f6ad55"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Terracotta",
+          "hex": "#c05621"
+        },
+        {
+          "role": "Background",
+          "name": "Cream",
+          "hex": "#fffaf0"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Soft Peach",
+          "hex": "#fed7aa"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Deep Brown",
+          "hex": "#744210"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Soft Red",
+          "hex": "#e53e3e"
+        }
+      ],
+      "decorativeHints": [
+        "Sun rays, warm lighting effects",
+        "Rounded shapes, organic curves",
+        "Hearts, smiling faces, friendly icons",
+        "Warm gradient overlays"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "cool",
+      "tagline": "Technical, professional, precise",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Engineering Blue",
+          "hex": "#2563eb"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Navy Blue",
+          "hex": "#1e3a5f"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Cyan",
+          "hex": "#06b6d4"
+        },
+        {
+          "role": "Background",
+          "name": "Light Gray",
+          "hex": "#f8f9fa"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Blueprint Off-White",
+          "hex": "#faf8f5"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Amber",
+          "hex": "#f59e0b"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Light Blue",
+          "hex": "#bfdbfe"
+        }
+      ],
+      "decorativeHints": [
+        "Grid lines and alignment guides",
+        "Dimension indicators and measurements",
+        "Technical schematics and diagrams",
+        "Geometric precision elements"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "dark",
+      "tagline": "Cinematic, premium, atmospheric",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Electric Purple",
+          "hex": "#8b5cf6"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Cyan Blue",
+          "hex": "#06b6d4"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Magenta Pink",
+          "hex": "#ec4899"
+        },
+        {
+          "role": "Background",
+          "name": "Deep Purple-Black",
+          "hex": "#0a0a0a"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Rich Navy",
+          "hex": "#1a1a2e"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Amber",
+          "hex": "#f59e0b"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Pure White",
+          "hex": "#ffffff"
+        }
+      ],
+      "decorativeHints": [
+        "Glowing accent elements and neon highlights",
+        "Atmospheric fog or particle effects",
+        "Silhouettes with backlit edges",
+        "Subtle gradient backgrounds"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "earth",
+      "tagline": "Natural, organic, grounded",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Forest Green",
+          "hex": "#276749"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Sage",
+          "hex": "#9ae6b4"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Earth Brown",
+          "hex": "#744210"
+        },
+        {
+          "role": "Background",
+          "name": "Sand Beige",
+          "hex": "#f5e6d3"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Sky Blue",
+          "hex": "#e0f2fe"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Sunset Orange",
+          "hex": "#ed8936"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Water Blue",
+          "hex": "#63b3ed"
+        }
+      ],
+      "decorativeHints": [
+        "Leaves, trees, mountains, natural forms",
+        "Sun, clouds, organic flowing lines",
+        "Botanical illustrations",
+        "Earthy textures and natural patterns"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "elegant",
+      "tagline": "Sophisticated, refined, understated luxury",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Soft Coral",
+          "hex": "#e8a598"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Muted Teal",
+          "hex": "#5b8a8a"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Dusty Rose",
+          "hex": "#d4a5a5"
+        },
+        {
+          "role": "Background",
+          "name": "Warm Cream",
+          "hex": "#f5f0e6"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Soft Beige",
+          "hex": "#f0ebe0"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Gold",
+          "hex": "#c9a962"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Copper",
+          "hex": "#b87333"
+        }
+      ],
+      "decorativeHints": [
+        "Delicate ornamental details",
+        "Subtle gradients and soft transitions",
+        "Refined geometric patterns",
+        "Balanced, symmetrical compositions"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "macaron",
+      "tagline": "Soft macaron pastel color blocks on warm cream",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Sky Blue",
+          "hex": "#a8d8ea"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Mint Green",
+          "hex": "#b5e5cf"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Lavender",
+          "hex": "#d5c6e0"
+        },
+        {
+          "role": "Background",
+          "name": "Warm Cream",
+          "hex": "#f5f0e8"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Peach",
+          "hex": "#ffd5c2"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Coral Red",
+          "hex": "#e8655a"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Deep Charcoal",
+          "hex": "#2d2d2d"
+        }
+      ],
+      "decorativeHints": [
+        "Rounded pastel color blocks",
+        "Subtle warm paper grain texture",
+        "Soft shadows, no hard edges",
+        "Gentle gradient transitions between zones"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "mono",
+      "tagline": "Clean, focused, essential",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Pure Black",
+          "hex": "#000000"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Near Black",
+          "hex": "#1f1f1f"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Dark Gray",
+          "hex": "#374151"
+        },
+        {
+          "role": "Background",
+          "name": "White",
+          "hex": "#ffffff"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Off-White",
+          "hex": "#fafafa"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Medium Gray",
+          "hex": "#9ca3af"
+        }
+      ],
+      "decorativeHints": [
+        "Maximum negative space",
+        "Thin lines and minimal strokes",
+        "Single focal point emphasis",
+        "Stark contrast between elements"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "pastel",
+      "tagline": "Gentle, whimsical, soft",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Soft Pink",
+          "hex": "#ffb6c1"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Mint",
+          "hex": "#98d8c8"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Lavender",
+          "hex": "#c8a2c8"
+        },
+        {
+          "role": "Background",
+          "name": "White",
+          "hex": "#ffffff"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Light Cream",
+          "hex": "#fff8e7"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Butter Yellow",
+          "hex": "#fffacd"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Sky Blue",
+          "hex": "#bee3f8"
+        }
+      ],
+      "decorativeHints": [
+        "Cute rounded proportions",
+        "Stars, sparkles, flowers, decorative flourishes",
+        "Soft shadows and gentle highlights",
+        "Storybook-style elements"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "retro",
+      "tagline": "Nostalgic, vintage, classic",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Coral Red",
+          "hex": "#e07a5f"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Mint Green",
+          "hex": "#81b29a"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Mustard Yellow",
+          "hex": "#f2cc8f"
+        },
+        {
+          "role": "Primary 4",
+          "name": "Dark Maroon",
+          "hex": "#5d3a3a"
+        },
+        {
+          "role": "Background",
+          "name": "Cream Off-White",
+          "hex": "#f5f0e6"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Aged Paper",
+          "hex": "#f5e6d3"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Burnt Orange",
+          "hex": "#d4764a"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Rock Blue",
+          "hex": "#577590"
+        },
+        {
+          "role": "Accent 3",
+          "name": "Vintage Gold",
+          "hex": "#c9a227"
+        },
+        {
+          "role": "Accent 4",
+          "name": "Faded Teal",
+          "hex": "#2f7373"
+        }
+      ],
+      "decorativeHints": [
+        "Halftone dots and vintage badges",
+        "Aged textures with subtle paper grain",
+        "Sunburst/radiating lines for energy",
+        "Pill-shaped clouds, small dots and stars",
+        "Classic icons and retro motifs"
+      ],
+      "bestFor": ""
+    },
+    {
+      "id": "duotone",
+      "tagline": "Dramatic, cinematic, two-color high contrast",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Burnt Orange",
+          "hex": "#e8751a"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Deep Teal",
+          "hex": "#0a6e6e"
+        },
+        {
+          "role": "Background",
+          "name": "Off-Black",
+          "hex": "#121212"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Dark Charcoal",
+          "hex": "#1e1e1e"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Warm Cream",
+          "hex": "#f5e6d0"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Amber Highlight",
+          "hex": "#f4a623"
+        }
+      ],
+      "decorativeHints": [
+        "Stark two-color separation across entire composition",
+        "Halftone transitions between the two colors",
+        "Silhouettes in one color against the other",
+        "Minimal use of third color (only for small highlights)",
+        "High contrast figure-ground relationships"
+      ],
+      "bestFor": "",
+      "pairs": [
+        {
+          "name": "Orange + Teal",
+          "a": "#e8751a",
+          "b": "#0a6e6e",
+          "feel": "Cinematic, action"
+        },
+        {
+          "name": "Red + Cream",
+          "a": "#c0392b",
+          "b": "#f5e6d0",
+          "feel": "Bold, classic"
+        },
+        {
+          "name": "Blue + Gold",
+          "a": "#1a3a5c",
+          "b": "#d4a843",
+          "feel": "Prestigious, premium"
+        },
+        {
+          "name": "Purple + Green",
+          "a": "#6b3fa0",
+          "b": "#2ecc71",
+          "feel": "Futuristic, contrast"
+        },
+        {
+          "name": "Magenta + Cyan",
+          "a": "#c2185b",
+          "b": "#00bcd4",
+          "feel": "Vibrant, pop"
+        },
+        {
+          "name": "Crimson + Navy",
+          "a": "#dc143c",
+          "b": "#0d1b2a",
+          "feel": "Dramatic, noir"
+        }
+      ]
+    },
+    {
+      "id": "vivid",
+      "tagline": "Energetic, bold, attention-grabbing",
+      "colors": [
+        {
+          "role": "Primary 1",
+          "name": "Bright Red",
+          "hex": "#ef4444"
+        },
+        {
+          "role": "Primary 2",
+          "name": "Neon Green",
+          "hex": "#22c55e"
+        },
+        {
+          "role": "Primary 3",
+          "name": "Electric Blue",
+          "hex": "#3b82f6"
+        },
+        {
+          "role": "Background",
+          "name": "Light Blue",
+          "hex": "#eff6ff"
+        },
+        {
+          "role": "Background Alt",
+          "name": "Soft Lavender",
+          "hex": "#f5f3ff"
+        },
+        {
+          "role": "Accent 1",
+          "name": "Bright Orange",
+          "hex": "#fb923c"
+        },
+        {
+          "role": "Accent 2",
+          "name": "Vivid Yellow",
+          "hex": "#facc15"
+        }
+      ],
+      "decorativeHints": [
+        "Dynamic diagonal lines and angles",
+        "Bold geometric shapes and color blocks",
+        "Dramatic lighting effects",
+        "High-energy visual compositions"
+      ],
+      "bestFor": ""
+    }
+  ],
+  "renderings": [
+    {
+      "id": "flat-vector",
+      "tagline": "Clean, modern, geometric illustration",
+      "lines": [
+        "Clean outlines with uniform stroke weight",
+        "Closed shapes (coloring-book style)",
+        "Rounded line endings, avoid sharp corners",
+        "Consistent stroke width throughout"
+      ],
+      "texture": [
+        "None: smooth, flat color fills only",
+        "No gradients, shadows, or noise",
+        "Solid color blocks"
+      ],
+      "depth": [
+        "Flat: no shadows, no perspective",
+        "2D layering with overlap for depth illusion",
+        "Optional 2.5D isometric layering (front/back occlusion, no atmospheric perspective)",
+        "No 3D effects or bevels"
+      ],
+      "elements": [
+        "Geometric icons and simple shapes",
+        "Bold outlined objects with clean fills",
+        "Geometric simplification: complex objects → basic shapes (trees → lollipop/triangle, buildings → rectangles)",
+        "\"Toy model\" aesthetic: cute, rounded proportions",
+        "Decorative: dots, lines, sunbursts, pill-shaped clouds, small stars",
+        "Isolated elements on clean backgrounds"
+      ]
+    },
+    {
+      "id": "pixel",
+      "tagline": "Retro 8-bit, nostalgic, chunky",
+      "lines": [
+        "Pixel grid alignment, no anti-aliasing",
+        "Staircase edges on diagonals",
+        "Single-pixel or double-pixel outlines",
+        "Blocky, angular forms"
+      ],
+      "texture": [
+        "Dithering patterns for gradients",
+        "No smooth transitions",
+        "Cross-hatching with pixel precision",
+        "Limited 16-32 color palette per scene"
+      ],
+      "depth": [
+        "None: flat pixel planes only",
+        "Parallax layering (foreground/background)",
+        "No perspective or 3D effects"
+      ],
+      "elements": [
+        "8-bit sprites and chunky shapes",
+        "Simple iconography: stars, hearts, arrows",
+        "Text bubbles with pixel borders",
+        "Progress bars with chunky segments",
+        "Retro gaming UI elements"
+      ]
+    },
+    {
+      "id": "digital",
+      "tagline": "Polished, precise, modern",
+      "lines": [
+        "Clean, precise, computer-perfect edges",
+        "Consistent stroke weights",
+        "Sharp corners where appropriate",
+        "Anti-aliased smooth rendering"
+      ],
+      "texture": [
+        "Smooth surfaces with no visible texture",
+        "Subtle gradients permitted (soft, controlled)",
+        "Frosted glass and blur effects",
+        "Clean shadows with consistent direction"
+      ],
+      "depth": [
+        "Subtle gradients and soft drop shadows",
+        "Layered card-based layouts",
+        "Light 3D effects (subtle, not realistic)",
+        "Material Design-inspired elevation"
+      ],
+      "elements": [
+        "Polished icons and UI components",
+        "Data visualizations: charts, graphs, metrics",
+        "Card layouts and structured grids",
+        "Tag chips, progress bars, status indicators",
+        "Clean geometric shapes"
+      ]
+    },
+    {
+      "id": "hand-drawn",
+      "tagline": "Sketchy, organic, personal",
+      "lines": [
+        "Sketchy, organic, slightly imperfect strokes",
+        "Variable line weight (thicker at pressure points)",
+        "Wavy connectors and arrows",
+        "Natural hand tremor visible"
+      ],
+      "texture": [
+        "Paper grain and subtle surface texture",
+        "Pencil/pen/marker texture on strokes",
+        "Casual fills with visible brush direction"
+      ],
+      "depth": [
+        "Minimal: light hand-drawn shadows or hatching",
+        "No realistic depth or perspective",
+        "Simple layering with overlap"
+      ],
+      "elements": [
+        "Doodles, organic shapes, hand-lettered labels",
+        "Conceptual icons with sketchy quality",
+        "Connection lines with hand-drawn wavy feel",
+        "Stars, arrows, underlines, circles, checkmarks",
+        "Stick figures and simple characters"
+      ]
+    },
+    {
+      "id": "painterly",
+      "tagline": "Soft, artistic, expressive",
+      "lines": [
+        "Soft brush strokes with variable opacity",
+        "No hard outlines; edges defined by color transitions",
+        "Organic flowing strokes with natural blending"
+      ],
+      "texture": [
+        "Visible paint or watercolor wash textures",
+        "Color bleeds and wet-on-wet effects",
+        "Paper texture showing through transparent areas",
+        "Brush stroke patterns visible"
+      ],
+      "depth": [
+        "Soft edges with natural color blending",
+        "Atmospheric depth through color fading",
+        "Layered washes creating depth illusion"
+      ],
+      "elements": [
+        "Watercolor washes as backgrounds",
+        "Natural elements: leaves, flowers, organic forms",
+        "Soft gradients and color transitions",
+        "Splatter and drip effects as accents",
+        "Botanical and environmental motifs"
+      ]
+    },
+    {
+      "id": "chalk",
+      "tagline": "Educational, authentic, classroom",
+      "lines": [
+        "Imperfect chalk strokes with variable pressure",
+        "Visible chalk texture and grain",
+        "Slightly wobbly, hand-drawn quality",
+        "Thick strokes for emphasis, thin for details"
+      ],
+      "texture": [
+        "Chalk dust effects around text and elements",
+        "Board surface (dark, slightly worn)",
+        "Eraser smudges and residue",
+        "Grainy chalk quality on all elements"
+      ],
+      "depth": [
+        "None: flat chalk drawings on board surface",
+        "Layering through erasure and redrawing",
+        "No shadows or perspective"
+      ],
+      "elements": [
+        "Chalk doodles: stars, arrows, underlines",
+        "Mathematical formulas and diagrams",
+        "Stick figures and simple icons",
+        "Connection lines with chalk feel",
+        "Checkmarks, circles, boxes for lists",
+        "Wooden frame border optional"
+      ]
+    },
+    {
+      "id": "screen-print",
+      "tagline": "Bold, limited-color poster art with print texture",
+      "lines": [
+        "Clean, sharp edges between color blocks",
+        "No outlines — shapes defined by color boundaries",
+        "Stencil-cut quality, bold silhouettes",
+        "Geometric shapes with precise registration"
+      ],
+      "texture": [
+        "Halftone dot patterns within color fills",
+        "Slight color layer misregistration (offset between print layers)",
+        "Paper grain texture beneath colors",
+        "Risograph / screen print imperfections (ink spread, dot gain)"
+      ],
+      "depth": [
+        "Flat color planes layered front to back",
+        "Depth through silhouette overlap and color layering",
+        "No gradients — tonal variation via halftone density",
+        "Negative space as active compositional element"
+      ],
+      "elements": [
+        "Bold silhouettes and symbolic shapes",
+        "Geometric framing (circles, arches, triangles)",
+        "Figure-ground inversion (negative space forms secondary image)",
+        "Limited icon vocabulary: key props, symbolic objects",
+        "Typography integrated as design element, not overlay",
+        "Vintage poster border treatments"
+      ]
+    }
+  ],
+  "textLevels": [
+    {
+      "id": "none",
+      "area": "85% visual area"
+    },
+    {
+      "id": "title-only",
+      "area": "85% visual area"
+    },
+    {
+      "id": "title-subtitle",
+      "area": "75% visual area"
+    },
+    {
+      "id": "text-rich",
+      "area": "60% visual area"
+    }
+  ],
+  "moods": [
+    {
+      "id": "subtle",
+      "application": "Use low contrast, muted colors, light visual weight, calm aesthetic"
+    },
+    {
+      "id": "balanced",
+      "application": "Use medium contrast, normal saturation, balanced visual weight"
+    },
+    {
+      "id": "bold",
+      "application": "Use high contrast, vivid saturated colors, heavy visual weight, dynamic energy"
+    }
+  ]
+}

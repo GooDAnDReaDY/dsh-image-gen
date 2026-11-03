@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.22
+
+### Added
+- **Multi-Model Shootout Comparison Matrix Tool (`compare_models_matrix`) (#503)**: Concurrently benchmarks a single prompt across multiple providers and models (Google Imagen 3, FAL FLUX Dev, Replicate FLUX Schnell, Seedream 3.0, OpenAI DALL-E 3, etc.) using `asyncPool`. Features target settings adapters (`buildComparisonTargets`) that automatically adapt aspect ratios and parameters per model with `adjusted` tracking. Automatically composites successful model outputs into a unified Sharp contact sheet grid with model name badges and latency overlays, and outputs a formatted Markdown comparison table with duration, estimated cost, and asset links.
+- **Bundled Offline Inspiration Prompt Catalog (`search_inspiration_prompts`) (#504)**: Curated offline database of 970+ production-tested artistic and photographic prompts from `awesome-gpt-image-2` and `handraw-style` collections. Zero token and network overhead. Features rich multi-attribute filtering by category, style tag, scene, keywords, and case ID, plus random creative sampling and taxonomy exploration (`list_categories: true`) with ready-to-use bracketed placeholder templates.
+
 ## 0.12.21
 
 ### Added
