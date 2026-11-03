@@ -1,3 +1,7 @@
+## 🚀 Updates v0.12.21: Composer Provider Pill & In-Card Regenerate Modal (#501, #502)
+- **Quick Provider Switcher Pill in Composer (#501)**: Mounted in `conversation.input.right` slot. Quick-switch providers and models on the fly directly from the composer toolbar without navigating to settings.
+- **In-Card Regenerate with Prompt Edit Modal (#502)**: Edit prompt and choose new vs same seed right from the chat message card with the `🔄 Regenerate…` button.
+
 ## 🚀 Updates v0.12.20: Interactive A/B Comparison Slider & Persistent Revision Carousel (#499, #500)
 - **Interactive In-Chat A/B Comparison Slider (#499)**: Touch- and mouse-friendly Before/After split comparison slider with draggable vertical divider handle and translucent badges. Seamlessly reveals original vs enhanced versions in chat cards for face restoration, inpainting, remix variations, and multi-version revisions.
 - **Persistent Revision Switcher Carousel in Chat Cards (#500)**: In-card revision history switcher with `< v1 / N >` navigation buttons, seed / timestamp metadata badges, and client-side `localStorage` caching (`dsh_image_gen_revisions:`) capped at 20 revisions across page reloads.
