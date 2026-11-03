@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.21
+
+### Added
+- **Quick Provider Switcher Pill in Chat Composer (`ProviderPill`) (#501)**: Mounted into official DSH slot `conversation.input.right`. Renders interactive provider status pill with active icon and dropdown menu for on-the-fly switching between FAL, Gemini, OpenAI, Replicate, Seedream, ComfyUI, and Subscription providers without opening Settings. Configurable via `showProviderPill` setting.
+- **In-Card Regenerate with Prompt Edit Modal (`conversation-regenerate`) (#502)**: Direct `🔄 Regenerate…` action in chat cards opening an in-card overlay with full multi-line prompt editing, aspect ratio preservation, and New vs Same seed controls.
+
 ## 0.12.20
 
 ### Added
