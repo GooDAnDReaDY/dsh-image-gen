@@ -53,6 +53,9 @@ const EXPECTED_TOOLS = [
   'generate_seamless_texture',
   'compare_models_matrix',
   'search_inspiration_prompts',
+  'compose_baoyu_prompt',
+  'canvas_state',
+  'view_canvas',
 ]
 
 test('lifecycle: apply() delegates to registerAllTools and keeps host thin', () => {
@@ -107,6 +110,8 @@ test('lifecycle: orchestrator wires all tool groups', () => {
     'registerTextureTools',
     'registerModelMatrixTools',
     'registerInspirationTools',
+    'registerBaoyuComposeTools',
+    'registerCanvasTools',
   ]) {
     assert.match(src, new RegExp(fn))
   }
