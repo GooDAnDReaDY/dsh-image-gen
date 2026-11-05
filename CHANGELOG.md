@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.26
+
+### Added
+- **Composer Provider Button Visibility Setting in Settings Card (`showProviderPill`) (#519)**: Added an accessible, clearly named switch (`showProviderPill`) to the General tab in the Image Generation settings card (`FalSettingsCard`). Allows users to hide or show the chat composer toolbar provider/model switcher button directly through the UI without manual file edits. Persists across application restarts in both DSH Desktop and Web profiles while keeping generation, active provider, models, and gallery capabilities fully operational. Includes complete English and Chinese localization and unit test coverage.
+
 ## 0.12.25
 
 ### Fixed
