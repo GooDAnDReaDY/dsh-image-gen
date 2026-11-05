@@ -160,6 +160,8 @@
       'f.seedreamKeyEnvHint': '存储 SeaDream 接口密钥的凭证名称。',
       'f.seedreamModel': 'SeaDream 模型 ID',
       'f.seedreamModelHint': '字节跳动 SeaDream 图像模型标识符。',
+      'f.showProviderPill': '输入框服务商切换按钮',
+      'f.showProviderPillHint': '在对话输入框中显示或隐藏快速切换图像服务商和模型的快捷按钮。',
       'f.stylePreset': '艺术风格后缀',
       'f.stylePresetHint': '自动追加到所有生成提示词末尾的风格后缀。',
       'f.subscriptionQuality': '订阅质量',

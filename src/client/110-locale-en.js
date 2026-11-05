@@ -160,6 +160,8 @@
       'f.seedreamKeyEnvHint': 'Credential reference holding the SeaDream API key.',
       'f.seedreamModel': 'SeaDream Model ID',
       'f.seedreamModelHint': 'ByteDance SeaDream model identifier.',
+      'f.showProviderPill': 'Composer Provider Button',
+      'f.showProviderPillHint': 'Show or hide the quick provider and model switcher button in the chat input composer.',
       'f.stylePreset': 'Artistic Style Preset',
       'f.stylePresetHint': 'Automatic visual style suffix added to all generated prompts.',
       'f.subscriptionQuality': 'Subscription Quality',

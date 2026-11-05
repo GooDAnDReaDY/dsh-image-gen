@@ -15,6 +15,7 @@
     const FIELDS = [
       // General
       { field: 'enabled', spec: booleanField('enabled'), kind: 'select', options: ['true', 'false'], labelKey: 'f.enabled', hintKey: 'f.enabledHint', tab: 'general' },
+      { field: 'showProviderPill', spec: booleanField('showProviderPill'), kind: 'select', options: ['true', 'false'], labelKey: 'f.showProviderPill', hintKey: 'f.showProviderPillHint', tab: 'general' },
       { field: 'provider', spec: selectField('provider', PROVIDERS), kind: 'select', options: PROVIDERS, labelKey: 'f.provider', hintKey: 'f.providerHint', tab: 'general', providerNeeds: { fal: 'f.needFal', custom: 'f.needCustom', codex: 'f.needCodex', grok: 'f.needGrok', local: 'f.needLocal', seedream: 'f.needSeedream', gemini: 'f.needGemini', replicate: 'f.needReplicate' } },
       { field: 'defaultSize', spec: selectField('defaultSize', IMAGE_SIZES), kind: 'select', options: IMAGE_SIZES, labelKey: 'f.defaultSize', hintKey: 'f.defaultSizeHint', sizePixels: SIZE_PIXELS, tab: 'general' },
       { field: 'defaultFormat', spec: selectField('defaultFormat', OUTPUT_FORMATS), kind: 'select', options: OUTPUT_FORMATS, labelKey: 'f.defaultFormat', hintKey: 'f.defaultFormatHint', tab: 'general' },

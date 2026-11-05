@@ -1,3 +1,6 @@
+## 🚀 Updates v0.12.26: Composer Provider Button Visibility Setting (#519)
+- **Composer Provider Button Visibility Setting (`showProviderPill`) (#519)**: Added an accessible toggle in the General tab of Image Generation settings to show or hide the quick provider/model switcher button in the chat input composer. Changing visibility preserves configured provider, model, generation tools, and gallery capabilities without disabling the plugin.
+
 ## 🚀 Updates v0.12.21: Composer Provider Pill & In-Card Regenerate Modal (#501, #502)
 - **Quick Provider Switcher Pill in Composer (#501)**: Mounted in `conversation.input.right` slot. Quick-switch providers and models on the fly directly from the composer toolbar without navigating to settings.
 - **In-Card Regenerate with Prompt Edit Modal (#502)**: Edit prompt and choose new vs same seed right from the chat message card with the `🔄 Regenerate…` button.
