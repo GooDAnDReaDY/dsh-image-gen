@@ -37,6 +37,6 @@ Thumbs.db
 
 # internal agent plans
 docs/plans/
- generated-images/ 
- image-*.png 
-image-*.jpg 
+generated-images/
+image-*.png
+image-*.jpg

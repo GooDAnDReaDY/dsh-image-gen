@@ -105,12 +105,12 @@
 
       const updatePrompt = (val) => {
         setPrompt(val)
-        try { window.localStorage.setItem('dsh_studio_prompt', val) } catch (_) {}
+        try { window.localStorage.setItem('dsh_studio_prompt', val) } catch (_) { /* ignore localStorage quota/disabled */ }
       }
 
       const updateNegativePrompt = (val) => {
         setNegativePrompt(val)
-        try { window.localStorage.setItem('dsh_studio_neg_prompt', val) } catch (_) {}
+        try { window.localStorage.setItem('dsh_studio_neg_prompt', val) } catch (_) { /* ignore localStorage quota/disabled */ }
       }
 
       const handleAddStyleTag = (tag) => {
@@ -170,7 +170,7 @@
             if (typeof window !== 'undefined' && typeof window.Event === 'function') chatInput.dispatchEvent(new window.Event('input', { bubbles: true }))
             inserted = true
           }
-        } catch (_) {}
+        } catch (_) { /* ignore chat input access failure */ }
 
         if (typeof navigator !== 'undefined' && navigator.clipboard) {
           navigator.clipboard.writeText(snippet)

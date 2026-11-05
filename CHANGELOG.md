@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.25
+
+### Fixed
+- **Preflight Quota Hardening & Offline Dataset Chunking (`awesome-gpt-image-2`, `handraw-style`) (#517)**: Pre-compressed offline inspiration prompt datasets with gzip (`.json.gz`) and chunked the large GPT dataset into two sub-256KB parts (`part1` and `part2`), loaded transparently via native `zlib.gunzipSync` in `lib/inspiration-catalog.js`. Enforces that all published npm package files strictly satisfy the 256 KB preflight quota while preserving 100% of the 970+ curated prompt cases offline.
+- **Watermark Parameter Wiring in Tool Schema and Provider Dispatch (#517)**: Fully exposed the `watermark` parameter (`default`, `off`, `on`) in the `generate_image` tool schema in `lib/tools/generation.js` and wired it into `makeProviders` options.
+- **ComfyUI Multipart Error Sanitization (#517)**: Sanitized and truncated ComfyUI upload response errors in `lib/comfy-workflow-helpers.js` using `sanitizeErrorAndLogs`, preventing potential secret or internal path leakage into user-facing error messages.
+- **Client Catch Hardening & Dead Code Cleanup (#517)**: Annotated silent `catch (_) {}` blocks in `src/client/150-image-studio.js` with explicit intent comments for localStorage quotas and chat input access fallbacks. Removed dead/unused imports from `lib/tools/workspace-save.js`. Rebuilt client bundle with 0 preflight FAILs and all 363 localization keys aligned.
+
 ## 0.12.24
 
 ### Added
