@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.27
+
+### Changed
+- **Internal Export Cleanup & Preflight Heuristic Hardening (#521)**: Unexported module-internal storage constants in `lib/gallery-store.js` (`DB_NAME`, `DB_VERSION`, `STORE_NAME`, `TOMBSTONE_STORE`, `FAV_PROMPT_STORE`, `FAV_FOLDER_STORE`), watermark options in `lib/watermark.js` (`WATERMARK_OPTIONS`), loop guard default in `lib/loop-guard.js` (`DEFAULT_MAX_CONSECUTIVE_GENERATIONS`), and filename matching regex in `lib/workspace-save.js` (`GENERATED_IMAGE_NAME_REGEX`), keeping module internals encapsulated while preserving 100% public package API compatibility.
+- **Test Simulation Utility Contract Annotations (#521)**: Added explicit `@internal` JSDoc annotations to test-only helpers (`clearAllApprovals` in `lib/approval-gate.js`, `processBatchItems` in `lib/batch-queue.js`, `compositeInpaintPatch` in `lib/inpaint-staging.js`) for clear architectural contracts and preflight heuristic compliance.
+
 ## 0.12.26
 
 ### Added
