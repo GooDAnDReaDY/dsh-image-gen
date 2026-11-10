@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.12.28
+
+### Security
+- **Fail-Closed Core Authorization for History Route (`/dsh-image-gen/history`) (#530)**: Added explicit core route rejection check (`getRouteRejectionStatus(req, { connection })`) preventing unauthenticated reads of prompt history, models, and attachment references from private LAN and Tailscale environments without authenticated DSH session credentials.
+- **Fail-Closed Write Authorization for Updater Endpoint (`/api/dsh-image-gen/update`) (#531)**: Added `getRouteWriteRejectionStatus` to the updater endpoint, guarding against unauthorized remote triggers of package updates across local network topologies.
+- **Supply-Chain Dependency Vulnerability Remediation (`zod`, `fast-uri`) (#533)**: Fixed development dependency lockfile vulnerabilities by enforcing `overrides` for `zod >=4.6.6` (addressing memory exhaustion advisory GHSA-mrhx-c7xc-m3w5) and `fast-uri >=3.1.9` (addressing GHSA-w74x-v6f9-j3xg), resulting in 0 vulnerabilities in `npm audit`.
+
+### Fixed
+- **Integration of Lifecycle, Batch Queue, and Inpaint Compositing Capabilities (#532)**:
+  - Connected `clearAllApprovals` to the Cordis plugin lifecycle disposal event (`ctx.on('dispose', ...)`), ensuring pending user confirmation gates are cleanly rejected upon plugin reload.
+  - Exposed and wired `processBatchItems` directly into the `manage_batch_queue` tool (`action: 'process'`) for deterministic concurrent queue execution.
+  - Connected `compositeInpaintPatch` into `createStagingSession` for local pixel-level patch compositing.
+  - Eliminated all heuristic dead-export warnings in preflight verification.
+
 ## 0.12.27
 
 ### Changed
