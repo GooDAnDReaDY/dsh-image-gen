@@ -374,4 +374,8 @@
       'privacy.active': 'Hidden (Blur)',
       'privacy.inactive': 'Visible',
       'privacy.revealHint': 'Hover to reveal',
+      'card.fallback': 'Fallback',
+      'studio.workflowDrop': 'Drop ComfyUI PNG or JSON workflow to import',
+      'studio.workflowImported': 'Workflow imported successfully',
+      'studio.invalidJson': 'Invalid workflow JSON',
     }

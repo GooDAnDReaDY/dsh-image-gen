@@ -49,11 +49,13 @@
         }
       }
 
+      const _fallback = meta?._fallback || block?._fallback || block?.result?._fallback || null
       return {
         attachment,
         url,
         beforeUrl,
         text: cleanText,
+        _fallback,
       }
     }
 
@@ -298,10 +300,29 @@
         sendActionPrompt(t('card.actionRemoveBg') + ': remove_background(image: "' + ref + '")')
       }
 
+      const fallbackInfo = parsed._fallback || block?._fallback || block?.result?._fallback || null
+      const fallbackBadge = fallbackInfo && fallbackInfo.triggered ? react.createElement(
+        'span',
+        {
+          className: 'ig-badge',
+          style: {
+            fontSize: '11px',
+            background: 'var(--dsw-alias-brand-subtle, rgba(59, 130, 246, 0.15))',
+            color: 'var(--dsw-alias-brand, #3b82f6)',
+            borderColor: 'var(--dsw-alias-brand, #3b82f6)',
+            padding: '2px 6px',
+            borderRadius: '4px',
+          },
+          title: `Fallback: ${fallbackInfo.primaryProvider} → ${fallbackInfo.actualProvider || fallbackInfo.providerUsed}`,
+        },
+        `⚡ ${t('card.fallback')}: ${fallbackInfo.actualProvider || fallbackInfo.providerUsed}`
+      ) : null
+
       const head = react.createElement(
         'div',
-        { className: 'ig-card-head' },
-        running ? '⏳ ' + t('card.generating') : failed ? '❌ ' + t('card.failed') : '🖼️ ' + t('card.image')
+        { className: 'ig-card-head', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+        react.createElement('span', null, running ? '⏳ ' + t('card.generating') : failed ? '❌ ' + t('card.failed') : '🖼️ ' + t('card.image')),
+        fallbackBadge
       )
 
       const body = []

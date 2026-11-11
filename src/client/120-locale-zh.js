@@ -374,4 +374,8 @@
       'privacy.active': '已隐藏（模糊）',
       'privacy.inactive': '正常显示',
       'privacy.revealHint': '悬停显示预览',
+      'card.fallback': '故障转移',
+      'studio.workflowDrop': '拖入 ComfyUI PNG 或 JSON 工作流以导入',
+      'studio.workflowImported': '工作流导入成功',
+      'studio.invalidJson': '无效的工作流 JSON',
     }

@@ -122,7 +122,7 @@ function createMockEnvironment() {
 
 test('tools-execute-smoke-382: all 35 tools have functional execute smoke checks', async () => {
   const env = createMockEnvironment()
-  assert.equal(env.registeredTools.size, 47, 'Profile all must register all 46 tools')
+  assert.equal(env.registeredTools.size, 48, 'Profile all must register all 48 tools')
 
   const originalFetch = globalThis.fetch
   globalThis.fetch = env.mockFetch
@@ -145,6 +145,7 @@ test('tools-execute-smoke-382: all 35 tools have functional execute smoke checks
       remix_image: { prompt: 'smoke remix', image: testPngPath },
       compare_images: { image_a: testPngPath, image_b: testPngPath },
       inspect_image_quality: { image: testPngPath },
+      extract_comfy_workflow: { image: testPngPath },
       remove_background: { image: testPngPath },
       upscale_image: { image: testPngPath, scale: 2 },
       vectorize_image: { image: testPngPath },
@@ -198,7 +199,7 @@ test('tools-execute-smoke-382: all 35 tools have functional execute smoke checks
       executedNames.push(name)
     }
 
-    assert.equal(executedNames.length, 47, 'All 46 tools must execute successfully')
+    assert.equal(executedNames.length, 48, 'All 48 tools must execute successfully')
   } finally {
     await rm(tempDir, { recursive: true, force: true })
     globalThis.fetch = originalFetch

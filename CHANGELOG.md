@@ -1,3 +1,10 @@
+## [0.12.30] - 2026-11-11
+
+### Added
+- **ComfyUI PNG Workflow Metadata Extractor & Drag-and-Drop (#525)**: Added `extract_comfy_workflow` tool extracting embedded node graphs, prompts, checkpoints, and LoRAs from PNG `tEXt` and `iTXt` metadata chunks. Added visual drag-and-drop workflow import in Image Studio.
+- **Provider Fallback Routing with Health-Aware Cooldown (#528)**: Added automatic cooldown tracking (60s on 429/503 HTTP responses) to prioritize healthy providers in fallback cascades. Enriched provenance metadata `_fallback` and visual fallback badge in Image Card.
+- **LoRA & Checkpoint Weights Injection (#529)**: Added `loras` parameter to `generate_image` tool schema and provider payloads, dynamically injecting `LoraLoader` nodes into ComfyUI workflows and serializing LoRAs to FAL FLUX endpoints.
+
 # Changelog
 
 ## 0.12.29

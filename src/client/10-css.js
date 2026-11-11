@@ -221,5 +221,13 @@
 }
 
 `
+      style.textContent += `
+/* Drag-and-drop workflow import (#525) */
+.ig-sidebar-studio.ig-drop-active {
+  outline: 2px dashed var(--dsw-alias-state-brand, #3b82f6) !important;
+  outline-offset: -4px;
+  background: var(--dsw-alias-brand-subtle, rgba(59, 130, 246, 0.05)) !important;
+}
+`
       document.head.appendChild(style)
     }

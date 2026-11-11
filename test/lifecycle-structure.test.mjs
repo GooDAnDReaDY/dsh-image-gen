@@ -24,6 +24,7 @@ const EXPECTED_TOOLS = [
   'vary_image',
   'compare_images',
   'inspect_image_quality',
+  'extract_comfy_workflow',
   'extract_design_tokens',
   'image_to_css_gradient',
   'check_image_contrast',

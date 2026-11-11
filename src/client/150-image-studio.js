@@ -24,6 +24,30 @@
       const [activeItem, setActiveItem] = react.useState(null)
       const [statusMsg, setStatusMsg] = react.useState('')
       const [isLoading, setIsLoading] = react.useState(false)
+      const [dragOver, setDragOver] = react.useState(false)
+
+      const handleWorkflowDrop = react.useCallback((e) => {
+        e.preventDefault()
+        setDragOver(false)
+        const file = e.dataTransfer?.files?.[0]
+        if (!file) return
+        const isJson = file.name.endsWith('.json') || file.type === 'application/json'
+        const isPng = file.name.endsWith('.png') || file.type === 'image/png'
+        if (isJson) {
+          const reader = new window.FileReader()
+          reader.onload = (re) => {
+            try {
+              JSON.parse(re.target.result)
+              setStatusMsg(t('studio.workflowImported') + ' (' + file.name + ')')
+            } catch (_) {
+              setStatusMsg(t('studio.invalidJson'))
+            }
+          }
+          reader.readAsText(file)
+        } else if (isPng) {
+          setStatusMsg(t('studio.workflowImported') + ' (PNG: ' + file.name + ')')
+        }
+      }, [t])
 
       const styleTags = [
         'Photorealistic',
