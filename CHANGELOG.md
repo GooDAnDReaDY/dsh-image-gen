@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.12.29
+
+### Added
+- **Privacy Mode with Keyboard Shortcut (`Alt+Shift+H`) (#524)**:
+  - Added global Privacy Mode client state with local storage persistence (`dsh_image_gen_privacy_mode`).
+  - Added discrete `PrivacyModeChip` in conversation session header utilities (`conversation.session.header.utilities`) and toggle switcher in the chat composer provider pill.
+  - Bound `Alt+Shift+H` shortcut to instantly disguise/blur all image preview surfaces (`.ig-card-preview`, `.ig-progressive-wrap`, `.ig-draft-img`, `.ig-final-img`, `.ig-thumb`, `.ig-sidebar-thumb`, `.ig-matrix-img`, `.ig-vault-thumb`) with smooth hover-to-reveal transitions and privacy badges for public workspaces, screen-sharing, and streaming.
+  - Complete English and Chinese localization parity for all privacy indicators.
+- **Gemini Native Protocol Toggle (`googleNative`) & Custom BaseURL (#523)**:
+  - Added `geminiBaseURL` and `googleNative` configuration options to the Gemini provider schema.
+  - Supported standard Google `generateContent` REST endpoint routing for custom OpenAI/Gemini relays and gateway proxies (One-API, New API, LiteLLM) with automatic path resolution.
+  - Added multi-format payload response parsing supporting standard Google `inlineData`, Vertex AI / Cloud predictions base64 format, and inline markdown data-URIs.
+  - Added comprehensive test coverage for custom base URLs, auth headers, format transcoding, and descriptive error handling.
+
 ## 0.12.28
 
 ### Security
