@@ -255,6 +255,36 @@
     }
 
     // -------------------------------------------------------------- Header Quick-Access Chip
+    
+    function PrivacyModeChip(props) {
+      const [privacy, togglePrivacy] = usePrivacyMode()
+      const t = props.t || ((k) => k)
+      return react.createElement(
+        'button',
+        {
+          type: 'button',
+          title: privacy ? t('privacy.active') : t('privacy.inactive'),
+          'aria-label': t('privacy.toggle'),
+          onClick: togglePrivacy,
+          style: {
+            appearance: 'none',
+            background: privacy ? 'var(--dsw-alias-brand-subtle, rgba(59, 130, 246, 0.15))' : 'none',
+            border: privacy ? '1px solid var(--dsw-alias-brand, #3b82f6)' : '1px solid var(--dsw-alias-border-l2)',
+            borderRadius: '6px',
+            padding: '4px 8px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            fontSize: '12px',
+            color: privacy ? 'var(--dsw-alias-brand, #3b82f6)' : 'var(--dsw-alias-label-secondary)',
+          },
+        },
+        react.createElement('span', { 'aria-hidden': true }, privacy ? '🙈' : '👁️'),
+        react.createElement('span', null, t('privacy.title'))
+      )
+    }
+
     function GalleryHeaderChip(props) {
       const [open, setOpen] = react.useState(false)
       return react.createElement(

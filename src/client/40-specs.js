@@ -55,6 +55,8 @@
       // Provider: Gemini
       { field: 'geminiModel', spec: textField('geminiModel'), kind: 'text', labelKey: 'f.geminiModel', hintKey: 'f.geminiModelHint', placeholderKey: 'p.geminiModel', when: ['gemini'], tab: 'provider' },
       { field: 'geminiKeyEnv', spec: textField('geminiKeyEnv'), kind: 'text', labelKey: 'f.geminiKeyEnv', hintKey: 'f.geminiKeyEnvHint', placeholderKey: 'p.geminiKeyEnv', when: ['gemini'], tab: 'provider' },
+      { field: 'geminiBaseURL', spec: textField('geminiBaseURL'), kind: 'text', labelKey: 'f.geminiBaseURL', hintKey: 'f.geminiBaseURLHint', placeholderKey: 'p.geminiBaseURL', when: ['gemini'], tab: 'provider' },
+      { field: 'googleNative', spec: booleanField('googleNative'), kind: 'boolean', labelKey: 'f.googleNative', hintKey: 'f.googleNativeHint', when: ['gemini'], tab: 'provider' },
 
       // Provider: Local
       { field: 'localKind', spec: selectField('localKind', ['comfyui', 'a1111']), kind: 'select', options: ['comfyui', 'a1111'], labelKey: 'f.localKind', hintKey: 'f.localKindHint', when: ['local'], tab: 'provider' },

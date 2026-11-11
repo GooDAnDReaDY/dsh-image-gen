@@ -626,7 +626,7 @@
 
       return react.createElement(
         'div',
-        { className: 'ig-section-card', style: { margin: '8px 0' } },
+        { className: 'ig-section-card ig-card-preview', 'data-ig-preview': '1', style: { margin: '8px 0', position: 'relative' } },
         head,
         body,
         actions.length > 0 ? react.createElement('div', { className: 'ig-row', style: { marginTop: '8px' } }, actions) : null,

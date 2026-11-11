@@ -163,6 +163,63 @@
 .ig-sidebar-active-card{display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-layer-2)}
 .ig-sidebar-preview-img{width:100%;max-height:180px;object-fit:contain;border-radius:6px;background:var(--dsw-alias-bg-layer-3)}
 .ig-sidebar-actions{display:flex;flex-wrap:wrap;gap:6px}
+
+/* Privacy Mode (#524) */
+.ig-privacy-mode .ig-card-preview img,
+.ig-privacy-mode .ig-progressive-wrap img,
+.ig-privacy-mode .ig-draft-img,
+.ig-privacy-mode .ig-final-img,
+.ig-privacy-mode .ig-thumb,
+.ig-privacy-mode .ig-sidebar-thumb,
+.ig-privacy-mode .ig-sidebar-preview-img,
+.ig-privacy-mode .ig-matrix-img,
+.ig-privacy-mode .ig-vault-thumb,
+.ig-privacy-mode .ig-ab-base-img,
+.ig-privacy-mode .ig-ab-clip-img,
+.ig-privacy-mode [data-ig-preview] img {
+  filter: blur(28px) grayscale(50%) !important;
+  transition: filter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.ig-privacy-mode .ig-card-preview:hover img,
+.ig-privacy-mode .ig-progressive-wrap:hover img,
+.ig-privacy-mode .ig-draft-img:hover,
+.ig-privacy-mode .ig-final-img:hover,
+.ig-privacy-mode .ig-thumb:hover,
+.ig-privacy-mode .ig-sidebar-thumb:hover,
+.ig-privacy-mode .ig-sidebar-preview-img:hover,
+.ig-privacy-mode .ig-matrix-img:hover,
+.ig-privacy-mode .ig-vault-thumb:hover,
+.ig-privacy-mode .ig-ab-base-img:hover,
+.ig-privacy-mode .ig-ab-clip-img:hover,
+.ig-privacy-mode [data-ig-preview]:hover img {
+  filter: none !important;
+}
+
+.ig-privacy-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 0.2s ease;
+}
+.ig-privacy-mode .ig-card-preview:hover .ig-privacy-badge,
+.ig-privacy-mode [data-ig-preview]:hover .ig-privacy-badge {
+  opacity: 0;
+}
+
 `
       document.head.appendChild(style)
     }

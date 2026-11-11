@@ -119,3 +119,58 @@ window.__ModuleLoader__.load({
       }
     }
     const fetchJson = fetchWithTimeout
+    // -------------------------------------------------------------- Privacy Mode State & Shortcut (#524)
+    const PRIVACY_STORAGE_KEY = 'dsh_image_gen_privacy_mode'
+    let isPrivacyMode = false
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        isPrivacyMode = window.localStorage.getItem(PRIVACY_STORAGE_KEY) === 'true'
+      }
+    } catch (_) { /* storage inaccessible */ }
+
+    const privacyListeners = new Set()
+
+    function setPrivacyMode(enabled) {
+      isPrivacyMode = !!enabled
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(PRIVACY_STORAGE_KEY, isPrivacyMode ? 'true' : 'false')
+        }
+      } catch (_) { /* storage inaccessible */ }
+
+      if (typeof document !== 'undefined' && document.body) {
+        document.body.classList.toggle('ig-privacy-mode', isPrivacyMode)
+      }
+      for (const fn of privacyListeners) {
+        try { fn(isPrivacyMode) } catch (_) { /* listener error */ }
+      }
+    }
+
+    function togglePrivacyMode() {
+      setPrivacyMode(!isPrivacyMode)
+    }
+
+    function usePrivacyMode() {
+      const [privacy, setPrivacy] = react.useState(isPrivacyMode)
+      react.useEffect(() => {
+        const fn = (v) => setPrivacy(v)
+        privacyListeners.add(fn)
+        return () => { privacyListeners.delete(fn) }
+      }, [])
+      return [privacy, togglePrivacyMode]
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        if (typeof document !== 'undefined' && document.body) {
+          document.body.classList.toggle('ig-privacy-mode', isPrivacyMode)
+        }
+        window.addEventListener('keydown', (e) => {
+          if (e.altKey && e.shiftKey && (e.code === 'KeyH' || e.key === 'H' || e.key === 'h')) {
+            e.preventDefault()
+            togglePrivacyMode()
+          }
+        })
+      } catch (_) { /* window/event listener unavailable */ }
+    }
+

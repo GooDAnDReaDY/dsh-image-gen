@@ -357,6 +357,20 @@
         )
       )
 
+      // Conversation header privacy mode chip (#524)
+      registerSlotWhenReady('conversation.session.header.utilities', () =>
+        ctx.slots.register(
+          {
+            name: 'conversation.session.header.utilities',
+            id: 'dsh-image-gen-privacy-chip',
+            order: 9,
+            locale: NS,
+            inject: () => ({ ctx }),
+          },
+          (props) => react.createElement(PrivacyModeChip, { ...props, ctx })
+        )
+      )
+
       // Conversation header utilities chip (quick-access gallery button in chat header)
       registerSlotWhenReady('conversation.session.header.utilities', () =>
         ctx.slots.register(

@@ -104,7 +104,42 @@
               ),
               isSelected ? react.createElement('span', { className: 'ig-pill-check' }, '✓') : null
             )
-          })
+          }),
+          react.createElement(
+            'div',
+            {
+              style: {
+                padding: '8px 10px',
+                borderTop: '1px solid var(--dsw-alias-border-l2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '12px',
+                color: 'var(--dsw-alias-label-secondary)',
+                cursor: 'pointer',
+                userSelect: 'none',
+              },
+              onClick: () => {
+                togglePrivacyMode()
+              },
+              title: t('privacy.toggle'),
+            },
+            react.createElement('span', null, t('privacy.title')),
+            react.createElement(
+              'span',
+              {
+                style: {
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: isPrivacyMode ? 'var(--dsw-alias-state-brand, #3b82f6)' : 'var(--dsw-alias-bg-layer-3)',
+                  color: isPrivacyMode ? '#fff' : 'inherit',
+                },
+              },
+              isPrivacyMode ? t('privacy.active') : t('privacy.inactive')
+            )
+          )
         ) : null
       )
     }
