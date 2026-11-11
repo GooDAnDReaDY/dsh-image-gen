@@ -375,6 +375,8 @@
       'privacy.inactive': '正常显示',
       'privacy.revealHint': '悬停显示预览',
       'card.fallback': '故障转移',
+      'card.deepReverse': '深度反向',
+      'card.deepReverseTitle': '分析镜头光学、布光及排版',
       'studio.workflowDrop': '拖入 ComfyUI PNG 或 JSON 工作流以导入',
       'studio.workflowImported': '工作流导入成功',
       'studio.invalidJson': '无效的工作流 JSON',

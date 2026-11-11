@@ -300,6 +300,11 @@
         sendActionPrompt(t('card.actionRemoveBg') + ': remove_background(image: "' + ref + '")')
       }
 
+      const onDeepReverse = () => {
+        const ref = parsed.attachment ? (parsed.attachment.attachmentId || parsed.attachment.id) : (parsed.url || '')
+        if (ref) sendActionPrompt(t('card.deepReverse') + ': deep_reverse_prompt(image: "' + ref + '", tier: "cinematic")')
+      }
+
       const fallbackInfo = parsed._fallback || block?._fallback || block?.result?._fallback || null
       const fallbackBadge = fallbackInfo && fallbackInfo.triggered ? react.createElement(
         'span',
@@ -453,6 +458,13 @@
           react.createElement('button', { key: 'reroll', type: 'button', className: 'ig-btn', onClick: onReroll }, '🎲 ' + t('card.reroll')),
           react.createElement('button', { key: 'upscale', type: 'button', className: 'ig-btn', onClick: onUpscale }, '🔍 ' + t('card.upscale')),
           react.createElement('button', { key: 'removeBg', type: 'button', className: 'ig-btn', onClick: onRemoveBg }, '✂️ ' + t('card.removeBg')),
+          react.createElement('button', {
+            key: 'deepReverse',
+            type: 'button',
+            className: 'ig-btn',
+            title: t('card.deepReverseTitle'),
+            onClick: onDeepReverse,
+          }, '🔬 ' + (t('card.deepReverse') || 'Deep Reverse')),
           react.createElement('button', { key: 'copy', type: 'button', className: 'ig-btn', onClick: onCopyPrompt }, copied ? '✓ Copied' : '📋 ' + t('card.copyPrompt'))
         )
       }

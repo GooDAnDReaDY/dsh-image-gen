@@ -87,7 +87,9 @@ test('reverse-prompt: tool execute analyzes reference image and synthesizes recr
     effect: (fn) => fn(),
     tools: {
       register: (tool) => {
-        registeredTool = tool
+        if (tool.name === 'reverse_prompt_and_recreate') {
+          registeredTool = tool
+        }
       },
     },
     logger: { info: () => {}, warn: () => {}, error: () => {} },

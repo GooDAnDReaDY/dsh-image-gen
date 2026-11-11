@@ -52,9 +52,9 @@ test('toolsets profile: default minimal mode registers <= 3 core tools with sche
   )
 })
 
-test('toolsets profile: "all" profile registers all 48 tools (#337, #451, #454, #455, #459, #460, #461, #463, #464, #465, #467, #468, #503, #504, #525)', () => {
+test('toolsets profile: "all" profile registers all 50 tools (#337, #451, #454, #455, #459, #460, #461, #463, #464, #465, #467, #468, #503, #504, #525, #526, #527)', () => {
   const tools = getRegisteredTools({ toolsetProfile: 'all' })
-  assert.equal(tools.length, 48, '"all" profile must register all 48 tools')
+  assert.equal(tools.length, 50, '"all" profile must register all 50 tools')
 })
 
 test('toolsets profile: custom mode with nested toolsets toggles individual categories (#337)', () => {
@@ -62,8 +62,8 @@ test('toolsets profile: custom mode with nested toolsets toggles individual cate
     toolsetProfile: 'custom',
     toolsets: { design: true },
   })
-  // 3 core + 15 design = 18
-  assert.equal(designOnly.length, 18)
+  // 3 core + 17 design = 20
+  assert.equal(designOnly.length, 20)
   const names = designOnly.map((t) => t.name)
   assert.ok(names.includes('set_style_anchor'))
   assert.ok(names.includes('generate_ui_asset'))
@@ -97,7 +97,7 @@ test('toolsets profile: custom mode with flat boolean keys (#337)', () => {
   assert.ok(!names.includes('generate_spritesheet'))
 })
 
-test('master switch: all 48 tools reject with disabled error when cfg.enabled is false (#356)', async () => {
+test('master switch: all 50 tools reject with disabled error when cfg.enabled is false (#356)', async () => {
   let liveConfig = {
     enabled: false,
     toolsetProfile: 'all',
@@ -120,7 +120,7 @@ test('master switch: all 48 tools reject with disabled error when cfg.enabled is
     resolveApiKey: () => {},
   })
 
-  assert.equal(tools.length, 48, 'Profile all must register 48 tools')
+  assert.equal(tools.length, 50, 'Profile all must register 50 tools')
 
   // When enabled is false, executing any tool must reject with disabled message
   for (const t of tools) {
@@ -221,16 +221,16 @@ test('toolsets profile: reactive update on profile change (minimal -> all -> cus
   // 2. Switch to "all" without restart
   liveCfg = { toolsetProfile: 'all' }
   controller.sync()
-  assert.equal(registeredTools.size, 48, 'Profile all must register exactly 48 tools without restart')
+  assert.equal(registeredTools.size, 50, 'Profile all must register exactly 50 tools without restart')
   // Verify no duplicates
   const namesAll = Array.from(registeredTools.keys())
   const uniqueNamesAll = new Set(namesAll)
-  assert.equal(uniqueNamesAll.size, 48, 'Must have 48 unique tool names')
+  assert.equal(uniqueNamesAll.size, 50, 'Must have 50 unique tool names')
 
   // 3. Switch to custom with design toolset only
   liveCfg = { toolsetProfile: 'custom', toolsets: { design: true } }
   controller.sync()
-  assert.equal(registeredTools.size, 18, 'Custom design toolset must have 3 core + 15 design = 18 tools')
+  assert.equal(registeredTools.size, 20, 'Custom design toolset must have 3 core + 17 design = 20 tools')
   assert.ok(registeredTools.has('set_style_anchor'))
   assert.ok(registeredTools.has('generate_ui_asset'))
   assert.ok(registeredTools.has('reverse_prompt_and_recreate'))

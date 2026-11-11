@@ -375,6 +375,8 @@
       'privacy.inactive': 'Visible',
       'privacy.revealHint': 'Hover to reveal',
       'card.fallback': 'Fallback',
+      'card.deepReverse': 'Deep Reverse',
+      'card.deepReverseTitle': 'Analyze camera optics, lighting and typography',
       'studio.workflowDrop': 'Drop ComfyUI PNG or JSON workflow to import',
       'studio.workflowImported': 'Workflow imported successfully',
       'studio.invalidJson': 'Invalid workflow JSON',

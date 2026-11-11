@@ -50,6 +50,8 @@ const EXPECTED_TOOLS = [
   'generate_with_control',
   'generate_turnaround_sheet',
   'reverse_prompt_and_recreate',
+  'deep_reverse_prompt',
+  'generate_ecommerce_pack',
   'restore_face_and_details',
   'generate_seamless_texture',
   'compare_models_matrix',

@@ -1,3 +1,9 @@
+## [0.12.31] - 2026-11-11
+
+### Added
+- **Deep Technical Reverse Prompt (`deep_reverse_prompt`, #526)**: Dissects existing images into precise photographic camera optics (focal length, aperture, angle, depth of field), studio lighting setups, physical surface materials, color grade palettes, and typography directives across 3 depth tiers (`concise`, `standard`, `cinematic`). Added direct action button in Image Card.
+- **E-Commerce Multi-Asset Photography Suite (`generate_ecommerce_pack`, #527)**: Synthesizes complete commercial 4-shot product packages (Catalog Hero on pure white, Lifestyle in-situ interior, Macro tactile texture, and 16:9 Marketing Banner with typography negative space) with unified budget metering and structured markdown reporting.
+
 ## [0.12.30] - 2026-11-11
 
 ### Added
