@@ -1,3 +1,11 @@
+## [0.12.32] - 2026-11-12
+
+### Fixed
+- **Canonical DSH Core Theme Tokens & Zero Color Fallbacks (#538)**: Replaced all non-existent `--dsw-alias-*` CSS variables across `src/client/*` with verified tokens from `@deepseek-ai/dsh-client-ui-theme` (`design-platform.css`) and removed all hardcoded `rgba(...)`, `rgb(...)`, and `#hex` color fallbacks.
+- **Clean Checkout Root & Stray Tarball Guard (#539)**: Removed untracked `.tgz` archives from the repository root and added `scripts/pack-check.mjs` to `npm test` to block stray release tarballs inside the checkout tree.
+- **DSH Store 262,144-Byte File Size Gate (#540)**: Added `scripts/pack-check.mjs` (`npm run pack:check`) to enforce the 256 KiB (`262,144` bytes) per-file DSH Store limit during `npm test` (`lib/client.js` at `250,237` bytes, `11,907` bytes headroom).
+- **Provider Cooldown Reset on Settings Save (#541)**: Integrated `clearAllProviderCooldowns()` into `PUT /dsh-image-gen/config` (`lib/settings-route.js`) so updating provider settings, base URLs, or credentials immediately clears active provider cooldowns.
+
 ## [0.12.31] - 2026-11-11
 
 ### Added
