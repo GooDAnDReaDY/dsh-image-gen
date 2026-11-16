@@ -1,3 +1,15 @@
+## [0.12.33] - 2026-11-16
+
+### Fixed
+- **Honest Expected-Elements Verification (#543)**: `inspect_image_quality` no longer claims "Verified presence of …" without an actual check. It now queries a vision tool when `expected_elements` is provided and returns a structured `elementVerification` result (`verified`, `method`, `present`, `verdict`); without a reachable vision service it honestly reports `verified: false`. Vision-reported missing elements fail the inspection.
+- **Per-Turn Paid Provider-Call Loop Guard (#544)**: Added `trackProviderCall` counting each billable provider invocation per user turn. All fan-out tools (spritesheet frames, style/image/model matrix cells, theme-pair variants, e-commerce shots, responsive mockups, image-pack ratios) and 17 previously uncovered paid tools now participate in loop-guard protection. New `providerCallLimit` setting (default 24, 0 = off) in the Safety & Budget tab with full en/zh localization.
+- **Offline Test Invariant & Injectable Fetch (#545)**: The approval-gate test no longer performs real HTTPS calls to `queue.fal.run`. Provider call sites across all tool modules resolve `deps.fetchImpl` first and only fall back to global `fetch`; `test/_setup.mjs` now installs a global offline guard that fails any non-loopback network request during tests.
+- **Reference Integrity — No Local-Path Leaks (#546, regression #375)**: `resolveSource` now supports http(s) reference URLs with scheme validation, embedded-credential rejection, cloud-metadata/link-local blocking, a 50 MB size cap, and image signature verification. Unresolvable local paths in `face_reference`/`reference_image` fail with explicit guidance instead of silently leaking filesystem paths to providers; provider backends (FAL, Replicate, Custom/Midjourney, Seedream) only emit data URIs from bytes or validated http(s) URLs; the facial-identity prompt is only applied when the reference actually resolved.
+- **ToolDispatcher Enforcement & Toolset Reactivity (#547, tail #384)**: `toolDispatcher` now routes through the wrapped `execute`, so `enabled: false` blocks recipe/dispatcher paths and live-progress wiring applies everywhere. `computeKey` includes the 8 opt-in toolset flags (`recipes`, `capabilities`, `profiles`, `staging`, `queue`, `variants`, `lineage`, `designExport`) so toggling them applies without a host restart.
+
+### Security
+- **Cloud-Metadata & Link-Local Guard for Reference URLs (#546)**: reference downloads reject AWS/GCP/Azure metadata endpoints and link-local addresses, embedded URL credentials, and non-http(s) schemes before any network request is issued.
+
 ## [0.12.32] - 2026-11-12
 
 ### Fixed
