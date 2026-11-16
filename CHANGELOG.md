@@ -1,3 +1,13 @@
+## [0.12.34] - 2026-11-16
+
+### Fixed
+- **Honest Vectorization Failure (#549, regression #399)**: `traceToSvg` no longer returns a synthetic solid rectangle as a successful vectorization when the input cannot be decoded; it throws `Failed to vectorize image` with the underlying reason instead.
+- **Gemini API Key Header Hygiene (#550)**: removed the redundant `?key=` query parameter from the `generateContent` endpoint and the provider diagnostics probe; the Gemini key now travels exclusively in the `x-goog-api-key` header, preventing leakage into proxy/CDN logs and error traces.
+- **Preserved Gemini Response MIME (#552)**: `ensureImageFormat` now receives `{ fallbackMime: responseMime }`; the previous bare-string third argument destructured away and silently relabelled JPEG/WebP responses as `image/png`, corrupting file extensions and sidecar metadata.
+
+### Security
+- **Bounded Design Export Body (#551, #313 class)**: `/dsh-image-gen/design/export` now reads POST bodies through `readBoundedRequestBody` (64 KiB limit, HTTP 413 `Payload Too Large`, socket destroyed on stream overflow) instead of unbounded body accumulation.
+
 ## [0.12.33] - 2026-11-16
 
 ### Fixed
