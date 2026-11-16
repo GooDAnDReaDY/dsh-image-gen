@@ -1,3 +1,12 @@
+## [0.12.38] - 2026-11-17
+
+### Fixed
+- **Patch-Only Release Validator (#568)**: `pack-check` now mechanically enforces the documented patch-only rule — the package version must be exactly one patch increment above the highest published tag (or a clean minor-line start); larger jumps fail the build. The byte-identical `0.11.15`/`0.11.16` CHANGELOG duplicate was removed.
+- **Source-Text Assertion Reduction (#570)**: duplicated locale-parity source assertions (#425) removed — the contract is enforced behaviorally by `build-client.mjs verifyLocales()` on every test run; remaining source-reading checks retargeted from the minified bundle format to the concatenated client sources, constituting the conscious minimum guarding browser-only contracts.
+
+### Changed
+- **Client Bundle Minification & Budget Gate (#569)**: the client bundle is now minified with esbuild at build time — `lib/client.js` shrank from ~250 KB to ~163 KB (62% of the DSH Store limit, restoring >30% headroom). `pack-check` enforces a hard bundle budget at 70% of the 262,144-byte Store limit. `esbuild` added as a `devDependency` (build-time only, not shipped). Source-contract tests moved to the concatenated sources via `test/_client-source.mjs`; the vm-execution test still loads the real minified bundle. Lazy per-feature chunking tracked as a separate research issue.
+
 ## [0.12.37] - 2026-11-16
 
 ### Fixed
@@ -360,11 +369,6 @@
 - **Client HTTP Fallback Error Handling (#366)**: Check `res.ok` and error payload in HTTP settings fallback. On failure, rollback optimistic snapshot, preserve dirty state, and surface error banner in SettingsCard.
 - **Config & UI Field Synchronization (#369)**: Add `comfyWorkflowJson` with JSON graph validation, normalize string `fallbackProviders` to arrays, and align legacy alias fields with schema so all UI controls pass validation without rejection.
 - **Reactive Tool Registration on Profile Changes (#384)**: Dynamically re-evaluate and re-register tools when `toolsetProfile` or `toolsets` changes via settings watch, disposing former registrations without requiring a server restart.
-
-## 0.11.16
-
-### Fixed
-- **Peer gate on DSH 0.2.0-rc.1** (#58): DSH skips a profile bundle whose `peerDependencies` exclude the running version, so this plugin was absent from the profile with no error in the UI. Every `@deepseek-ai/dsh-*` peer now names both the 0.1.7-rc.2 and 0.2.0-rc.1 lines, because semver does not admit a prerelease of the next minor into a range that does not name it.
 
 ## 0.11.15
 
