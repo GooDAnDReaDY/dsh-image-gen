@@ -1,175 +1,161 @@
-## 🚀 更新 v0.12.26: 输入框生图服务切换按钮显隐设置 (#519)
-- **输入框服务商按钮显隐控制 (`showProviderPill`) (#519)**: 在生图设置的“常规”标签页中增加了直观开关，用户可自由控制是否在对话输入框显示快速切换服务商和模型的快捷胶囊。关闭该按钮仅隐藏输入框入口，不影响插件启用状态、已配置的服务商和模型、历史图库及其他工具功能。
-
-## 🚀 更新 v0.12.21: 输入框生图服务胶囊与卡片内重新生成模态框 (#501, #502)
-- **输入框快速生图服务胶囊 (#501)**: 挂载于 `conversation.input.right` 插槽，无需离开聊天即可在输入框工具栏快速切换 FAL、Gemini、OpenAI、ComfyUI 等生图提供商。
-- **消息卡片内修改提示词重新生成模态框 (#502)**: 点击卡片上的 `🔄 Regenerate…` 按钮即可弹出编辑框修改提示词、选择保持或刷新随机种子，并在保留当前参数的前提下快速重试。
-
-## 🚀 更新 v0.12.20: 交互式 A/B 对比滑块与持久化版本轮播 (#499, #500)
-- **对话框交互式 A/B 对比滑块 (#499)**: 支持鼠标与触控手势的“前后对比”分割滑块，配备可拖动分界线与半透明状态徽章。可在面部修复、局部重绘、风格重混和多版本修改中无缝直观对比原图与效果图。
-- **消息卡片持久化版本轮播卡尺 (#500)**: 卡片内集成 `< v1 / N >` 版本历史导航按钮与随机种子/时间戳徽章，采用浏览器 `localStorage` 本地存储（每张卡片上限 20 个版本），页面刷新后历史记录不丢失。
-
 # 📦 @goodandready/dsh-image-gen
 
-<div align="center">
+**当前版本：`0.12.37`**（与 `package.json` 同步，#563）
 
-<h3>DeepSeek Harness 全能图像生成与视觉处理插件</h3>
-
-<p align="center">
-  <a href="https://www.npmjs.com/package/@goodandready/dsh-image-gen"><img src="https://img.shields.io/npm/v/@goodandready/dsh-image-gen.svg?style=for-the-badge&color=6366f1&labelColor=1e1b4b" alt="npm version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/GooDAnDReaDY/dsh-image-gen.svg?style=for-the-badge&color=10b981&labelColor=064e3b" alt="license"></a>
-  <a href="https://github.com/topics/dsh-plugin"><img src="https://img.shields.io/badge/DSH-Plugin-8b5cf6.svg?style=for-the-badge&labelColor=2e1065" alt="DSH Plugin"></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node-20%2B-f59e0b.svg?style=for-the-badge&labelColor=451a03" alt="Node version"></a>
-</p>
-
-<p align="center">
-  <a href="https://goodandready.app/"><img src="https://img.shields.io/badge/作者所有项目-goodandready.app-ff4500.svg?style=for-the-badge&logo=rocket&logoColor=white&labelColor=1a1a2e" alt="所有项目"></a>
-</p>
-
-<p align="center">
-  <a href="README.md"><b>🇬🇧 English</b></a> •
-  <a href="README.ru.md"><b>🇷🇺 Русский</b></a> •
-  <a href="README.zh.md"><b>🇨🇳 中文说明</b></a>
-</p>
-
-<table align="center">
-  <tr>
-    <td align="center">
-      ⭐ <strong>如果您喜欢这个插件，请在 GitHub 上为它点亮 Star</strong> — 这能让我知道插件对您有用，并鼓励我继续开发和维护它。
-      <br><br>
-      🐛 <strong>如果您发现 Bug 或希望增加功能</strong>，请使用任意语言在 GitHub 上提交 Issue — 我会评估您的建议，并在后续版本中实现有价值的改进。
-    </td>
-  </tr>
-</table>
-
-</div>
+> 面向 DeepSeek Harness 的多提供商图像生成与视觉处理套件：智能体可通过 50 个工具（`all` 配置文件；3 个在 `minimal`；启用可选工具集最多 66 个）完成文本生图、编辑、去背、放大、矢量化、多参考融合与质量检查，覆盖 8 个生成后端。
 
 ---
 
-## 🚀 更新 v0.12.12: 右侧边栏 Image Studio 工作台与会话资源归档 (#452, #453)
-- **原生右侧边栏图像工作室面板 (#452)**: 注册持久化扩展槽 `sidebarRightTabs` 与 `sidebar.right.pane.tab`（标识符 `dsh-image-studio`）。提供提示词风格自动补全、反向提示词排除标签、服务商/模型/比例选择、透明背景开关、紧凑型最近生成缩略图网格以及一键复制文件路径与插入对话。
-- **会话级资源归档与语义化命名 (#453)**: 新增配置项 `organizeBySession: boolean`（默认 `true`），将生成资源归档至 `<sessionCwd>/assets/images/<sessionSlug>/`。内置 `buildSemanticSlug` 实体提取器生成规范语义化文件名（例如 `futuristic-hero-banner-cyberpunk-v1.png`），完全向后兼容 Asset Vault。
+## 🚀 亮点功能
 
-## 🚀 更新 v0.12.9: 完整支持 DSH Desktop Electron 运行时 (#478)
-- **DSH Desktop 自定义协议授权**: 在 `isTrustedLocalRequest`、`getRouteRejectionStatus` 及 `getRouteWriteRejectionStatus` 中增加对本地回环连接下特权协议 `dsh-app://app/` 的安全校验放行。
-- **解除桌面端端点与图片拦截**: 解决了 Electron 环境下访问 `/dsh-image-gen/image`、`/dsh-image-gen/approval`、`/dsh-image-gen/vault` 和 `/dsh-image-gen/config` 时遭遇的 HTTP 403 Forbidden 错误，恢复了桌面端中的缩略图预览、交互式审批闸门操作以及 Studio Vault 资产库。
-- **保持严格的纵深防御**: 针对外部 LAN 发起的伪造请求及非受信自定义协议（如 `evil-scheme://`、`dsh-app://untrusted.host`）继续实施严格的 403 Forbidden 拒绝。
-
-## 🚀 更新 v0.12.8: 交互式生成审批闸门 (#450)
-- **交互式审批闸门**: 防止自主智能体在后台循环中意外或过量调用计费生成 API。在“安全与预算”设置中支持 `requireApproval: boolean`（默认 `false`）与 `approvalTimeoutSec: number`（默认 `120`，范围 5-600）。
-- **交互式卡片 `FalApprovalCard`**: 在对话工具视图中实时渲染预估任务计划（提示词、提供商、模型、尺寸与预估 USD 费用），提供 `[🚀 确认生成]` 与 `[✏️ 修改提示词]` 操作按钮。
-- **安全回滚与审批接口**: 超时或用户取消时完全不消耗预算，通过受保护的 `/dsh-image-gen/approval` 接口进行状态协调。支持 `approved: true` 参数直接放行已确认任务。
-
-## ⚡ 核心功能与架构提升 (v0.10.0)
-
-**`@goodandready/dsh-image-gen`** 为 DeepSeek Harness 提供工业级高可用的图像生成与视觉处理工具链：
-* **ComfyUI 本地后端工作流形状修复 (#322, GitHub #7)**：修复 `lib/providers/backends/local.js` 中多包一层 `{ prompt: workflow }` 导致 ComfyUI 报 `missing_node_type: Node 'ID #prompt' has no class_type` 的缺陷；增加节点结构自检。
-* **8大后端全面支持**: FAL.ai、Replicate、OpenAI/SiliconFlow、ChatGPT Plus (OAuth)、Grok Imagine (OAuth)、ComfyUI/A1111 本地生成、ByteDance SeaDream 与 Google Imagen 3。
-* **指数退避与 Jitter 队列防爆**: 针对 FAL 与 Replicate 异步队列引入智能 Backoff 轮询，彻底杜绝 429 报错。
-* **确定性哈希缓存 (Deterministic Cache)**: 相同 Prompt 与 Seed 的重复请求直接从本地秒级返回，零 API 消耗。
-* **ComfyUI / Automatic1111 拖拽直通**: PNG 元数据原生内嵌标准 `Parameters` 块，生成图片可直接拖入 WebUI/ComfyUI 还原参数。
-* **尺寸 64 倍数自动对齐**: 自动对齐 VAE 运算尺寸，避免图像失真。
-* **多风格预设增强**: 内置 `cinematic`、`anime` 等风格的独立 Negative Prompt 与 Guidance Scale 优化。
+- **输入框生图服务胶囊 (`showProviderPill`, #501/#519)**：挂载于 `conversation.input.right` 插槽，无需离开聊天即可快速切换生图提供商与模型；可在设置的“常规”标签页中隐藏。
+- **交互式 A/B 对比滑块 (#499)**：支持鼠标与触控的“前后对比”分割滑块，用于面部修复、局部重绘、风格重混的直观对比。
+- **版本历史轮播 (#500)**：卡片内 `< v1 / N >` 版本导航，浏览器 `localStorage` 本地持久化（每张卡片上限 20 个版本）。
+- **交互式生成审批闸门 (#450)**：计费生成前在聊天中展示计划（提示词、提供商、预估费用）并等待确认；超时或取消不产生任何费用。
+- **重侧边栏 Image Studio 工作台 (#452/#453)**：原生右侧边栏生图面板，样式自动补全、负面提示词、透明度选择器与最近图像网格；会话级资产归档与语义命名。
+- **消息卡片内修改提示词重新生成 (#502)**：点击 `🔄 Regenerate…` 修改提示词并选择保持或刷新随机种子。
 
 ---
-
-## 🚀 更新 v0.10.26: 架构模块化拆分与仓库源码净化 (#235, #238, #239)
-* **架构模块化拆分 (#239)**：所有服务端模块均严格符合 <= 600 行规范：提取 `lib/tools/generation-pack.js` (74行，`generation.js` 降至 547行)、`lib/history.js` (93行) 与 `lib/attachment-helper.js` (82行，`index.js` 降至 557行)。客户端源码解耦为 `src/client/*` 15 个子模块（均 <= 337 行）。
-* **仓库源码净化 (#235)**：内部智能体指令文件 (`AGENTS.md`, `index.md`) 已从 Git 索引彻底移除并加入 `.gitignore` 与 `.gitattributes`。
-* **主题规范对齐 (#238)**：全面完成所有 Web UI 界面的零硬编码颜色验证与关闭，深度适配 `--dsw-alias-*` 与 `color-mix(...)`。
-* **包分发完整性**：正式将 `README.ru.md` 与 `README.zh.md` 收录至 npm `files` 发布白名单。
-
-## 🚀 更新 v0.10.25: DSH 主题颜色适配、响应式多端原型、无缝纹理与精灵图导出 (#173, #177, #178, #238)
-* **100% 主题变量原生适配 (#238)**: 彻底移除客户端代码中的所有写死 `rgba(...)` 和 Hex 颜色（`src/client/10-css.js`、`src/client/80-gallery.js`），徽章、提示栏和画廊遮罩全部通过 `color-mix(...)` 配合 `--dsw-alias-*` 主题变量动态生成，完美兼容深色与浅色主题。
-* **多端响应式原型生成器 (`generate_responsive_mockups`, #173)**: 输入单个产品提示词，并发生成风格统一的移动端 (9:16)、平板端 (3:4) 与桌面端 (16:9) UI 原型，支持聊天卡片中的分栏切换预览。
-* **无缝平铺纹理生成器 (`generate_seamless_pattern`, #178)**: 自动生成四方连续平铺背景图，内置接缝平滑度校验与 CSS 平铺预览参数。
-* **2D 逐帧精灵图生成器 (`generate_spritesheet`, #177)**: 自动化横向动画序列帧渲染，内置 CSS `@keyframes` 动画代码与 SVG 多帧预览条。
-* **客户端源码模块化重构 (#244)**: 将原本庞大的单文件拆分为 `src/client/*` 目录下 15 个独立职责模块，配套 `scripts/build-client.mjs` 构建机制。Preflight 检查 `FAIL=0`，179/179 项自动化测试全绿。
-
-## 🚀 更新 v0.10.24: 质量加固 — 发布边界、设置状态、主题颜色与模块拆分 (#235–#242)
-* **发布边界**: 新增 `.gitattributes`，对 `AGENTS.md`、`index.md`、`docs/`、`.gitea/` 设置 `export-ignore`，GitHub source 归档与 `git archive` 不再包含内部工作流文件。
-* **设置状态回退**: 修正设置卡片中的提供方/配置状态处理，部分或未知状态不再误显示为 “unavailable”。
-* **对齐设计系统**: 将残留的 `fal-` CSS 类前缀改为 `ig-`，并以 `var(--dsw-alias-*, <fallback>)` 绑定 DSH 主题变量。
-* **敏感文件加固**: 历史记录、缓存 meta/data 与花费计量写入后强制 `0600` 权限。
-* **死代码清理与模块拆分**: 删除未使用的 `listCuratedStyles`；拆分过大的服务端模块 — `providers.js` 工具函数抽到 `provider-utils.js`，`processing.js` 拆为 `processing-basic.js` + `processing-advanced.js`。客户端拆分见 #244。
-
-## 🚀 更新 v0.10.23: 应用内一键更新、设置同步、真实探针与语言规范 (#232)
-* **应用内一键自动更新**: 设置卡片内新增「插件更新」模块（`UpdaterSection`），配合 `/api/dsh-image-gen/update` 接口。自动查询 npm 官方注册表，对比语义化版本号，并在本地回环或私有局域网安全授权下执行 `dsh plugin add @goodandready/dsh-image-gen@latest`。
-* **1:1 核心配置与界面设置同步**: 严格对齐 `lib/index.js` 宿主 `Config` 与 `lib/client.js` 界面字段，在「✨ 提示词增强」标签页下完整呈现 `autoEnhancePrompt`（智能自动增强提示词）与 `defaultStylePreset`（默认风格预设）。
-* **真实网络诊断探针**: 在 `testProviderConnection` 中为 Replicate (`/v1/models`)、Google Gemini (`/v1beta/models`) 及字节跳动 Seedream 增加带超时保护的真实 HTTP 网络探测与延迟往返测速。
-* **严格多语言纯度标准**: 核心代码完全遵照 DSH 插件规范，内置纯净完整的 `en` 和 `zh` 词典；俄语支持通过 `goodandready/dsh-russian-lang` 独立注册。`lib/` 源码中完全清理非拉丁字符。
-* **WAI-ARIA 无障碍访问支持**: 为标签页切换与表单错误提示加入 `role="tablist"`, `role="tab"`, `aria-selected`, `aria-controls`, `role="tabpanel"`, `aria-describedby` 和 `role="alert"`。
-
-## 🚀 更新 v0.10.22: 设置卡片状态引用稳定性与修复 React Error #185 无限循环 (#230)
-* **设置卡片状态引用稳定性**: 修复了 `FalSettingsCardController` 和 `CardForm.prototype.bind` 中引发的 React Error #185（`Maximum update depth exceeded`）。快照在渲染周期内进行引用缓存（`Object.is(prev, next) === true`），彻底杜绝 React 18 / `useSyncExternalStore` 的无限重新渲染死循环。
-* **深度 DSH 运行时集成**: 无缝集成官方 `@deepseek-ai/dsh-client-store`（`runtime.createSnapshotStore`），并提供零依赖的高性能独立快照缓存兜底。
-* **自动化回归测试集**: 在 `test/client-syntax.test.mjs` 中引入针对引用一致性的专项测试，严密校验多次连续读取的一致性、单次发布通知机制与监听器注销完整性。
-
-## 🚀 更新 v0.10.21: 变体工作台、智能比例裁切与品牌资源包导出 (#228)
-* **交互式变体与风格重混工作台 (Remix Workbench)**: 直接集成在 `FalImageCard` 和图库中的交互抽屉。支持连续创意度/去噪强度滑块 (0.05 到 0.95)、预设快捷按钮（“微调 0.25”、“强创意 0.65”）及提示词引导。
-* **智能比例无损画布裁切器 (`smart_crop_image`)**: 快速裁切适配各大社交与设计标准比例 (`1:1`, `16:9`, `9:16`, `4:3`, `3:2`, `2:3`)，支持自动对焦、三分法构图 (`rule_of_thirds`) 与黑边留白 (`letterbox`)。
-* **品牌资源套件导出器 (`export_asset_pack`)**: 一键生成生产级网站与 PWA 资源套件：SVG Favicon、PWA 推荐图标套件 (`icon-192.svg`, `icon-512.svg`)、`manifest.webmanifest`、1200×630 社交分享预览卡片 (`og-card.svg`) 与索引 `catalog.json`。
-* **覆盖 12 大视觉工具的交互 Toolview**: 在对话中直接提供重混、放大、裁切与栅格拼图的可视化操作。
-* **响应式多端 Mockup 套件 (`generate_responsive_mockups`, #173)**: 同一产品提示词并行生成 Mobile 9:16、Tablet 3:4、Desktop 16:9 三端 UI mockup，统一风格与品牌色，保存为 `mockup-mobile.png` / `mockup-tablet.png` / `mockup-desktop.png`，对话内以三标签页预览。
-* **严谨的中英双语界面**: 完整的 `zh` 和 `en` 词典覆盖。
-
-## 🚀 更新 v0.10.19: 侧边栏内置图库、连接诊断与风格引擎 (#224)
-* **原生侧边栏图库与历史抽屉**: 直接集成至 DSH 原生右侧面板 (`sidebarRightTabs` 与 `sidebar.right.pane.tab`)、`betterSidebar`，并在对话会话顶部标题栏中新增快捷入口按钮 (`conversation.session.header.utilities`)。支持浏览历史生成、参数详情查看、一键复制提示词与 Markdown 链接。
-* **交互式提供商连接诊断**: 在设置卡片的“提供商”标签页新增“测试连接”按钮。实时检测 Fal.ai、ComfyUI、Automatic1111 或自定义 OpenAI 兼容接口的网络连通性与往返延迟。
-* **精选风格预设与提示词增强引擎**: 内置 10 款精心调校的艺术与摄影预设风格 (`cinematic`, `photorealistic`, `anime`, `minimalist_vector`, `isometric_3d`, `analog_film`, `cyberpunk`, `pixel_art`, `oil_painting`, `claymation`)，支持 `autoEnhancePrompt` 自动强化与 `style_preset` 工具参数。
-* **拼图与多图对比拼接工具 (`assemble_image_grid`)**: 将 2 至 4 张图像拼接为整齐紧凑的并排对比、2x2 网格或垂直长图，采用纯 Node.js SVG 矢量容器渲染，无需笨重外部二进制依赖（包体积严格保持在 250 KiB 以下）。
-* **品牌色板约束生成**: 在 `generate_image` 中传入 `palette_colors` (十六进制色值数组)，算法级引导正向与反向提示词紧密贴合特定色系，并提供 WCAG 对比度校验。
-* **局部重绘与遮罩编辑 (`edit_image`)**: 新增 `mask_image` 遮罩支持与精细 `strength` (0.0 至 1.0) 去噪强度调节。
-* **完整中英文界面语言包**: Web 界面全面支持 `zh` 和 `en` 语言。
-
-## 🚀 v0.10.4 更新：Cordis 生命周期、完整设置界面与国际化
-- **Cordis 生命周期 (#136)**：将所有 7 个工具注册包装在 `ctx.effect` 中，以便在热重载时正常释放。
-- **设置界面完整性 (#137)**：添加了 Replicate、SeaDream、Gemini、本地 ComfyUI/A1111、风格预设和 LLM 增强器的配置字段。
-- **包清单依赖 (#138)**：在 `peerDependencies` 中补齐了内核服务依赖。
-- **React 组件优化 (#139)**：从 `FalImageCard` 中移除了未使用的无用状态。
-- **全面国际化 (#140)**：消除了硬编码文本，为中、英、俄语提供完整翻译。
 
 ## 📦 安装
 
 ```bash
-dsh plugin --profile web add @goodandready/dsh-image-gen
+dsh plugin add @goodandready/dsh-image-gen
 ```
+
+支持提供商：**FAL (fal.ai)**、**Google Gemini / Imagen**、**OpenAI DALL-E / Images API**、**Replicate**、**Seedream (字节跳动)**、**自定义 OpenAI 兼容网关**、**本地 ComfyUI**、**Automatic1111 (Stable Diffusion WebUI)**，以及无需 API Key 的 **DSH Subscription Images**。
+
+---
+
+## 🧭 工具集配置 (toolsetProfile)
+
+| 配置文件 | 工具数量 | 说明 |
+|---|---|---|
+| `minimal`（默认） | 3 | `generate_image`、`edit_image`、`inspect_image_quality`，节省约 8,000 提示词 token |
+| `all` | **50** | 以下完整注册表 |
+| `all` + 可选工具集 | **66** | 追加 recipes / capabilities / profiles / staging / queue / variants / lineage / designExport |
+| `custom` | 任意 | 由设置中的布尔开关精细控制 |
+
+---
+
+## 🛠️ 完整工具注册表（50 个）
+
+### 核心生成（4）
+| 工具 | 说明 |
+|---|---|
+| `generate_image` | 文本生图，支持比例、质量、参考图锚定与负面提示词 |
+| `generate_image_pack` | 多比例打包（1:1、16:9、9:16 等） |
+| `vary_image` | 保留构图的可控变体生成 |
+| `remix_image` | 可控重混，支持去噪强度、样式与几何保持 |
+
+### 编辑与增强（11）
+| 工具 | 说明 |
+|---|---|
+| `edit_image` | 定向编辑 / inpainting，自动上下文检索原图 |
+| `upscale_image` | 2x/4x 分辨率放大 |
+| `remove_background` | 背景移除，输出透明 PNG |
+| `compare_images` | 逐像素对比两张图像 |
+| `blend_images` | 多图加权融合 |
+| `vectorize_image` | 位图矢量化（SVG），自适应调色板 |
+| `smart_crop_image` | 智能裁切至标准比例（`auto_focus`、`rule_of_thirds`、`letterbox`） |
+| `assemble_image_grid` | 2–4 张图像合成对比网格（纯 SVG） |
+| `outpaint_image` | 方向性画布扩展与背景续写 |
+| `async_generate_image` | 异步生成管线（`task_id` + 轮询） |
+| `generate_with_control` | ControlNet 结构控制（`canny`/`depth`/`pose`/`sketch`） |
+
+### 创意与 Web 资产（6）
+| 工具 | 说明 |
+|---|---|
+| `generate_ui_asset` | 图标 / 贴纸 / Hero 横幅，负空间构图 + 透明背景 |
+| `generate_theme_pair` | 亮/暗主题成对生成 + 响应式 HTML/CSS 片段 |
+| `generate_spritesheet` | 精灵图集与 CSS 动画 |
+| `generate_pwa_icons` | 完整 PWA 图标规格 + manifest |
+| `generate_seamless_pattern` | 无缝平铺图案 |
+| `search_inspiration_prompts` | 内置 970+ 离线灵感提示词目录 |
+
+### 工作室与连续性（11）
+| 工具 | 说明 |
+|---|---|
+| `set_style_anchor` | 会话级角色 / 风格 / 面部锚定 |
+| `render_wireframe_asset` | 线框 → 高保真设计稿（设计系统预设） |
+| `generate_character_sheet` | 多角度角色设定表 |
+| `generate_style_matrix` | 2×2 风格矩阵 + 盲评对比 |
+| `generate_image_matrix` | 种子/CFG 变体矩阵 |
+| `generate_turnaround_sheet` | 三视图转身表（自动切片） |
+| `reverse_prompt_and_recreate` | 反推提示词并重建 |
+| `deep_reverse_prompt` | 深度摄影光学反推（三档深度） |
+| `generate_seamless_texture` | 无缝纹理（3×3 检查网格） |
+| `compare_models_matrix` | 多模型横评 + Sharp 联络表 |
+| `generate_ecommerce_pack` | 电商四镜头产品包 |
+
+### 视觉与本地化（7）
+| 工具 | 说明 |
+|---|---|
+| `inspect_image_quality` | 清晰度/空白检测 + 期望元素视觉核验 |
+| `replace_image_text` | 图内文字替换（OCR + inpainting + 字体重排） |
+| `translate_image_text` | 图内文字翻译（俄/英/中） |
+| `restore_face_and_details` | 面部与高频细节修复 |
+| `beautify_diagram` | Mermaid/Graphviz → 3D 等距图表美化 |
+| `generate_drawio_diagram` | 可编辑 Draw.io / mxfile 架构图 + SVG 预览 |
+| `extract_comfy_workflow` | 提取 PNG 内嵌 ComfyUI 工作流 |
+
+### 前端与设计资产（5）
+| 工具 | 说明 |
+|---|---|
+| `extract_design_tokens` | 主色/语义色 → CSS 变量 / Tailwind / W3C JSON |
+| `image_to_css_gradient` | 图像 → 轻量 CSS 网格渐变 |
+| `check_image_contrast` | WCAG 对比度与 scrim 叠加 |
+| `optimize_vector_svg` | SVG 清理、规范 viewBox、导出 React TSX |
+| `export_asset_pack` | 完整 Web/PWA 资产包 |
+
+### 工作区与画布（4）
+| 工具 | 说明 |
+|---|---|
+| `save_image_to_workspace` | 内容寻址工作区导出 |
+| `canvas_state` | 无限画布状态检查 |
+| `view_canvas` | 画布选区物化为对话附件 |
+| `compose_baoyu_prompt` | Baoyu 五维风格/构图提示词装配器 |
+| `sketch_to_image` | 草图上色成图 |
+| `generate_responsive_mockups` | Mobile/Tablet/Desktop 自适应三件套 |
+
+### 可选工具集（+16，共 66）
+| 工具 | 工具集 | 说明 |
+|---|---|---|
+| `run_image_recipe` / `manage_image_recipes` | recipes | 顺序多步配方管线 |
+| `validate_comfy_workflow` | recipes | ComfyUI 工作流预校验 |
+| `select_image_model` / `validate_model_features` | capabilities | 能力注册表推荐与预检 |
+| `manage_project_profiles` / `resolve_project_profile_params` | profiles | 项目视觉档案 |
+| `stage_image_edit` / `review_staged_edit` | staging | inpaint 暂存与安全评审 |
+| `enqueue_batch_jobs` / `manage_batch_queue` | queue | 持久化批量队列 |
+| `evaluate_image_variants` / `select_variant_winner` | variants | 变体评估与胜者选择 |
+| `inspect_image_lineage` / `get_image_replay_payload` | lineage | 血缘 DAG 与可复现载荷 |
+| `export_design_asset` | designExport | Figma/Penpot/OpenDesign 导出 |
+
+---
+
+## 🛡️ 安全性
+
+- **路径隔离**：`resolveSource`/`resolveConversationImage` 经 `fs.realpath` 规范化，symlink 越界立即拒绝。
+- **SSRF 防护**：提供商 Base URL 与返回的下载 URL 均验证协议/凭据/云元数据/内网地址；下载 100 MB 封顶。
+- **路由策略**：全部 HTTP 路由按 `isTrustedLocalRequest` / 会话认证 / CSRF（Origin、`Sec-Fetch-Site`）分级防护；SSE 不发送通配 CORS。
+- **环回限制**：一键更新端点仅接受 loopback/私有网段 + `x-dsh-plugin-update: 1` + 同源。
+- **请求体限额**：所有变更端点读取请求体均有 64 KiB–15 MB 上限并返回 413。
+- **Fail-Closed**：`enabled: false` 时所有工具立即拒绝执行，不发起任何网络请求。
+
+---
+
+## 📄 更新历史（节选）
+
+- **v0.12.26 (#519)**：输入框生图服务切换按钮显隐设置。
+- **v0.12.21 (#501/#502)**：输入框生图服务胶囊与卡片内重新生成模态框。
+- **v0.12.20 (#499/#500)**：交互式 A/B 对比滑块与持久化版本轮播。
+- **v0.12.12 (#452/#453)**：右测边栏 Image Studio 工作台与会话资源归档。
+- **v0.12.8 (#450)**：交互式生成审批闸门。
+
+完整英文/俄文变更记录见 `README.md` / `README.ru.md`。
 
 ---
 
 ## 📄 许可证
 
-MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
-
-## 🛠️ 新增核心功能 (v0.10.32)
-
-* **`save_image_to_workspace` (#510)**: 内容寻址工作区磁盘确定性导出（`image-<digest-prefix>.<ext>`），具备词法/真实路径双重防逃逸检查与暂存原子重命名。
-* **`compose_baoyu_prompt` (#505)**: 宝玉 5 维风格与构图 Prompt 组合器。沿构图类型、调色盘、渲染媒介、文字排版、情绪氛围 5 个正交维度合成专业设计规范，自带严格色彩渲染限制与分类检索。
-* **`canvas_state` (#506)**: 画布工作台状态实时探测。检查无限画布上的形状、生成图溯源（模型/提示词）、手绘画笔、文本便签及当前选中元素度量。
-* **`view_canvas` (#507)**: 画布选区截图固化与对话附件物化。将手绘草图或选中形状导出为耐用图片附件，解锁草图成图（sketch-to-image）与多模态交互式重绘。
-* **`compare_models_matrix` (#503)**: 多模型横向对比评测工具。单个 Prompt 一键同时调度 Gemini Imagen 3、FAL FLUX Dev、Replicate FLUX Schnell、Seedream 3、DALL-E 3 并发生成，自动适配画幅比例，测算延迟与成本，并通过 Sharp 合成并排对比图。
-* **`search_inspiration_prompts` (#504)**: 内置离线精选灵感提示词库（收录 awesome-gpt-image-2 与 handraw-style 970+ 案例），支持分类、画风、场景与关键词筛选，零 Token/网络开销。
-* **`generate_seamless_texture` (#468)**: 无缝平铺纹理与重复图案生成，适用于 3D 材质、游戏开发与网页背景，集成环形偏移接缝平滑与 3×3 预览网格。
-* **`reverse_prompt_and_recreate` (#465)**: 基于视觉反向工程与美学风格提取，将任意图像逆向解析为结构化提示词，并可一键重新合成风格化副本。
-* **`restore_face_and_details` (#467)**: 局部面部与高频细节修复管线（Hi-Res 细节修复），自动定位面部与焦点区域，并采用羽化边缘无缝融合。
-* **`generate_with_control` (#463)**: ControlNet 结构引导生成，支持边缘、深度和姿势控制 (`canny` / `depth` / `pose` / `sketch`)。
-* **`generate_turnaround_sheet` (#464)**: 多角度角色与 3D 资产三视图/多角度模型表生成，自动切片为独立透视图像并输出 JSON 清单。
-* **`outpaint_image` (#459)**: 图像边界外扩与定向补全（支持上下左右任意方向），结合 Sharp 透明画布扩展与 SVG 扩展蒙版生成，实现大场景无缝外绘。
-* **`async_generate_image` (#460)**: 异步任务生成管线，支持立即返回 `task_id`（`wait: false`）、状态轮询与队列防护，支持指数退避自动等待完成。
-* **`translate_image_text` (#454)**: 图像内文字翻译与视觉本地化（支持中、英、俄），结合 OCR 文本检测、自动生成 Inpaint 擦除蒙版及保留原图排版与坐标的高质量文字重绘。
-* **`render_wireframe_asset` (#455)**: 线框图与原型草图转高保真 UI 设计资产，支持精细几何保留（fidelity 0.2–0.85）与四种设计系统预设（`modern_saas`、`dark_glassmorphism`、`brutalist`、`apple_minimal`）。
-* **`generate_drawio_diagram` (#451)**: 生成可在 Draw.io / diagrams.net 中完全编辑的架构图和流程图（`.drawio` / `mxfile` XML），并附带清晰的矢量 SVG 预览。支持 5 种精选主题风格（`light`、`dark`、`blueprint`、`corporate`、`nord`）、10 种节点形状（圆角矩形、椭圆、菱形、圆柱/数据库、云朵、参与者/用户等）、连接线样式（正交、直线、曲线、虚线、双向）以及自动拓扑布局算法（`horizontal`、`vertical`、`grid`、`tree`）。集成 Figma 与 Penpot 剪贴板代码片段导出。
-* **`generate_image`**: 图像生成工具，支持角色与主体视觉一致性绑定 (`reference_image`, `reference_strength`)、多轮长会话上下文压缩守卫 (#456)、 支持多服务商热插拔、确定性 Seed 复现、多种长宽比、精选风格预设（`photorealistic`、`anime`、`isometric_3d`、`pixel_art`、`cinematic`、`minimalist_vector`、`claymation`、`cyberpunk`、`analog_film`、`oil_painting`）、反向提示词智能过滤与自然语言回退（DALL-E、FLUX），以及细粒度推理参数调优（`steps`: 1–150、`guidance_scale`: 1–30、`sampler_name`: `euler`、`dpmpp_2m` 等）。
-* **`set_style_anchor` (#283)**: 会话级角色与风格参考锚点，在连续对话中锁定主体、配色、光照与渲染媒介。
-* **`generate_ui_asset` (#284)**: 布局感知与留白控制 UI 资产生成器，支持精准留白（`isolated`、`centered`、`left_empty`、`right_empty`、`top_empty`、`bottom_empty`）与自动透明通道。
-* **`generate_style_matrix` (#286)**: 2x2 风格矩阵探索与双盲对比，并发生成 4 种美学预设切片并支持一键应用。
-* **`对话内局部重绘画布` (#285)**: 在消息卡片上直接唤起交互式笔刷画布，支持选区涂抹与即时 Inpainting 局部重绘。
-* **`智能服务商自动故障转移链` (#282)**: 主服务商 429、5xx、超时或额度耗尽时自动无缝切换备选渠道。
-
-## 🛡️ 安全性
-* **内部端点会话鉴权与 SSRF 防护 (#474)**：所有 HTTP 路由接入 DSH 会话鉴权 (`ctx.connection?.requestRejection`)，阻断未认证局域网客户端与伪造来源；对提供商 Base URL 执行严格协议与域名白名单校验，新增 `allowCustomBaseUrl` 配置项。
-* **配置请求大小限制 (#313)**：`PUT /dsh-image-gen/config` 限制请求体最大 64 KB，超出返回 HTTP 413，防止内存耗尽 DoS。
-* **客户端构建校验 (#316)**：`scripts/build-client.mjs` 支持 `--check` 模式，确保构建一致性。
-* **架构解耦优化 (#317)**：`lib/index.js` 精简为轻量级门面，拆分 `config-schema.js`、`resolve-source.js` 与 `studio-routes.js`。
-* **启动与运行时清理 (#318, #319)**：优化历史记录权限修复，移除废弃的 `loc.get` 调用。
-
+MIT — 见 [LICENSE](LICENSE)。

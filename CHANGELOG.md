@@ -1,3 +1,14 @@
+## [0.12.37] - 2026-11-16
+
+### Fixed
+- **Documentation Counts Synchronized with the Registry (#563)**: stale claims removed — `AGENTS.md` updated to the current version and the real registry counts (50 in `all`, 66 with opt-in toolsets, 3 in `minimal`); `register-tools.js` header and `config-schema` description corrected; README Overviews state the counts. New audit test derives the counts from the live registry and asserts every document (including `AGENTS.md` version vs `package.json`) stays in sync.
+- **README.zh Restructured (#564)**: the Chinese README now carries the current version header, a complete 50-tool registry placed before the License section, and security/installation sections aligned with the English and Russian READMEs.
+- **Version-Sync Gate (#565, regression #350)**: `pack-check` now fails when `package-lock.json` version drifts from `package.json`.
+- **Smoke Hygiene (#567)**: `pack-check` fails on known smoke artifacts in the checkout root (`manifest.json`, `icons/`, `image-ac*.png`); the smoke suite writes into the system temp directory instead of the checkout.
+
+### Added
+- **Bundled Agent Skill Now Ships (#566, regression #164)**: `skills/image-generation/SKILL.md` is included in the npm package (`files`) and the public GitHub mirror (`EXTRA_ALLOW`) — the "Bundled official agent skill" claim is now true. Internal `docs/` remain excluded per the documentation boundary policy.
+
 ## [0.12.36] - 2026-11-16
 
 ### Fixed
