@@ -1,3 +1,15 @@
+## [0.12.35] - 2026-11-16
+
+### Fixed
+- **Cache Size Predicate (#553)**: history cache lookups compared `criteria.size !== criteria.size` (always false), so cache hits ignored the requested size; the predicate now compares against the entry, preventing wrong-size cache hits.
+- **Batch Queue Persistence Integrity (#554, regressions #365/#338)**: `lib/batch-queue.js` now honors `DSH_HOME`, serializes every read-modify-write under an in-process queue + cross-process `withFileLock`, writes atomically with 0600 permissions, and `processBatchItems` implements a real bounded-concurrency worker pool. Mutating queue APIs are async; tool/route call sites updated.
+- **Bounded SSE Sessions (#555)**: subscribing to an unknown `callId` no longer creates a permanent session entry — early subscribers are parked in a TTL-bounded map and absorbed on session start (#379 preserved); `activeSessions` are capped at 500 with a stale-session sweep; the SSE stream no longer sends `Access-Control-Allow-Origin: *`.
+- **Studio Routes Trusted-Local Guard (#556)**: all 9 studio/workbench REST routes now enforce `isTrustedLocalRequest` as the first step (403 for untrusted clients), closing the defence-in-depth gap.
+- **Canvas Route Registration (#557)**: replaced the non-existent `webServer.registerRoute` call with the canonical `ctx.webServer.register({ kind: 'exact', path, handler })` — canvas sync silently never registered in production; absence of the webServer service is now logged instead of silently ignored.
+
+### Security
+- **Studio Routes + SSE Hardening (#555, #556)**: trusted-local enforcement across the whole studio HTTP surface and removal of the wildcard CORS header from the SSE stream.
+
 ## [0.12.34] - 2026-11-16
 
 ### Fixed
