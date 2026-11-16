@@ -1,3 +1,15 @@
+## [0.12.36] - 2026-11-16
+
+### Fixed
+- **Async Task Eviction Safety (#558)**: the async task registry no longer evicts the oldest entry when it is still queued/processing — only terminal tasks are evicted; a registry full of live tasks rejects creation with a descriptive error instead of orphaning a running task.
+- **Vault Deletion Containment (#559)**: default deletion roots narrowed to `DSH_HOME` + session cwd; `/dsh-image-gen/design/export` resolves workspace-relative references only against an explicit `cwd` parameter (never the server process CWD); hardcoded `/home/vadim` replaced with `os.homedir()`.
+- **Design Export SVG Passthrough (#562)**: SVG markup forwarded to Figma/Penpot clipboard payloads is hardened — `<script>` blocks, event-handler attributes, `<foreignObject>` and script-style URIs are stripped.
+
+### Security
+- **Provider Download Policy (#560)**: all provider-returned image download URLs are now validated before fetching (http/https only, no embedded credentials, cloud metadata/link-local always blocked, private networks only for the local provider with explicit opt-in) with a 100 MB size cap — a compromised gateway can no longer point the harness at internal endpoints.
+- **Data-URI Media Allowlist (#561)**: inline `data:` image sources accept only raster media types (png/jpeg/webp/gif); attacker-controlled `image/svg+xml` payloads with active content are rejected.
+- **Centralized Markup Sanitization (#562)**: new `sanitizeCssIdentifier`/`sanitizeSvgMarkup` security helpers; image-matrix and model-matrix badges now use full XML escaping (previously partial), spritesheet CSS animation names are constrained to safe identifiers, and theme-pair snippet attributes are escaped with script-scheme neutralization.
+
 ## [0.12.35] - 2026-11-16
 
 ### Fixed
